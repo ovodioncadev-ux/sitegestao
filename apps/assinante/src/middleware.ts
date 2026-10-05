@@ -23,6 +23,7 @@ export function middleware(request: NextRequest) {
   if (caminho.startsWith('/api/auth')) return NextResponse.next();
   if (caminho.startsWith('/api/plans')) return NextResponse.next();
   if (caminho.startsWith('/api/neighborhoods')) return NextResponse.next();
+  if (caminho === '/api/saude') return NextResponse.next();
   if (caminho.startsWith('/api/area')) return NextResponse.next();
   if (caminho.startsWith('/api/site')) return NextResponse.next();
   if (caminho.startsWith('/api/evento')) return NextResponse.next();

@@ -10,16 +10,19 @@
 
 For detailed architecture, routing, data flow and conventions, see [docs/CODEBASE_MAP.md](docs/CODEBASE_MAP.md).
 
-## Current State (29/09/2026)
+## Current State (05/10/2026)
 
-- **Database:** 22 migrations (Fases 0–9 + Etapas 1–2; a 421 aplicada também no principal em 30/09/2026). Testes SQL: `pnpm teste:banco` (fase1..10) + `pnpm seguranca`. Os testes SQL exigem `DATABASE_TEST_URL` (branch de teste do Neon; sem fallback para o principal). `pnpm db:migrar:teste` migra só o teste. Ver README, "Banco de testes".
-- **Auditoria de estabilidade (30/09/2026):** rotina diária serializada por advisory lock e resistente a falha isolada; defeito duplicado recusado; `dentro_area_entrega` recalculado por gatilho ao mexer nas faixas; pools do `pg` com ouvinte de erro (o Neon derruba conexões ociosas); `/api/plans` e `/api/neighborhoods` com cache de 30 s. Dados `[TESTE]` ainda no banco: `pnpm db:limpar-teste` remove (não toca na auditoria).
-- **Fase 9:** cobrança do período (`gerar_cobranca`, forma pix|cartao), pausa com retorno previsto, reposição de defeitos (`reposicoes`), resposta aos pedidos do assinante, horário de entrega, `/configuracoes`, rotina diária (`processar_rotina_diaria`; botão no painel e `POST /api/rotina` com `CRON_SECRET`).
-- **Fluxo de assinatura pelo site:** site (`Assinar`) → `assinante:/assinar?plano=<semanal|quinzenal|mensal>` → conta (`/cadastro`) → endereço (`criar_meu_cadastro`) → confirmação (`assinar_plano`). Nenhum dado pessoal vai por URL; o site não coleta nada.
-- **Site** lê planos/bairros/área por rewrites para o assinante (sem CORS). **Preço** vem de `planos_publicos()` (pente × entregas_por_mes), sem valor no código. **Bairros** = faixas de CEP ativas (hoje 0 → lista vazia, e todo CEP é "fora da área").
-- **Vínculo conta↔cliente por e-mail só com e-mail confirmado** (migration 13). Sem serviço de e-mail ninguém tem e-mail confirmado: o dono vincula na ficha do cliente.
-- **Não existe:** integração de pagamento (InfinitePay/Asaas), serviço de e-mail configurado, faixas de CEP. Ver DECISOES.md ("Fase 8").
-- **Testes unitários:** `pnpm test` (assinante: `caminhoInterno`, `ehFrequencia`).
+- **Database:** 29 migrations (Fases 0–10, Etapas 1–2 e Blocos 3–8; as migrations 424–428 só foram aplicadas no banco de teste local, **não no Neon**). Testes SQL: `pnpm teste:banco` (~280 verificações + concorrência do limite de login) + `pnpm seguranca`. Exigem `DATABASE_TEST_URL` (branch de teste; sem fallback para o principal). `pnpm db:migrar:teste` migra só o teste. Ver README, "Banco de testes".
+- **CI:** `ci/github-actions-ci.yml` (4 jobs: segurança, qualidade, banco, e2e). **Ainda não ativado**: copie para `.github/workflows/ci.yml` (o token de envio não tinha a permissão `workflow`). Passo a passo de lançamento: [docs/LANCAMENTO.md](docs/LANCAMENTO.md).
+- **Site (Blocos 1–2):** `apps/site` com componentes base (`components/ui`), fontes via `next/font`, seções do Stitch. Conteúdo público (planos por entrega, frescor, frete, desconto, corte, FAQ) vem de `GET /api/site` e `/api/plans` (Bloco 3). Contraste AA nos tokens (`--cor-sobre-ouro`, `--cor-ouro-escuro`, `--cor-whatsapp`).
+- **Fluxo de assinatura (Bloco 4):** site → `assinante:/assinar` com indicador de etapas → conta → endereço → confirmação. Funil anônimo (`eventos_funil`, `POST /api/evento`); `scripts/e2e/assinatura.mjs`.
+- **Fora da área (Bloco 5):** "Avise-me" (`POST /api/interesse`, `registrar_interesse`), consentimento versionado (`@ovo/config/privacidade`), `/interessados` no painel. Sem auditoria nesta tabela, de propósito (LGPD).
+- **D8 (Bloco 6):** chave `exigir_pagamento_antes_da_1a_entrega` em `/configuracoes` (**desligada** por padrão): ligada, a assinatura nasce aguardando o 1º pagamento (`aguardando_pagamento_desde`), com a 1ª fatura e sem entrega; pagar libera a entrega (corte D9 no instante da confirmação); quem não paga em N dias é cancelado pela rotina. **Pagamento online:** papel `app_pagamentos` + `confirmar_pagamento_online`, webhook `POST /api/pagamento/webhook` que **nunca confia no corpo** (consulta o provedor). Provedores: `nenhum` (padrão) | `simulado` (dev) | `infinitepay` (**contrato A CONFIRMAR**, só liga com `INFINITEPAY_CONTRATO_CONFIRMADO=sim`).
+- **Entrada no ar (Bloco 8):** limite de login no Postgres (`consumir_rate_limit` + `customStorage` do Better Auth), CSP com `CSP_MODO=relatorio|impor` (lido no build), `GET /api/saude`, `scripts/smoke.mjs`, `scripts/rodar-rotina.sh`, `scripts/e2e/{assinatura,pagamento,csp}.mjs`.
+- **Auditoria de estabilidade (30/09/2026):** rotina diária serializada por advisory lock e resistente a falha isolada; defeito duplicado recusado; `dentro_area_entrega` recalculado por gatilho ao mexer nas faixas; pools do `pg` com ouvinte de erro; `/api/plans` e `/api/neighborhoods` com cache de 30 s.
+- **Regras de cobrança D1–D15:** decididas em `DECISOES.md`; **implementadas só D8, D9 e D10 (calendário de entregas)**. Faltam D1/D2 (vencimento dia 3, inadimplência), D3–D7, D11, D15.
+- **Não existe:** serviço de e-mail configurado, faixas de CEP cadastradas (sem elas ninguém assina), fotos/depoimentos reais, ferramenta de monitoramento de erros.
+- **Testes unitários:** `pnpm test` (assinante: segurança, whatsapp, cache, funil, interesse, pagamento, limite; gestão: csv).
 
 ## Key Decisions
 
@@ -27,7 +30,7 @@ For detailed architecture, routing, data flow and conventions, see [docs/CODEBAS
   Veja [docs/SEGURANCA.md](docs/SEGURANCA.md) para threat model, mitigações, rate limit e runbook de incident.
 - **Data:** nenhuma política de `insert`, `update` ou `delete` a `app_anon` ou `app_usuario`; toda escrita passa por função SQL com lista fechada.
 - **Audit:** auditoria imutável, gatilho `auditar()` em 8 tabelas, inclui antes/depois e quem agiu.
-- **Preço:** hardcoded em SQL (semanal 16400¢, quinzenal 8200¢, mensal 4100¢); cliente não envia preço.
+- **Preço:** vem do banco (`config_negocio.preco_pente_centavos` × entregas por mês, via `planos_publicos()`); o cliente nunca envia preço.
 - **Datas:** sem `Date` do JS; tudo via `::text` ou `::timestamp` com fuso São Paulo no SQL.
 - **Limites:** listas do gestão sem paginação (200/300/500 linhas).
 

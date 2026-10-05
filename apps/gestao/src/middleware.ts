@@ -21,6 +21,8 @@ export function middleware(request: NextRequest) {
   if (caminho.startsWith('/api/auth')) return NextResponse.next();
   // Agendador externo: sem cookie; a autorização é o CRON_SECRET, conferido na própria rota.
   if (caminho === '/api/rotina') return NextResponse.next();
+  // Monitor de disponibilidade: sem cookie, e a resposta é só { ok }.
+  if (caminho === '/api/saude') return NextResponse.next();
   if (ROTAS_PUBLICAS.some((rota) => caminho.startsWith(rota))) return NextResponse.next();
   if (!temCookieDeSessao(request)) return redirecionarParaLogin(request);
 

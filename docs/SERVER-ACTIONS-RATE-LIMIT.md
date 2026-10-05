@@ -1,3 +1,9 @@
+> **⚠️ Atualização (Bloco 8, 05/10/2026):** o módulo `rate-limit-server-action.ts` descrito aqui **foi removido**.
+> Ele nunca foi ligado a nenhuma Server Action e não compilava (importava `emTransacao`, que é privada em
+> `acesso.ts`), então **não protegia nada**. O que existe hoje: rotas públicas sem cache limitadas por IP via
+> `limitar_acesso_publico()` (migration do Bloco 3) e login/cadastro via `consumir_rate_limit()` no
+> `customStorage` do Better Auth (migration do Bloco 8). O texto abaixo fica como histórico.
+
 # 🔒 Rate Limit em Server Actions — Guia de Implementação
 
 **Documento de Referência:** Como usar rate limit em Server Actions críticas  
