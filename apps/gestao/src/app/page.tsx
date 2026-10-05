@@ -7,6 +7,13 @@ import { FormAcao } from './_componentes/form-acao';
 import { rodarRotinaDiaria } from './acoes-painel';
 import { formatarReais, hojeEmSaoPaulo } from '@/lib/formatar';
 
+const ETAPAS_DO_FUNIL = [
+  ['plano_clicado', 'Clicaram em um plano no site'],
+  ['conta_criada', 'Criaram a conta'],
+  ['endereco_salvo', 'Informaram o endereço'],
+  ['assinatura_confirmada', 'Confirmaram a assinatura'],
+] as const;
+
 type Plano = {
   nome: string;
   frete_centavos: number;
@@ -24,7 +31,7 @@ export default async function PainelInicial() {
     return <SemPermissao mensagem="Você não tem permissão para realizar esta ação." />;
   }
 
-  const { planos, totalClientes, hoje, pendencias } = await comoUsuario(usuario.usuarioId, async (bd) => {
+  const { planos, totalClientes, hoje, pendencias, funil } = await comoUsuario(usuario.usuarioId, async (bd) => {
     const planos = await bd.consultar<Plano>(
       `select nome, frete_centavos, desconto_primeiro_mes_pct, freshness_max_dias, intervalo_dias
          from planos where ativo order by intervalo_dias`,
@@ -45,7 +52,12 @@ export default async function PainelInicial() {
               (select count(*) from faturas where status in ('pendente', 'atrasada') and vencimento < $1::date) as devendo`,
       [hojeEmSaoPaulo()],
     );
+    const funilLinhas = await bd.consultar<{ etapa: string; total: string }>(
+      `select etapa, count(*) as total from eventos_funil
+        where criado_em > now() - interval '30 days' group by etapa`,
+    );
     return {
+      funil: Object.fromEntries(funilLinhas.map((l) => [l.etapa, Number(l.total)])) as Record<string, number>,
       pendencias: {
         pedidos: Number(p?.pedidos ?? 0),
         reposicoes: Number(p?.reposicoes ?? 0),
@@ -108,6 +120,30 @@ export default async function PainelInicial() {
           </>
         )}
       </p>
+
+      <h2>Funil de assinatura (30 dias)</h2>
+      <p className="suave">
+        Contagem por etapa, sem identificar pessoas: não dá para saber se quem criou conta é a mesma pessoa que clicou
+        no plano.
+      </p>
+      <div className="tabela-rolavel">
+        <table>
+          <thead>
+            <tr>
+              <th>Etapa</th>
+              <th>Pessoas</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ETAPAS_DO_FUNIL.map(([etapa, rotulo]) => (
+              <tr key={etapa}>
+                <td>{rotulo}</td>
+                <td>{funil[etapa] ?? 0}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <h2>Planos</h2>
       <div className="tabela-rolavel">

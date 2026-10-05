@@ -133,10 +133,21 @@ export default async function MinhaAssinatura({ searchParams }: { searchParams: 
   return (
     <Pagina titulo={`Olá, ${cliente.nome.split(' ')[0]}`}>
       {nova === '1' && assinatura && (
-        <p role="status" className="msg-ok">
-          Assinatura criada! Sua primeira entrega já está agendada. A cobrança é confirmada pela Ovo di Onça: o
-          pagamento online ainda não está disponível.
-        </p>
+        <section className="cartao" role="status" aria-labelledby="titulo-nova">
+          <h2 id="titulo-nova">Assinatura criada!</h2>
+          <p>
+            Sua primeira entrega está agendada para <strong>{formatarData(assinatura.proxima_entrega)}</strong>.
+          </p>
+          <p className="suave">
+            Como pagar: o pagamento online ainda não está disponível. Envie o comprovante do PIX pelo WhatsApp e a
+            Ovo di Onça confirma a cobrança.
+          </p>
+          <p>
+            <a className="botao botao-whatsapp" href={WHATSAPP_URL} target="_blank" rel="noreferrer">
+              Enviar comprovante pelo WhatsApp
+            </a>
+          </p>
+        </section>
       )}
       <section className="cartao" aria-labelledby="titulo-assinatura">
         <h2 id="titulo-assinatura">Sua assinatura</h2>

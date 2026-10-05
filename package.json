@@ -12,7 +12,7 @@
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
     "test": "pnpm --filter @ovo/assinante test",
-    "teste:banco": "pnpm --filter @ovo/database teste:fase1 && pnpm --filter @ovo/database teste:fase2 && pnpm --filter @ovo/database teste:fase3 && pnpm --filter @ovo/database teste:fase4 && pnpm --filter @ovo/database teste:fase5 && pnpm --filter @ovo/database teste:fase6 && pnpm --filter @ovo/database teste:fase7 && pnpm --filter @ovo/database teste:fase8 && pnpm --filter @ovo/database teste:fase9 && pnpm --filter @ovo/database teste:fase10 && pnpm --filter @ovo/database teste:etapa1 && pnpm --filter @ovo/database teste:etapa2 && pnpm --filter @ovo/database teste:bloco3",
+    "teste:banco": "pnpm --filter @ovo/database teste:fase1 && pnpm --filter @ovo/database teste:fase2 && pnpm --filter @ovo/database teste:fase3 && pnpm --filter @ovo/database teste:fase4 && pnpm --filter @ovo/database teste:fase5 && pnpm --filter @ovo/database teste:fase6 && pnpm --filter @ovo/database teste:fase7 && pnpm --filter @ovo/database teste:fase8 && pnpm --filter @ovo/database teste:fase9 && pnpm --filter @ovo/database teste:fase10 && pnpm --filter @ovo/database teste:etapa1 && pnpm --filter @ovo/database teste:etapa2 && pnpm --filter @ovo/database teste:bloco3 && pnpm --filter @ovo/database teste:bloco4",
     "db:papel-servidor": "pnpm --filter @ovo/database db:papel-servidor",
     "db:migrar": "pnpm --filter @ovo/database db:migrar",
     "db:migrar:teste": "pnpm --filter @ovo/database db:migrar:teste",

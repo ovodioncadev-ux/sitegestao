@@ -34,6 +34,19 @@ export async function cepAtendido(cep: string): Promise<boolean> {
   return data.atendido;
 }
 
+/**
+ * Conta o clique em "Assinar" (funil, sem dado pessoal). sendBeacon sobrevive à
+ * navegação para outro site; qualquer falha é ignorada: nunca atrapalha o clique.
+ */
+export function registrarCliquePlano(plano: string): void {
+  try {
+    const corpo = new Blob([JSON.stringify({ etapa: 'plano_clicado', plano })], { type: 'application/json' });
+    navigator.sendBeacon('/api/evento', corpo);
+  } catch {
+    /* só contagem */
+  }
+}
+
 /** Endereço do passo de assinatura, no app do assinante. O plano vai pelo nome público, nunca por id. */
 export function urlAssinar(plano: string): string {
   const base = process.env.NEXT_PUBLIC_URL_ASSINANTE ?? 'http://localhost:3001';

@@ -6,6 +6,7 @@ import { buscarCliente } from '@/lib/assinante';
 import { formatarReais, formatarTelefone, WHATSAPP_URL } from '@/lib/formatar';
 import { ehFrequencia, lerPlanosPublicos, type PlanoPublico } from '@/lib/planos';
 import { FormAcao } from '../_componentes/form-acao';
+import { CabecalhoFunil } from '../_componentes/funil';
 import { CampoCep } from '../_componentes/campo-cep';
 import { CampoMascara } from '../_componentes/campo-mascara';
 import { confirmarAssinatura, criarMeuCadastro } from './acoes';
@@ -23,13 +24,15 @@ function ResumoDoPlano({ plano }: { plano: PlanoPublico }) {
       <dl className="lista-dados">
         <dt>Valor</dt>
         <dd>
-          {formatarReais(plano.precoCentavos)} por mês
-          {plano.descontoPrimeiroMesPct > 0 && ` (${formatarReais(primeiroMes)} no 1º mês)`}
+          {formatarReais(plano.precoEntregaCentavos)} por entrega
+          <br />
+          {plano.entregasPorMes} {plano.entregasPorMes === 1 ? 'entrega' : 'entregas'} por mês · {plano.frequencia === 'semanal' ? 'cerca de ' : ''}
+          {formatarReais(plano.precoCentavos)}/mês
+          {plano.descontoPrimeiroMesPct > 0 &&
+            ` (${plano.descontoPrimeiroMesPct}% de desconto no 1º mês: ${formatarReais(primeiroMes)})`}
         </dd>
         <dt>Entrega</dt>
-        <dd>
-          A cada {plano.intervaloDias} dias{plano.ancorarEmQuarta && ', sempre às quartas-feiras'}
-        </dd>
+        <dd>Sempre às quartas-feiras</dd>
         <dt>Frete</dt>
         <dd>{plano.freteCentavos === 0 ? 'Incluso' : formatarReais(plano.freteCentavos)}</dd>
         <dt>Frescor</dt>
@@ -47,19 +50,25 @@ export default async function Assinar({ searchParams }: { searchParams: Promise<
   // 1. Sem plano escolhido: vitrine simples.
   if (!plano) {
     return (
+      <>
+      <CabecalhoFunil passo={1} />
       <main className="pagina">
         <h1>Escolha seu plano</h1>
         {planos.length === 0 && <p className="suave">Nenhum plano disponível no momento.</p>}
         {planos.map((p) => (
           <section key={p.frequencia} className="cartao">
             <h2>{p.nome}</h2>
-            <p>{formatarReais(p.precoCentavos)} por mês</p>
+            <p>
+              {formatarReais(p.precoEntregaCentavos)} por entrega · {p.entregasPorMes}{' '}
+              {p.entregasPorMes === 1 ? 'entrega' : 'entregas'} por mês
+            </p>
             <Link className="botao" href={`/assinar?plano=${p.frequencia}`}>
               Escolher {p.nome}
             </Link>
           </section>
         ))}
       </main>
+      </>
     );
   }
 
@@ -69,6 +78,8 @@ export default async function Assinar({ searchParams }: { searchParams: Promise<
   // 2. Sem conta/sessão: mostra o plano e leva ao cadastro, voltando para cá.
   if (!usuario) {
     return (
+      <>
+      <CabecalhoFunil passo={2} />
       <main className="pagina">
         <h1>Assinar</h1>
         <ResumoDoPlano plano={plano} />
@@ -84,6 +95,7 @@ export default async function Assinar({ searchParams }: { searchParams: Promise<
           </p>
         </section>
       </main>
+      </>
     );
   }
 
@@ -119,6 +131,8 @@ export default async function Assinar({ searchParams }: { searchParams: Promise<
   // 5. Falta o cadastro (endereço validado).
   if (!dados.cliente) {
     return (
+      <>
+      <CabecalhoFunil passo={3} />
       <main className="pagina">
         <h1>Seu endereço</h1>
         <ResumoDoPlano plano={plano} />
@@ -174,6 +188,7 @@ export default async function Assinar({ searchParams }: { searchParams: Promise<
           </FormAcao>
         </section>
       </main>
+      </>
     );
   }
 
@@ -182,6 +197,8 @@ export default async function Assinar({ searchParams }: { searchParams: Promise<
   // 6. Cadastro feito, mas o CEP está fora da área: sem assinatura.
   if (!dados.naArea) {
     return (
+      <>
+      <CabecalhoFunil passo={3} />
       <main className="pagina">
         <h1>Ainda não entregamos aí</h1>
         <section className="cartao">
@@ -199,11 +216,14 @@ export default async function Assinar({ searchParams }: { searchParams: Promise<
           </p>
         </section>
       </main>
+      </>
     );
   }
 
   // 7. Confirmação.
   return (
+    <>
+    <CabecalhoFunil passo={4} />
     <main className="pagina">
       <h1>Confirmar assinatura</h1>
       <ResumoDoPlano plano={plano} />
@@ -239,5 +259,6 @@ export default async function Assinar({ searchParams }: { searchParams: Promise<
         </FormAcao>
       </section>
     </main>
+    </>
   );
 }

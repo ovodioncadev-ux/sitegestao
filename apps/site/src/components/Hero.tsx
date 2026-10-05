@@ -1,6 +1,6 @@
 'use client';
 
-import { urlAssinar } from '@/lib/api';
+import { registrarCliquePlano, urlAssinar } from '@/lib/api';
 import { Botao, Container } from './ui';
 
 export function Hero() {
@@ -15,7 +15,11 @@ export function Hero() {
           Máx. 7 dias entre a colheita e a entrega. Frete grátis na área atendida.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Botao href={urlAssinar('semanal')} className="text-[length:var(--texto-medio)]">
+          <Botao
+            href={urlAssinar('semanal')}
+            onClick={() => registrarCliquePlano('semanal')}
+            className="text-[length:var(--texto-medio)]"
+          >
             Assinar agora
           </Botao>
           <Botao href="#planos" variante="contorno" className="text-[length:var(--texto-medio)]">

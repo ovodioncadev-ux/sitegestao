@@ -82,7 +82,7 @@ a { color: var(--cor-ouro-escuro); }
 }
 .botao:disabled { opacity: 0.7; cursor: default; }
 .botao-secundario { background: transparent; border: 1px solid var(--cor-texto); }
-.botao-whatsapp { background: var(--cor-whatsapp); color: #fff; }
+.botao-whatsapp { background: var(--cor-whatsapp); color: var(--cor-sobre-escuro); }
 
 .msg-ok { color: var(--cor-sucesso); margin-top: var(--esp-3); }
 .msg-erro { color: var(--cor-erro); margin-top: var(--esp-2); }
@@ -103,3 +103,64 @@ th, td {
   outline: 2px solid var(--cor-ouro-escuro);
   outline-offset: 2px;
 }
+
+/* ── Topo do fluxo de assinatura (marca do site + etapas) ─────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.funil-topo {
+  max-width: var(--largura-conteudo);
+  margin: 0 auto;
+  padding: var(--esp-6) var(--esp-6) 0;
+}
+.funil-topo-linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-4);
+}
+.funil-marca {
+  font-family: var(--fonte-titulo);
+  font-size: var(--texto-medio);
+  color: var(--cor-texto);
+  text-decoration: none;
+}
+.funil-voltar { font-size: var(--texto-pequeno); }
+
+.passos {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--esp-2);
+  list-style: none;
+  margin: var(--esp-6) 0 0;
+  padding: 0;
+}
+.passo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--esp-1);
+  text-align: center;
+  font-size: var(--texto-pequeno);
+  color: var(--cor-texto-suave);
+}
+.passo-numero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--raio-pilula);
+  border: 1px solid var(--cor-borda);
+  background: var(--cor-fundo);
+  font-weight: 600;
+}
+.passo-atual { color: var(--cor-texto); font-weight: 600; }
+.passo-atual .passo-numero { background: var(--cor-ouro); border-color: var(--cor-ouro); color: var(--cor-sobre-ouro); }
+.passo-feito .passo-numero { background: var(--cor-secundaria); border-color: var(--cor-secundaria); color: var(--cor-sobre-escuro); }

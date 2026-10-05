@@ -1,7 +1,7 @@
 'use client';
 
 import { usePlanos } from '@/hooks/usePlanos';
-import { urlAssinar } from '@/lib/api';
+import { registrarCliquePlano, urlAssinar } from '@/lib/api';
 import { formatarReais, textoDesconto, textoMensal, textoFrescor, textoFrete } from '@/lib/formatar';
 import { Botao, Cartao, Secao, Selo } from './ui';
 
@@ -55,6 +55,7 @@ export function PlansSection() {
             </ul>
             <Botao
               href={urlAssinar(plan.id)}
+              onClick={() => registrarCliquePlano(plan.id)}
               variante={plan.highlighted ? 'primario' : 'contorno'}
               className="mt-4 w-full"
             >

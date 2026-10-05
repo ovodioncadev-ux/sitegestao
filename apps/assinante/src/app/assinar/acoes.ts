@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { comoAssinante } from '@/lib/assinante';
 import { ErroNegocio, rodar } from '@/lib/erros';
+import { registrarEvento } from '@/lib/evento';
 import { ehFrequencia } from '@/lib/planos';
 import type { Estado } from '@/lib/tipos';
 import {
@@ -46,8 +47,8 @@ export async function criarMeuCadastro(_estado: Estado, dados: FormData): Promis
     const cidade = textoObrigatorio(campo(dados, 'cidade'), 'Cidade', 2, 100);
     const estado = ufObrigatoria(campo(dados, 'estado'));
 
-    await comoAssinante((bd) =>
-      bd.consultar('select criar_meu_cadastro($1, $2, $3, $4, $5, $6, $7, $8, $9)', [
+    await comoAssinante(async (bd) => {
+      await bd.consultar('select criar_meu_cadastro($1, $2, $3, $4, $5, $6, $7, $8, $9)', [
         nome,
         telefone,
         cep,
@@ -57,8 +58,9 @@ export async function criarMeuCadastro(_estado: Estado, dados: FormData): Promis
         bairro,
         cidade,
         estado,
-      ]),
-    );
+      ]);
+      await registrarEvento(bd, 'endereco_salvo', plano);
+    });
 
     revalidatePath('/assinar');
     redirect(`/assinar?plano=${plano}`);
@@ -77,6 +79,7 @@ export async function confirmarAssinatura(_estado: Estado, dados: FormData): Pro
       if (!linha) throw new ErroNegocio('Este plano não está disponível.');
 
       await bd.consultar('select assinar_plano($1::smallint)', [linha.id]);
+      await registrarEvento(bd, 'assinatura_confirmada', plano);
     });
 
     revalidatePath('/');

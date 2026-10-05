@@ -18,10 +18,11 @@
   --cor-texto: #1c2826;
   --cor-texto-suave: #4a5957;
   --cor-ouro: #e67e22;
-  --cor-ouro-escuro: #b85f12;
+  --cor-ouro-escuro: #a15200;   /* texto/link sobre fundo claro: ≥ 4,7:1 (o #b85f12 anterior dava 4,07:1 no rosado) */
   --cor-ouro-app: #d4a437;
   --cor-borda: rgb(28 40 38 / 12%);
-  --cor-sobre-ouro: #fff;       /* texto sobre fundo --cor-ouro */
+  --cor-sobre-ouro: #1c2826;    /* texto sobre fundo --cor-ouro: 5,3:1 (branco daria 2,85:1) */
+  --cor-sobre-escuro: #fff;     /* texto sobre fundo escuro (verde, WhatsApp) */
   --cor-superficie: #fff8f6;
   --cor-superficie-baixa: #fff1ed;
   --cor-secundaria: #50652a;
@@ -30,7 +31,7 @@
   /* ── Estado ─────────────────────────────────────────────────────── */
   --cor-sucesso: #1e824c;
   --cor-erro: #ba1a1a;
-  --cor-whatsapp: #1a9e4b;
+  --cor-whatsapp: #157f3c;      /* texto branco sobre ele: 5,1:1 (#1a9e4b dava 3,5:1) */
 
   /* ── Tipografia ─────────────────────────────────────────────────── */
   /* As variáveis --font-* vêm do next/font de cada layout; sem elas, cai no nome da fonte. */

@@ -69,7 +69,8 @@ begin
       'criar_meu_cadastro',        -- cria o cliente da PROPRIA conta (identidade vem da sessao)
       'assinar_plano',             -- assina para o PROPRIO cliente (identidade vem da sessao)
       'site_conteudo',             -- vitrine: frescor, frete, desconto e corte derivados dos planos ativos
-      'limitar_acesso_publico'     -- contador por IP de rotas publicas; rotas e limites fixos no corpo
+      'limitar_acesso_publico',    -- contador por IP de rotas publicas; rotas e limites fixos no corpo
+      'registrar_evento_funil'     -- conta etapa e plano publico do funil; sem dado pessoal, etapas em lista fechada
     )
     and (
       has_function_privilege('app_anon', p.oid, 'execute')

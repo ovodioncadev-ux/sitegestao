@@ -224,3 +224,20 @@ Migration `1758758424000_bloco3-conteudo-publico.sql`. **Aplicada só no banco d
 | Correções da Fase 10 achadas no caminho | `rateLimit` estava **sem RLS** (reprovava a Lei 1 no `pnpm seguranca`) e `verificar_rate_limit` estava concedida a `app_usuario` sem funcionar (security invoker, sem privilégio na tabela). Ligou-se a RLS (sem policy) e revogou-se o grant. |
 
 **Não feito (de propósito):** depoimentos — não existem depoimentos reais e a tabela ficaria vazia; entra quando houver conteúdo. Textos do Hero, pilares e comparativo continuam no código (viram busca no servidor no Bloco 7).
+
+
+---
+
+## Bloco 4 — fluxo de assinatura com a cara do site (05/10/2026)
+
+Migration `1758758425000_bloco4-funil-de-conversao.sql`. **Aplicada só no banco de teste local; ainda não no Neon.**
+
+| Item | O que existe agora |
+|---|---|
+| Telas | `/assinar`, `/cadastro` e `/entrar` ganham topo com a marca, "Voltar ao site" (`NEXT_PUBLIC_URL_SITE`) e indicador de etapas (Plano → Conta → Endereço → Confirmação). O resumo do plano mostra preço por entrega e entregas por mês (D10); a data de entrega diz "sempre às quartas". |
+| Pós-assinatura | `/?nova=1` mostra a data da 1ª entrega, como pagar (PIX com comprovante no WhatsApp) e o botão do WhatsApp. |
+| Funil | `eventos_funil` + `registrar_evento_funil(etapa, plano)`: só etapa, plano público e instante (sem IP, e-mail ou sessão). Etapas: plano clicado (site, `sendBeacon`), conta criada (cadastro), endereço salvo e assinatura confirmada (nas actions, **na mesma transação** do fato). `POST /api/evento` com limite de 60/min por IP. O dono lê a contagem dos últimos 30 dias no painel inicial. Como não há identificador, o funil **não** liga etapas da mesma pessoa. |
+| Contraste (correção de B1/B2) | Texto branco sobre `--cor-ouro` dava 2,85:1. `--cor-sobre-ouro` agora é o texto escuro (5,3:1); `--cor-ouro-escuro` passou de `#b85f12` para `#a15200` (≥ 4,7:1 nos fundos claros); `--cor-whatsapp` de `#1a9e4b` para `#157f3c` (5,1:1 com texto branco). Novo `--cor-sobre-escuro` para texto sobre verde/WhatsApp. Vale para os três apps. |
+| E2E | `scripts/e2e/assinatura.mjs` (Playwright): site → plano → conta → endereço → confirmação → contagem do funil. Roda só contra banco de teste; precisa de uma faixa de CEP ativa. |
+
+**Pendente:** "fora da área → deixar contato" (Bloco 5); e-mail de confirmação de conta e fatura gerada ao assinar (Bloco 6, D8); o E2E ainda não roda no CI.

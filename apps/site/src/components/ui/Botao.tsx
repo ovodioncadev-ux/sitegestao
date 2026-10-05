@@ -6,11 +6,11 @@ const BASE =
   'inline-flex min-h-controle items-center justify-center rounded-controle px-6 py-2 font-medium transition-colors';
 
 const VARIANTES: Record<Variante, string> = {
-  primario: 'bg-ouro text-sobre-ouro hover:bg-ouro-escuro',
+  primario: 'bg-ouro text-sobre-ouro hover:brightness-95',
   contorno: 'border border-ouro bg-transparent text-ouro-escuro hover:bg-fundo-alt',
-  whatsapp: 'bg-whatsapp text-sobre-ouro hover:opacity-90',
+  whatsapp: 'bg-whatsapp text-sobre-escuro hover:opacity-90',
   /** Sobre fundo escuro (faixa verde). */
-  claro: 'bg-sobre-ouro text-ouro-escuro hover:bg-fundo-alt',
+  claro: 'bg-sobre-escuro text-ouro-escuro hover:bg-fundo-alt',
 };
 
 type Comum = { variante?: Variante; children: ReactNode; className?: string };
