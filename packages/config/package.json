@@ -1,0 +1,10 @@
+{
+  "name": "@ovo/config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./headers": "./src/headers.mjs",
+    "./whatsapp": "./src/whatsapp.mjs"
+  }
+}

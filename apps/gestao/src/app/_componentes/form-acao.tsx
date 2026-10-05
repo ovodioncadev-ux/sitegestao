@@ -1,0 +1,58 @@
+'use client';
+
+import { useActionState, useEffect, useRef, startTransition, type FormEvent, type ReactNode } from 'react';
+import type { AcaoDeFormulario } from '@/lib/tipos';
+
+/**
+ * Formulário que chama uma Server Action e MOSTRA o resultado: mensagem de
+ * sucesso ou de erro, no próprio lugar, sem tela de erro do Next.
+ *
+ * O envio é feito à mão (onSubmit) e não pelo `action=` do <form> de propósito:
+ * o `action=` do React 19 zera todos os campos depois de enviar, mesmo quando
+ * deu erro — e a pessoa perderia tudo o que digitou. Assim, o formulário só é
+ * limpo (limpar) quando a ação deu certo.
+ *
+ * Os campos entram como `children`, montados no servidor.
+ */
+export function FormAcao({
+  acao,
+  rotulo,
+  children,
+  limpar = false,
+  linha = false,
+}: {
+  acao: AcaoDeFormulario;
+  rotulo: string;
+  children?: ReactNode;
+  /** Zera os campos quando a ação der certo (formulários de "novo"). */
+  limpar?: boolean;
+  /** Campos e botão lado a lado (botões de ação dentro de tabela). */
+  linha?: boolean;
+}) {
+  const [estado, despachar, pendente] = useActionState(acao, null);
+  const formulario = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (estado?.ok && limpar) formulario.current?.reset();
+  }, [estado, limpar]);
+
+  function aoEnviar(evento: FormEvent<HTMLFormElement>) {
+    evento.preventDefault();
+    const dados = new FormData(evento.currentTarget);
+    startTransition(() => despachar(dados));
+  }
+
+  return (
+    <form ref={formulario} onSubmit={aoEnviar} className={linha ? 'form-linha' : undefined}>
+      {children}
+      <button type="submit" disabled={pendente}>
+        {pendente ? 'Enviando…' : rotulo}
+      </button>
+      {estado && (
+        <p role={estado.ok ? 'status' : 'alert'} className={estado.ok ? 'msg-ok' : 'msg-erro'}>
+          {estado.mensagem}
+        </p>
+      )}
+    </form>
+  );
+}

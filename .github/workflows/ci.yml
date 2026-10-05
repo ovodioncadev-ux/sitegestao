@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  seguranca:
+    name: Segredos e dependências
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # O histórico inteiro: a varredura procura .env em commits antigos.
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Varredura de segredos
+        run: bash scripts/verificar-segredos.sh
+
+      - name: Auditoria de dependências
+        # Alta e crítica resolvidas antes de lançar.
+        run: pnpm audit --audit-level=high
+
+      - name: Dependência instalada e não importada
+        # Superfície de ataque de graça. Não derruba o build ainda.
+        continue-on-error: true
+        run: pnpm dlx depcheck --ignores="@types/*,typescript,eslint*,tailwindcss,@tailwindcss/postcss"
+
+  tipos:
+    name: TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test

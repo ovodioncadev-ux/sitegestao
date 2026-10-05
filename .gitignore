@@ -1,0 +1,34 @@
+node_modules/
+.pnpm-store/
+
+.next/
+out/
+dist/
+build/
+.turbo/
+*.tsbuildinfo
+
+coverage/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+.vercel/
+supabase/.branches/
+supabase/.temp/
+
+# Design system reference (85 MB, não usado pelos apps)
+Ovo\ di\ Onça\ Design\ System/
+
+# ─────────────────────────────────────────────────────────────
+# SEGREDOS — regra 0.1 do prompt de construção.
+# NÃO REMOVA ESTAS DUAS LINHAS, E NÃO AS TROQUE POR
+# ".env" + ".env*.local": essa forma deixa .env.production passar.
+# ─────────────────────────────────────────────────────────────
+.env*
+!.env.example

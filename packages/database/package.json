@@ -1,0 +1,53 @@
+{
+  "name": "@ovo/database",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./acesso": "./src/acesso.ts",
+    "./auth": "./src/auth/better-auth.ts",
+    "./auth-cliente": "./src/auth/cliente.ts",
+    "./papel": "./src/auth/papel.ts",
+    "./types": "./src/types.ts",
+    "./middleware": "./src/middleware.ts",
+    "./rotina": "./src/rotina.ts"
+  },
+  "scripts": {
+    "db:papel-servidor": "node scripts/criar-papel-servidor.mjs",
+    "db:migrar": "node-pg-migrate up --envPath ../../.env --database-url-var DATABASE_ADMIN_URL -m migrations",
+    "db:limpar-teste": "node scripts/rodar-sql.mjs scripts/limpar-dados-teste.sql --banco-principal",
+    "db:migrar:teste": "node scripts/migrar-teste.mjs",
+    "db:reverter": "node-pg-migrate down --envPath ../../.env --database-url-var DATABASE_ADMIN_URL -m migrations",
+    "teste:estrutura": "node scripts/rodar-sql.mjs tests/lei1-estrutura.sql",
+    "teste:autorizacao": "node scripts/rodar-sql.mjs tests/teste-autorizacao.sql",
+    "teste:fase1": "node scripts/rodar-sql.mjs tests/teste-fase1-clientes.sql",
+    "teste:fase2": "node scripts/rodar-sql.mjs tests/teste-fase2-assinaturas.sql",
+    "teste:fase3": "node scripts/rodar-sql.mjs tests/teste-fase3-entregas.sql",
+    "teste:fase4": "node scripts/rodar-sql.mjs tests/teste-fase4-faturas.sql",
+    "teste:fase5": "node scripts/rodar-sql.mjs tests/teste-fase5-ciclo.sql",
+    "teste:fase6": "node scripts/rodar-sql.mjs tests/teste-fase6-auditoria.sql",
+    "typecheck": "tsc --noEmit",
+    "teste:fase7": "node scripts/rodar-sql.mjs tests/teste-fase7-assinante.sql",
+    "teste:fase8": "node scripts/rodar-sql.mjs tests/teste-fase8-cadastro-site.sql",
+    "teste:fase9": "node scripts/rodar-sql.mjs tests/teste-fase9-operacao.sql",
+    "teste:fase10": "node scripts/rodar-sql.mjs tests/teste-fase10-estabilidade.sql",
+    "teste:etapa1": "node scripts/rodar-sql.mjs tests/teste-etapa1-estrutura.sql",
+    "teste:etapa2": "node scripts/rodar-sql.mjs tests/teste-etapa2-calendario.sql"
+  },
+  "dependencies": {
+    "better-auth": "^1.2.7",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/pg": "^8.11.10",
+    "dotenv": "^16.4.5",
+    "next": "^15.5.4",
+    "node-pg-migrate": "^7.9.0",
+    "typescript": "^5.6.3"
+  },
+  "peerDependencies": {
+    "next": ">=15"
+  }
+}

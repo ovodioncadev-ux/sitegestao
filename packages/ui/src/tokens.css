@@ -1,0 +1,83 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Tokens de design — fonte única para os quatro apps.
+
+   Nenhum hex solto nos componentes. Se a cor não está aqui, ela não
+   existe no sistema.
+
+   Dourado da marca (decisão do Fred, 28/09/2026, ver DECISOES.md):
+   os dois dourados ficam — não era uma contradição a resolver, era uma
+   paleta com dois tons. `--cor-ouro` é o de ação (botões, links, foco);
+   `--cor-ouro-app` é o de destaque (badges, ícones, "Mais escolhido").
+   Fonte ainda pendente (Aclonica/Poppins seguem valendo até confirmação).
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Cores da marca ─────────────────────────────────────────────── */
+  --cor-fundo: #fdfbf7;
+  --cor-fundo-alt: #f4eade;
+  --cor-texto: #1c2826;
+  --cor-texto-suave: #4a5957;
+  --cor-ouro: #e67e22;
+  --cor-ouro-escuro: #b85f12;
+  --cor-ouro-app: #d4a437;
+  --cor-borda: rgb(28 40 38 / 12%);
+
+  /* ── Estado ─────────────────────────────────────────────────────── */
+  --cor-sucesso: #1e824c;
+  --cor-erro: #ba1a1a;
+  --cor-whatsapp: #1a9e4b;
+
+  /* ── Tipografia ─────────────────────────────────────────────────── */
+  --fonte-titulo: 'Aclonica', system-ui, sans-serif;  /* só h1 e h2 */
+  --fonte-corpo: 'Poppins', system-ui, sans-serif;    /* todo o resto */
+
+  /* Escala fechada. Fora dela não existe tamanho.
+     Mínimo na área do cliente: 14px.
+     No painel, 12px é permitido SOMENTE em rótulo de tabela. */
+  --texto-rotulo: 12px;
+  --texto-pequeno: 14px;
+  --texto-corpo: 16px;
+  --texto-medio: 18px;
+  --texto-grande: 24px;
+  --texto-titulo: 32px;
+  --texto-hero: 44px;
+
+  --altura-linha-corpo: 1.6;
+  --altura-linha-titulo: 1.2;
+
+  /* ── Espaçamento: escala de 8 ───────────────────────────────────── */
+  --esp-1: 4px;
+  --esp-2: 8px;
+  --esp-3: 12px;
+  --esp-4: 16px;
+  --esp-6: 24px;
+  --esp-8: 32px;
+  --esp-12: 48px;
+  --esp-16: 64px;
+  --esp-24: 96px;
+
+  --largura-conteudo: 1120px;
+  --altura-controle: 48px;      /* input e botão */
+  --alvo-toque: 44px;           /* mínimo de área clicável */
+  --padding-card: var(--esp-6);
+  --padding-celula: var(--esp-3);
+
+  /* ── Bordas e sombra ────────────────────────────────────────────── */
+  --raio-controle: 8px;         /* botão, input */
+  --raio-card: 16px;            /* card, modal */
+  --sombra-flutuante: 0 2px 8px rgb(28 40 38 / 8%);  /* só modal e dropdown */
+}
+
+/* Dark mode NÃO é implementado agora. Se um dia for, precisa de paleta
+   própria com contraste real — não cinza sobre cinza. */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

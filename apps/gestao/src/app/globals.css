@@ -1,0 +1,70 @@
+@import 'tailwindcss';
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  font-family: var(--fonte-corpo);
+  font-size: var(--texto-corpo);
+  line-height: var(--altura-linha-corpo);
+}
+
+h1,
+h2 {
+  font-family: var(--fonte-titulo);
+  line-height: var(--altura-linha-titulo);
+}
+
+/* ─── Interface provisória do painel ────────────────────────────────────────
+   Só o suficiente para usar e testar. Sem identidade visual, de propósito. */
+.pagina { max-width: 1040px; margin: 0 auto; padding: var(--esp-6); }
+.pagina h1 { font-size: var(--texto-grande); margin: var(--esp-4) 0; }
+.pagina h2 { font-size: var(--texto-medio); margin: var(--esp-8) 0 var(--esp-2); }
+.pagina p { margin: var(--esp-2) 0; }
+.pagina a { text-decoration: underline; }
+
+.menu { display: flex; flex-wrap: wrap; gap: var(--esp-4); align-items: center;
+  padding-bottom: var(--esp-3); border-bottom: 1px solid var(--cor-borda); }
+.menu-sair { margin-left: auto; }
+
+.pagina table { width: 100%; border-collapse: collapse; font-size: var(--texto-pequeno); }
+.pagina th, .pagina td { text-align: left; vertical-align: top; padding: var(--esp-2);
+  border-bottom: 1px solid var(--cor-borda); }
+.pagina th { font-size: var(--texto-rotulo); }
+.tabela-rolavel { overflow-x: auto; }
+
+.pagina label { display: block; margin: var(--esp-3) 0 var(--esp-1); font-size: var(--texto-pequeno); }
+.pagina input:not([type='checkbox']):not([type='radio']), .pagina select, .pagina textarea {
+  width: 100%; max-width: 420px; min-height: 40px; padding: 0 var(--esp-2);
+  border: 1px solid var(--cor-borda); border-radius: var(--raio-controle);
+  background: #fff; font: inherit; }
+.pagina textarea { padding: var(--esp-2); min-height: 72px; }
+.pagina button { min-height: 40px; padding: 0 var(--esp-4); margin-top: var(--esp-3);
+  border: 1px solid var(--cor-texto); border-radius: var(--raio-controle);
+  background: var(--cor-ouro); color: var(--cor-texto); font: inherit; font-weight: 600; cursor: pointer; }
+.pagina button:disabled { opacity: 0.6; cursor: default; }
+.pagina .secundario { background: transparent; }
+.pagina .perigo { background: #fff; border-color: var(--cor-erro); color: var(--cor-erro); }
+
+.form-linha { display: flex; flex-wrap: wrap; gap: var(--esp-2); align-items: flex-end; }
+.form-linha label { margin: 0; }
+.form-linha button { margin-top: 0; }
+.form-linha .msg-ok, .form-linha .msg-erro { flex-basis: 100%; }
+
+.filtros { display: flex; flex-wrap: wrap; gap: var(--esp-3); align-items: flex-end; margin: var(--esp-3) 0; }
+.filtros button { margin-top: 0; }
+
+.msg-ok { color: var(--cor-sucesso); font-weight: 600; }
+.msg-erro { color: var(--cor-erro); font-weight: 600; }
+.msg-info { background: var(--cor-fundo-alt); padding: var(--esp-2) var(--esp-3); border-radius: var(--raio-controle); }
+.suave { color: var(--cor-texto-suave); }
+.grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 var(--esp-4); }
+
+/* Foco de teclado sempre visível: toda navegação funciona só com teclado. */
+:focus-visible {
+  outline: 2px solid var(--cor-ouro-escuro);
+  outline-offset: 2px;
+}
