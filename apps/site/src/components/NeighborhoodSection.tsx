@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from 'react';
 import { useBairros } from '@/hooks/useBairros';
 import { cepAtendido } from '@/lib/api';
+import { mascararCep } from '@/lib/formatar';
 import { Botao, Secao } from './ui';
 
 export function NeighborhoodSection() {
@@ -43,7 +44,8 @@ export function NeighborhoodSection() {
             type="text"
             inputMode="numeric"
             value={cep}
-            onChange={(e) => setCep(e.target.value.replace(/[^\d-]/g, '').slice(0, 9))}
+            onChange={(e) => setCep(mascararCep(e.target.value))}
+            autoComplete="postal-code"
             placeholder="30000-000"
             className="rounded-controle border border-borda px-3 min-h-controle"
           />

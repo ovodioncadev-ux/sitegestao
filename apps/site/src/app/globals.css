@@ -50,9 +50,12 @@ h2 {
   line-height: var(--altura-linha-titulo);
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+/* Em @layer base: fora de camada, esta regra venceria as classes de cor do Tailwind. */
+@layer base {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 
 .tabela-rolavel {

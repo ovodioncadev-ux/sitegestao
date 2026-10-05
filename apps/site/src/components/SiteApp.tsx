@@ -7,6 +7,10 @@ import { ComparisonTable } from './ComparisonTable';
 import { NeighborhoodSection } from './NeighborhoodSection';
 import { FaqSection } from './FaqSection';
 import { Footer } from './Footer';
+import { FaixaConfianca } from './FaixaConfianca';
+import { Pilares } from './Pilares';
+import { ComoFunciona } from './ComoFunciona';
+import { CtaFinal } from './CtaFinal';
 
 /**
  * A vitrine não coleta dado de ninguém: "Assinar" leva ao app do assinante
@@ -20,10 +24,14 @@ export function SiteApp() {
       <Navbar />
       <main>
         <Hero />
+        <FaixaConfianca />
+        <Pilares />
         <PlansSection />
+        <ComoFunciona />
         <ComparisonTable />
         <NeighborhoodSection />
         <FaqSection />
+        <CtaFinal />
       </main>
       <Footer />
     </>

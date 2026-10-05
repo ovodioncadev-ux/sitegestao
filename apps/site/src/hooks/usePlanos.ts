@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { buscarPlanos } from '@/lib/api';
 import type { Plan } from '@/types';
 
@@ -8,6 +8,13 @@ export function usePlanos() {
   const [planos, setPlanos] = useState<Plan[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
+
+  const [tentativa, setTentativa] = useState(0);
+  const recarregar = useCallback(() => {
+    setCarregando(true);
+    setErro(null);
+    setTentativa((n) => n + 1);
+  }, []);
 
   useEffect(() => {
     buscarPlanos()
@@ -33,7 +40,7 @@ export function usePlanos() {
         setErro('Não foi possível carregar os planos agora. Tente de novo em instantes.');
       })
       .finally(() => setCarregando(false));
-  }, []);
+  }, [tentativa]);
 
-  return { planos, carregando, erro };
+  return { planos, carregando, erro, recarregar };
 }
