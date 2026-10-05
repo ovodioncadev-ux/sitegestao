@@ -258,3 +258,27 @@ Migration `1758758426000_bloco5-interessados.sql`. **Aplicada só no banco de te
 | Privacidade | **Sem auditoria** nesta tabela, de propósito: a auditoria é imutável e copiaria telefone e e-mail para onde não dá apagar. Remover apaga de verdade. Quem mudou a situação não fica registrado. |
 
 **Não feito:** aviso automático (precisa de serviço de e-mail ou WhatsApp API — hoje o dono avisa à mão, pelo link); prazo de retenção (os dados ficam até o dono avisar, descartar ou remover; defina um prazo e eu automatizo a limpeza).
+
+
+---
+
+## Bloco 6 · rodada 1 — D8: 1ª entrega só depois do pagamento + confirmação automática (05/10/2026)
+
+Migration `1758758427000_bloco6-d8-pagamento-antes-da-entrega.sql`. **Aplicada só no banco de teste local; ainda não no Neon.** Depois de migrar, rode `criar-papel-servidor.mjs` de novo para conceder `app_pagamentos` ao `app_servidor`.
+
+| Item | Como ficou |
+|---|---|
+| Chave | `config_negocio.exigir_pagamento_antes_da_1a_entrega`, **desligada** por padrão (editável em `/configuracoes`). Desligada = comportamento de sempre. Ligada vale só para assinaturas **novas** (as existentes não são tocadas). |
+| Assinatura nova (ligada) | Nasce `ativa` com `aguardando_pagamento_desde` preenchido, **sem entrega**, e a 1ª fatura já gerada (10% do 1º mês, vence no dia). Vale também para assinatura criada pelo dono no painel. Pausar, trocar de plano e agendar entrega à mão ficam recusados enquanto aguarda. |
+| Liberação | Pagar a fatura do 1º período (manual ou automático) chama `liberar_primeira_entrega`: cria a entrega na 1ª data do calendário do plano após o corte (D9). **O instante do corte é o da confirmação do pagamento** (`now()`), nunca uma data digitada. |
+| Prazo | `dias_para_pagar_1a_fatura` (padrão 7): a rotina diária cancela a assinatura e a 1ª fatura; o cliente volta a "cadastro em andamento" e pode assinar de novo. A rotina não gera fatura nova para quem aguarda. |
+| Confirmação online | Papel `app_pagamentos` (só executa `confirmar_pagamento_online`; sem `comoAdmin`). Idempotente por `(provedor, transacao)`; valor **menor** que o da fatura → `divergente` (não baixa); pagamento para fatura já paga/cancelada → `sem_efeito` (dono avalia estorno). Valor maior confirma e guarda o valor real. O painel do dono lista os dois casos. |
+| Webhook | `POST /api/pagamento/webhook`. **O corpo do aviso nunca é prova**: o servidor consulta o provedor e só então chama o banco. Limite de 120/min por IP; 404 se o pagamento online está desligado. |
+| Provedores | `PAGAMENTO_PROVEDOR=nenhum` (padrão, pagamento manual) · `simulado` (só dev; recusado em produção) · `infinitepay`. |
+
+### ⚠️ InfinitePay: contrato A CONFIRMAR
+
+O adaptador (`apps/assinante/src/lib/pagamento/infinitepay.ts`) foi escrito **sem acesso à documentação oficial** (domínio bloqueado no ambiente de desenvolvimento). Os nomes `order_nsu`, `handle`, `webhook_url`, `transaction_nsu`, `slug` e o endereço de `payment_check` vêm de fontes secundárias; o endereço de criação de link, os campos de item/valor e a **unidade do valor** (centavos?) são suposições, marcados com «A CONFIRMAR» no código. Por isso ele **só liga com `INFINITEPAY_CONTRATO_CONFIRMADO=sim`**. Antes de ligar: conferir cada ponto em infinitepay.io/checkout-documentacao, informar `INFINITEPAY_HANDLE` e uma `URL_PUBLICA_ASSINANTE` https alcançável pela InfinitePay. Se a unidade do valor estiver errada, o efeito é "divergente" (nenhuma fatura é baixada a menos): falha para o lado seguro. Cartão em **recorrência** não consta como suportado pelo checkout: "cartão" segue gerando uma fatura mensal com link avulso.
+
+### Fora desta rodada
+D1/D2/D10 (ciclo por mês de calendário e inadimplência), D3–D7 (pausa com crédito, troca de plano, cancelamento no fim do mês), D11 (dúzia pedida pelo assinante) e D15 (indicação). Com a chave ligada, o texto do FAQ "como funciona o pagamento" fica desatualizado: ajuste em `/faq`.

@@ -111,10 +111,16 @@ export default async function Assinar({ searchParams }: { searchParams: Promise<
   }
 
   const dados = await comoUsuario(usuario.usuarioId, async (bd) => {
+    // D8: com a chave ligada, a assinatura nasce aguardando o 1º pagamento (sem entrega agendada).
+    const cfg = await bd.umaLinha<{ espera: boolean; dias: number }>(
+      'select exigir_pagamento_antes_da_1a_entrega as espera, dias_para_pagar_1a_fatura as dias from config_negocio where id = 1',
+    );
+    const espera = Boolean(cfg?.espera);
+    const dias = cfg?.dias ?? 7;
     const cliente = await buscarCliente(bd, usuario.usuarioId);
     if (!cliente) {
       const perfil = await bd.umaLinha<{ nome: string }>('select nome from perfis where id = $1', [usuario.usuarioId]);
-      return { cliente: null, nome: perfil?.nome ?? '', vigente: false, naArea: false };
+      return { cliente: null, nome: perfil?.nome ?? '', vigente: false, naArea: false, espera, dias };
     }
     const vigente = await bd.umaLinha<{ id: string }>(
       `select id from assinaturas where cliente_id = $1 and status in ('ativa', 'pausada') limit 1`,
@@ -123,7 +129,7 @@ export default async function Assinar({ searchParams }: { searchParams: Promise<
     const area = await bd.umaLinha<{ atendido: boolean }>('select cep_dentro_area_entrega($1) as atendido', [
       cliente.cep,
     ]);
-    return { cliente, nome: cliente.nome, vigente: Boolean(vigente), naArea: Boolean(area?.atendido) };
+    return { cliente, nome: cliente.nome, vigente: Boolean(vigente), naArea: Boolean(area?.atendido), espera, dias };
   });
 
   // 4. Já assina: nada a fazer aqui.
@@ -253,11 +259,19 @@ export default async function Assinar({ searchParams }: { searchParams: Promise<
       </section>
 
       <section className="cartao">
-        <p className="suave">
-          Ao confirmar, sua assinatura é criada e a primeira entrega é agendada
-          {plano.ancorarEmQuarta && ' para a próxima quarta-feira disponível'}. O pagamento online ainda não está
-          disponível: a cobrança é confirmada pela Ovo di Onça (PIX com comprovante enviado pelo WhatsApp).
-        </p>
+        {dados.espera ? (
+          <p className="suave">
+            Ao confirmar, sua assinatura é criada e geramos a <strong>1ª fatura</strong> (com {plano.descontoPrimeiroMesPct}% de
+            desconto). A <strong>primeira entrega é agendada depois que o pagamento for confirmado</strong>, na próxima
+            quarta-feira disponível. Você tem {dados.dias} dias para pagar; passado o prazo, a assinatura é cancelada.
+          </p>
+        ) : (
+          <p className="suave">
+            Ao confirmar, sua assinatura é criada e a primeira entrega é agendada
+            {plano.ancorarEmQuarta && ' para a próxima quarta-feira disponível'}. O pagamento online ainda não está
+            disponível: a cobrança é confirmada pela Ovo di Onça (PIX com comprovante enviado pelo WhatsApp).
+          </p>
+        )}
         <FormAcao acao={confirmarAssinatura} rotulo="Confirmar assinatura">
           <input type="hidden" name="plano" value={plano.frequencia} />
         </FormAcao>

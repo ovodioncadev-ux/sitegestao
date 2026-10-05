@@ -26,15 +26,18 @@ export async function salvarConfiguracao(_estado: Estado, dados: FormData): Prom
     if (!HORA.test(horaCorte)) throw new ErroNegocio('Hora do corte inválida. Use HH:MM.');
     const bonus = decimal(campo(dados, 'bonus_indicador_pct'), 'Bônus do indicador (%)', 0, 100);
     const teto = decimal(campo(dados, 'teto_credito_indicacao_pct'), 'Teto de crédito por indicação (%)', 0, 100);
+    const exigirPagamento = dados.get('exigir_pagamento') === 'on';
+    const diasParaPagar = inteiro(campo(dados, 'dias_para_pagar_1a_fatura'), 'Dias para pagar a 1ª fatura', 1, 60);
 
     await comoDono((bd) =>
       bd.consultar(
         `update config_negocio
             set preco_pente_centavos = $1, preco_duzia_centavos = $2, dia_corte = $3,
                 hora_corte = $4::time, bonus_indicador_pct = $5, teto_credito_indicacao_pct = $6,
+                exigir_pagamento_antes_da_1a_entrega = $7, dias_para_pagar_1a_fatura = $8,
                 atualizado_em = now()
           where id = 1`,
-        [precoPente, precoDuzia, diaCorte, horaCorte, bonus, teto],
+        [precoPente, precoDuzia, diaCorte, horaCorte, bonus, teto, exigirPagamento, diasParaPagar],
       ),
     );
 

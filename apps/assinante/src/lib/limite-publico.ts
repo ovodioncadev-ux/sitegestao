@@ -16,7 +16,7 @@ export function ipDaRequisicao(cabecalhos: Pick<Headers, 'get'>): string {
  * O savepoint existe porque um erro SQL aborta a transação inteira; sem ele o
  * "libera" seria só de fachada e a consulta seguinte falharia junto.
  */
-export async function acessoBloqueado(bd: Executor, cabecalhos: Pick<Headers, 'get'>, rota: 'area' | 'evento' | 'interesse'): Promise<boolean> {
+export async function acessoBloqueado(bd: Executor, cabecalhos: Pick<Headers, 'get'>, rota: 'area' | 'evento' | 'interesse' | 'webhook'): Promise<boolean> {
   await bd.consultar('savepoint limite_publico');
   try {
     const linha = await bd.umaLinha<{ bloqueado: boolean }>('select limitar_acesso_publico($1, $2) as bloqueado', [

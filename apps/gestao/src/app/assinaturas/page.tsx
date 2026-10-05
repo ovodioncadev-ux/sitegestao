@@ -15,6 +15,7 @@ type Linha = {
   status: string;
   data_inicio: string;
   proxima_entrega: string | null;
+  aguardando_pagamento_desde: string | null;
 };
 
 const STATUS = Object.keys(STATUS_ASSINATURA);
@@ -44,7 +45,8 @@ export default async function Assinaturas({
     ),
     linhas: await bd.consultar<Linha>(
       `select a.id, a.cliente_id, c.nome as cliente_nome, p.nome as plano_nome,
-              a.status::text, a.data_inicio::text, a.proxima_entrega::text
+              a.status::text, a.data_inicio::text, a.proxima_entrega::text,
+              a.aguardando_pagamento_desde::text
          from assinaturas a
          join clientes c on c.id = a.cliente_id
          join planos p on p.id = a.plano_id
@@ -108,9 +110,11 @@ export default async function Assinaturas({
                     <Link href={`/clientes/${a.cliente_id}`}>{a.cliente_nome}</Link>
                   </td>
                   <td>{a.plano_nome}</td>
-                  <td>{rotulo(STATUS_ASSINATURA, a.status)}</td>
+                  <td>
+                    {a.aguardando_pagamento_desde ? 'Aguardando 1º pagamento' : rotulo(STATUS_ASSINATURA, a.status)}
+                  </td>
                   <td>{formatarData(a.data_inicio)}</td>
-                  <td>{formatarData(a.proxima_entrega)}</td>
+                  <td>{a.aguardando_pagamento_desde ? 'após o pagamento' : formatarData(a.proxima_entrega)}</td>
                   <td>
                     <Link href={`/assinaturas/${a.id}`}>Abrir</Link>
                   </td>

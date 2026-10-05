@@ -48,6 +48,7 @@ type Assinatura = {
   proxima_cobranca: string | null;
   pausada_em: string | null;
   data_retorno_prevista: string | null;
+  aguardando_pagamento_desde: string | null;
 };
 
 type ReposicaoLinha = {
@@ -110,7 +111,8 @@ export default async function DetalheAssinatura({ params }: { params: Promise<{ 
       `select a.id, a.cliente_id, c.nome as cliente_nome, a.plano_id, p.nome as plano_nome,
               a.status::text, a.data_inicio::text, a.data_fim::text, a.proxima_entrega::text,
               a.data_cancelamento::text, a.motivo_cancelamento, a.forma_cobranca::text,
-              a.proxima_cobranca::text, a.pausada_em::text, a.data_retorno_prevista::text
+              a.proxima_cobranca::text, a.pausada_em::text, a.data_retorno_prevista::text,
+              a.aguardando_pagamento_desde::text
          from assinaturas a
          join clientes c on c.id = a.cliente_id
          join planos p on p.id = a.plano_id
@@ -164,7 +166,9 @@ export default async function DetalheAssinatura({ params }: { params: Promise<{ 
 
   const vigente = assinatura.status === 'ativa' || assinatura.status === 'pausada';
   const hoje = hojeEmSaoPaulo();
-  const semProxima = assinatura.status === 'ativa' && !assinatura.proxima_entrega;
+  const aguardando = Boolean(assinatura.aguardando_pagamento_desde) && assinatura.status === 'ativa';
+  // "Sem próxima entrega" é alerta; aguardar o 1º pagamento é esperado (D8) e tem aviso próprio.
+  const semProxima = assinatura.status === 'ativa' && !assinatura.proxima_entrega && !aguardando;
 
   // Valor sugerido para a próxima fatura (regra única, calculada pelo banco).
   const valorSugerido = assinatura.status === 'ativa' ? await valorSugeridoPromessa : null;
@@ -193,7 +197,11 @@ export default async function DetalheAssinatura({ params }: { params: Promise<{ 
           </tr>
           <tr>
             <th>Próxima entrega</th>
-            <td>{formatarData(assinatura.proxima_entrega)}</td>
+            <td>
+              {aguardando
+                ? `Aguardando o 1º pagamento (desde ${formatarData(assinatura.aguardando_pagamento_desde)}): registre o pagamento da 1ª fatura para agendar a entrega`
+                : formatarData(assinatura.proxima_entrega)}
+            </td>
           </tr>
           <tr>
             <th>Forma de cobrança</th>

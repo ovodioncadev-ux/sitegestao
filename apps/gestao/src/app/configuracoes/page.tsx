@@ -14,6 +14,8 @@ type Config = {
   hora_corte: string;
   bonus_indicador_pct: string;
   teto_credito_indicacao_pct: string;
+  exigir_pagamento_antes_da_1a_entrega: boolean;
+  dias_para_pagar_1a_fatura: number;
 };
 
 type Plano = {
@@ -39,7 +41,8 @@ export default async function Configuracoes() {
   const { config, planos } = await comoUsuario(autorizacao.usuario.usuarioId, async (bd) => ({
     config: await bd.umaLinha<Config>(
       `select preco_pente_centavos, preco_duzia_centavos, dia_corte, to_char(hora_corte, 'HH24:MI') as hora_corte,
-              bonus_indicador_pct, teto_credito_indicacao_pct
+              bonus_indicador_pct, teto_credito_indicacao_pct,
+              exigir_pagamento_antes_da_1a_entrega, dias_para_pagar_1a_fatura
          from config_negocio where id = 1`,
     ),
     planos: await bd.consultar<Plano>(
@@ -95,6 +98,24 @@ export default async function Configuracoes() {
             <label htmlFor="teto">Teto de crédito por indicação (%)</label>
             <input id="teto" name="teto_credito_indicacao_pct" inputMode="decimal" required
               defaultValue={Number(config.teto_credito_indicacao_pct)} />
+          </div>
+          <div>
+            <label htmlFor="exigir_pagamento">
+              <input id="exigir_pagamento" name="exigir_pagamento" type="checkbox"
+                defaultChecked={config.exigir_pagamento_antes_da_1a_entrega} />{' '}
+              Só entregar depois do 1º pagamento (D8)
+            </label>
+            <p className="suave">
+              Desligado: a assinatura nasce com a 1ª entrega agendada, como sempre. Ligado: nasce aguardando o
+              pagamento da 1ª fatura (com o desconto do 1º mês) e a entrega só é agendada quando o pagamento for
+              confirmado. Vale só para assinaturas novas.
+            </p>
+          </div>
+          <div>
+            <label htmlFor="dias_pagar">Dias para pagar a 1ª fatura</label>
+            <input id="dias_pagar" name="dias_para_pagar_1a_fatura" inputMode="numeric" required
+              defaultValue={config.dias_para_pagar_1a_fatura} />
+            <p className="suave">Passado o prazo sem pagamento, a assinatura é cancelada pela rotina diária.</p>
           </div>
         </div>
       </FormAcao>

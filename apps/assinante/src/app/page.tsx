@@ -2,9 +2,11 @@ import Link from 'next/link';
 import { comoUsuario } from '@ovo/database';
 import { buscarCliente, exigirSessao } from '@/lib/assinante';
 import { formatarData, formatarReais, WHATSAPP_URL } from '@/lib/formatar';
+import { pagamentoOnlineAtivo } from '@/lib/pagamento/provedor';
 import { Pagina } from './_componentes/pagina';
 import { FormAcao } from './_componentes/form-acao';
 import { solicitarAlteracao } from './acoes';
+import { pagarFatura } from './pagamento/acoes';
 
 // Dado de cliente nunca é cacheado nem compartilhado entre pessoas.
 export const dynamic = 'force-dynamic';
@@ -38,6 +40,9 @@ type Assinatura = {
   forma_cobranca: string;
   proxima_cobranca: string | null;
   data_retorno_prevista: string | null;
+  /** D8: dia em que passou a aguardar o 1º pagamento (nulo = normal) e prazo para pagar. */
+  aguardando_pagamento_desde: string | null;
+  pagar_ate: string | null;
 };
 type Reposicao = { id: string; quantidade_ovos: number; status: string; reposicao: string | null };
 type Entrega = { id: string; data_prevista: string; status: string; pentes: number; duzias: number; horario: string | null };
@@ -57,10 +62,13 @@ export default async function MinhaAssinatura({ searchParams }: { searchParams: 
     const assinatura = await bd.umaLinha<Assinatura>(
       `select a.id, a.status, a.data_inicio::text, a.proxima_entrega::text,
               p.nome as plano_nome, p.freshness_max_dias, a.forma_cobranca::text,
-              a.proxima_cobranca::text, a.data_retorno_prevista::text
+              a.proxima_cobranca::text, a.data_retorno_prevista::text,
+              a.aguardando_pagamento_desde::text,
+              (a.aguardando_pagamento_desde + cfg.dias_para_pagar_1a_fatura)::text as pagar_ate
          from assinaturas a
          join planos p on p.id = a.plano_id
-        where a.cliente_id = $1
+         cross join config_negocio cfg
+        where a.cliente_id = $1 and cfg.id = 1
         order by (a.status in ('ativa', 'pausada')) desc, a.criado_em desc
         limit 1`,
       [cliente.id],
@@ -129,10 +137,44 @@ export default async function MinhaAssinatura({ searchParams }: { searchParams: 
   const vigente = assinatura && (assinatura.status === 'ativa' || assinatura.status === 'pausada');
   const pediuPausa = pedidos.some((p) => p.tipo === 'pausa');
   const pediuCancelamento = pedidos.some((p) => p.tipo === 'cancelamento');
+  const aguardando = Boolean(assinatura?.aguardando_pagamento_desde) && assinatura?.status === 'ativa';
+  const pagamentoOnline = pagamentoOnlineAtivo();
+  const primeiraEmAberto = faturas.find((f) => f.status === 'pendente' || f.status === 'atrasada');
 
   return (
     <Pagina titulo={`Olá, ${cliente.nome.split(' ')[0]}`}>
-      {nova === '1' && assinatura && (
+      {aguardando && assinatura && (
+        <section className="cartao" role="status" aria-labelledby="titulo-aguardando">
+          <h2 id="titulo-aguardando">{nova === '1' ? 'Assinatura criada! Falta o pagamento.' : 'Falta o pagamento da 1ª fatura'}</h2>
+          <p>
+            Assim que o pagamento for confirmado, agendamos a sua <strong>primeira entrega</strong>
+            {assinatura.pagar_ate && (
+              <>
+                . Pague até <strong>{formatarData(assinatura.pagar_ate)}</strong>; passado o prazo, a assinatura é
+                cancelada
+              </>
+            )}
+            .
+          </p>
+          {pagamentoOnline && primeiraEmAberto ? (
+            <FormAcao acao={pagarFatura} rotulo="Pagar agora">
+              <input type="hidden" name="fatura" value={primeiraEmAberto.id} />
+            </FormAcao>
+          ) : (
+            <>
+              <p className="suave">
+                Envie o comprovante do PIX pelo WhatsApp e a Ovo di Onça confirma a cobrança.
+              </p>
+              <p>
+                <a className="botao botao-whatsapp" href={WHATSAPP_URL} target="_blank" rel="noreferrer">
+                  Enviar comprovante pelo WhatsApp
+                </a>
+              </p>
+            </>
+          )}
+        </section>
+      )}
+      {nova === '1' && assinatura && !aguardando && (
         <section className="cartao" role="status" aria-labelledby="titulo-nova">
           <h2 id="titulo-nova">Assinatura criada!</h2>
           <p>
@@ -165,13 +207,13 @@ export default async function MinhaAssinatura({ searchParams }: { searchParams: 
             <dt>Plano</dt>
             <dd>{assinatura.plano_nome}</dd>
             <dt>Situação</dt>
-            <dd>{STATUS_ASSINATURA[assinatura.status] ?? assinatura.status}</dd>
+            <dd>{aguardando ? 'Aguardando o 1º pagamento' : (STATUS_ASSINATURA[assinatura.status] ?? assinatura.status)}</dd>
             <dt>Desde</dt>
             <dd>{formatarData(assinatura.data_inicio)}</dd>
             {assinatura.status === 'ativa' && (
               <>
                 <dt>Próxima entrega</dt>
-                <dd>{formatarData(assinatura.proxima_entrega)}</dd>
+                <dd>{aguardando ? 'Será agendada depois do pagamento' : formatarData(assinatura.proxima_entrega)}</dd>
               </>
             )}
             {assinatura.status === 'pausada' && assinatura.data_retorno_prevista && (
@@ -284,6 +326,7 @@ export default async function MinhaAssinatura({ searchParams }: { searchParams: 
                 <th scope="col">Vencimento</th>
                 <th scope="col">Valor</th>
                 <th scope="col">Situação</th>
+                {pagamentoOnline && <th scope="col">Pagamento</th>}
               </tr>
             </thead>
             <tbody>
@@ -295,14 +338,25 @@ export default async function MinhaAssinatura({ searchParams }: { searchParams: 
                     {STATUS_FATURA[f.status] ?? f.status}
                     {f.data_pagamento && ` em ${formatarData(f.data_pagamento)}`}
                   </td>
+                  {pagamentoOnline && (
+                    <td>
+                      {(f.status === 'pendente' || f.status === 'atrasada') && (
+                        <FormAcao acao={pagarFatura} rotulo="Pagar agora">
+                          <input type="hidden" name="fatura" value={f.id} />
+                        </FormAcao>
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
           </table>
         )}
         <p className="suave">
-          O pagamento é confirmado por nós
-          {assinatura?.forma_cobranca === 'cartao' ? '. Dúvidas pelo' : ': envie o comprovante do PIX pelo'}{' '}
+          {pagamentoOnline
+            ? 'O pagamento online é confirmado automaticamente. Dúvidas pelo'
+            : 'O pagamento é confirmado por nós'}
+          {pagamentoOnline ? '' : assinatura?.forma_cobranca === 'cartao' ? '. Dúvidas pelo' : ': envie o comprovante do PIX pelo'}{' '}
           <a href={WHATSAPP_URL} target="_blank" rel="noreferrer">
             WhatsApp
           </a>
