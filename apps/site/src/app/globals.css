@@ -1,5 +1,31 @@
 @import 'tailwindcss';
 
+/* Tailwind lê os tokens de @ovo/ui; nenhuma cor ou medida nasce aqui. */
+@theme inline {
+  --color-fundo: var(--cor-fundo);
+  --color-fundo-alt: var(--cor-fundo-alt);
+  --color-texto: var(--cor-texto);
+  --color-suave: var(--cor-texto-suave);
+  --color-ouro: var(--cor-ouro);
+  --color-ouro-escuro: var(--cor-ouro-escuro);
+  --color-ouro-app: var(--cor-ouro-app);
+  --color-sobre-ouro: var(--cor-sobre-ouro);
+  --color-borda: var(--cor-borda);
+  --color-secundaria: var(--cor-secundaria);
+  --color-secundaria-suave: var(--cor-secundaria-suave);
+  --color-superficie: var(--cor-superficie);
+  --color-superficie-baixa: var(--cor-superficie-baixa);
+  --color-erro: var(--cor-erro);
+  --color-whatsapp: var(--cor-whatsapp);
+  --radius-controle: var(--raio-controle);
+  --radius-card: var(--raio-card);
+  --radius-pilula: var(--raio-pilula);
+  --shadow-card: var(--sombra-card);
+  --max-width-conteudo: var(--largura-conteudo);
+  --min-height-controle: var(--altura-controle);
+  --min-height-toque: var(--alvo-toque);
+}
+
 html {
   color-scheme: light;
   scroll-behavior: smooth;
@@ -37,4 +63,14 @@ a {
 :focus-visible {
   outline: 2px solid var(--cor-ouro-escuro);
   outline-offset: 2px;
+}
+
+h1 {
+  font-size: var(--texto-hero-mobile);
+}
+
+@media (min-width: 768px) {
+  h1 {
+    font-size: var(--texto-hero);
+  }
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { WHATSAPP_EXIBICAO } from '@ovo/config/whatsapp';
+import { Secao } from './ui';
 
 const FAQ_ITEMS = [
   {
@@ -34,19 +35,15 @@ const FAQ_ITEMS = [
 ];
 export function FaqSection() {
   return (
-    <section
-      id="faq"
-      style={{ maxWidth: 'var(--largura-conteudo)', margin: '0 auto', padding: `var(--esp-16) var(--esp-6)` }}
-    >
-      <h2 style={{ textAlign: 'center', fontSize: 'var(--texto-titulo)' }}>Perguntas frequentes</h2>
-      <dl style={{ marginTop: 'var(--esp-8)' }}>
+    <Secao id="faq" titulo="Perguntas frequentes">
+      <dl>
         {FAQ_ITEMS.map((item) => (
-          <div key={item.question} style={{ marginBottom: 'var(--esp-6)' }}>
-            <dt style={{ fontWeight: 600 }}>{item.question}</dt>
-            <dd style={{ color: 'var(--cor-texto-suave)', marginTop: 'var(--esp-1)' }}>{item.answer}</dd>
+          <div key={item.question} className="mb-6">
+            <dt className="font-semibold">{item.question}</dt>
+            <dd className="mt-1 text-suave">{item.answer}</dd>
           </div>
         ))}
       </dl>
-    </section>
+    </Secao>
   );
 }

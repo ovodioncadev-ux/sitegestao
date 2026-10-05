@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { WHATSAPP_URL } from '@ovo/config/whatsapp';
+import { Botao } from './ui';
 
 const LINKS = [
   { href: '#planos', label: 'Planos' },
@@ -30,64 +31,30 @@ export function Navbar() {
   }, []);
 
   return (
-    <header
-      style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 40,
-        background: 'var(--cor-fundo)',
-        borderBottom: '1px solid var(--cor-borda)',
-      }}
-    >
-      <nav
-        style={{
-          maxWidth: 'var(--largura-conteudo)',
-          margin: '0 auto',
-          padding: `var(--esp-3) var(--esp-6)`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 'var(--esp-4)',
-        }}
-      >
-        <a
-          href="#inicio"
-          style={{ fontFamily: 'var(--fonte-titulo)', color: 'var(--cor-texto)', fontSize: 'var(--texto-medio)' }}
-        >
+    <header className="sticky top-0 z-40 border-b border-borda bg-fundo">
+      <nav className="mx-auto flex w-full max-w-conteudo flex-wrap items-center justify-between gap-4 px-6 py-3">
+        <a href="#inicio" className="font-[family-name:var(--fonte-titulo)] text-[length:var(--texto-medio)]">
           Ovo di Onça
         </a>
-        <ul style={{ display: 'flex', gap: 'var(--esp-4)', listStyle: 'none', margin: 0, padding: 0 }}>
-          {LINKS.map((link) => (
-            <li key={link.href}>
-              <a
-                href={link.href}
-                aria-current={ativo === link.href.slice(1) ? 'true' : undefined}
-                style={{
-                  color: ativo === link.href.slice(1) ? 'var(--cor-ouro-escuro)' : 'var(--cor-texto-suave)',
-                  fontWeight: ativo === link.href.slice(1) ? 600 : 400,
-                }}
-              >
-                {link.label}
-              </a>
-            </li>
-          ))}
+        <ul className="m-0 flex list-none flex-wrap gap-4 p-0">
+          {LINKS.map((link) => {
+            const atual = ativo === link.href.slice(1);
+            return (
+              <li key={link.href}>
+                <a
+                  href={link.href}
+                  aria-current={atual ? 'true' : undefined}
+                  className={atual ? 'font-semibold text-ouro-escuro' : 'text-suave'}
+                >
+                  {link.label}
+                </a>
+              </li>
+            );
+          })}
         </ul>
-        <a
-          href={WHATSAPP_URL}
-          target="_blank"
-          rel="noreferrer"
-          style={{
-            background: 'var(--cor-ouro)',
-            color: '#fff',
-            borderRadius: 'var(--raio-controle)',
-            padding: `var(--esp-2) var(--esp-4)`,
-            minHeight: 'var(--alvo-toque)',
-            display: 'inline-flex',
-            alignItems: 'center',
-          }}
-        >
+        <Botao href={WHATSAPP_URL} target="_blank" rel="noreferrer" className="min-h-toque py-2">
           Falar no WhatsApp
-        </a>
+        </Botao>
       </nav>
     </header>
   );
