@@ -24,6 +24,7 @@ export function middleware(request: NextRequest) {
   if (caminho.startsWith('/api/plans')) return NextResponse.next();
   if (caminho.startsWith('/api/neighborhoods')) return NextResponse.next();
   if (caminho.startsWith('/api/area')) return NextResponse.next();
+  if (caminho.startsWith('/api/site')) return NextResponse.next();
   if (ROTAS_PUBLICAS.some((rota) => caminho.startsWith(rota))) return NextResponse.next();
   if (!temCookieDeSessao(request)) return redirecionarParaLogin(request);
 

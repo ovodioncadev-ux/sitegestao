@@ -20,6 +20,8 @@ export async function GET() {
           freightCents: p.freteCentavos,
           firstMonthDiscountPct: p.descontoPrimeiroMesPct,
           badge: p.selo,
+          deliveriesPerMonth: p.entregasPorMes,
+          deliveryPriceCents: p.precoEntregaCentavos,
           // Só o que o banco sabe afirmar: nada de "frete grátis" ou "quarta-feira" fixos no código.
           features: [
             'Ovos caipiras, direto da fazenda',

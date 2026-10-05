@@ -1,3 +1,5 @@
+import type { ConteudoSite } from '@/types';
+
 /**
  * Cliente HTTP da vitrine. Os três endereços são do PRÓPRIO site: o
  * next.config.ts os repassa ao app do assinante no servidor (rewrites).
@@ -15,6 +17,10 @@ async function pegar<T>(caminho: string): Promise<T> {
 export async function buscarPlanos() {
   const data = await pegar<{ planos: PlanoDaApi[] }>('/api/plans');
   return data.planos ?? [];
+}
+
+export async function buscarConteudo(): Promise<ConteudoSite> {
+  return pegar<ConteudoSite>('/api/site');
 }
 
 export async function buscarBairros() {
@@ -44,5 +50,7 @@ export type PlanoDaApi = {
   firstMonthDiscountPct: number;
   /** Selo do plano, vindo do banco. Nulo = sem selo. */
   badge: string | null;
+  deliveriesPerMonth: number;
+  deliveryPriceCents: number;
   features: string[];
 };

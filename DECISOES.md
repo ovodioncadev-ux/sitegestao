@@ -207,3 +207,20 @@ existente é reescrita.
 - **Não implementado (etapas seguintes):** D8 (1ª entrega só após o pagamento),
   D1/D2, D3–D7, D11, D15; recalcular datas das assinaturas atuais; fatura pelo
   novo calendário.
+
+
+---
+
+## Bloco 3 — conteúdo público do site vindo do banco (05/10/2026)
+
+Migration `1758758424000_bloco3-conteudo-publico.sql`. **Aplicada só no banco de teste local; ainda não no Neon (principal nem teste).**
+
+| Item | O que existe agora |
+|---|---|
+| Preço por entrega (D10) | `planos_publicos()` devolve `entregas_por_mes` e `preco_entrega_centavos`; `/api/plans` expõe `deliveriesPerMonth` e `deliveryPriceCents`. O card mostra "R$ 41 por entrega" e "4 entregas por mês · cerca de R$ 164/mês" (só o semanal leva "cerca de": o mês tem 4 ou 5 quartas). **A fatura ainda cobra o valor fixo da regra anterior** (D10 na cobrança é etapa própria). |
+| Conteúdo do site | `GET /api/site` (cache de 30 s): frescor, frete grátis em todos?, desconto do 1º mês e corte, derivados de `site_conteudo()`; mais o FAQ. Se o banco não confirma, o site não afirma (a faixa de confiança omite a promessa). |
+| FAQ | Tabela `faq_itens` (RLS: anon lê só as ativas; escrita só pelo dono; auditada). Tela `/faq` no gestão. O telefone do WhatsApp **não** entra aqui: a pergunta de contato é fixa e usa `packages/config/src/whatsapp.mjs` (D12). |
+| Limite de acesso | `limitar_acesso_publico(ip, rota)` (definer, rotas e limites fixos): `/api/area` aceita 30 consultas/min por IP e responde 429 depois. `/api/plans`, `/api/neighborhoods` e `/api/site` não têm limite próprio porque são cacheadas (30 s). Vale a ressalva: o IP vem de `x-forwarded-for`, só confiável atrás de proxy que o reescreva. Se o contador falhar, a rota libera (fail-open). |
+| Correções da Fase 10 achadas no caminho | `rateLimit` estava **sem RLS** (reprovava a Lei 1 no `pnpm seguranca`) e `verificar_rate_limit` estava concedida a `app_usuario` sem funcionar (security invoker, sem privilégio na tabela). Ligou-se a RLS (sem policy) e revogou-se o grant. |
+
+**Não feito (de propósito):** depoimentos — não existem depoimentos reais e a tabela ficaria vazia; entra quando houver conteúdo. Textos do Hero, pilares e comparativo continuam no código (viram busca no servidor no Bloco 7).

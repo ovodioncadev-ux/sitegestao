@@ -33,7 +33,8 @@
     "teste:fase9": "node scripts/rodar-sql.mjs tests/teste-fase9-operacao.sql",
     "teste:fase10": "node scripts/rodar-sql.mjs tests/teste-fase10-estabilidade.sql",
     "teste:etapa1": "node scripts/rodar-sql.mjs tests/teste-etapa1-estrutura.sql",
-    "teste:etapa2": "node scripts/rodar-sql.mjs tests/teste-etapa2-calendario.sql"
+    "teste:etapa2": "node scripts/rodar-sql.mjs tests/teste-etapa2-calendario.sql",
+    "teste:bloco3": "node scripts/rodar-sql.mjs tests/teste-bloco3-conteudo-publico.sql"
   },
   "dependencies": {
     "better-auth": "^1.2.7",

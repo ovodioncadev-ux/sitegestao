@@ -28,6 +28,8 @@ export function usePlanos() {
             freshnessMaxDays: p.freshnessMaxDays,
             freightCents: p.freightCents,
             firstMonthDiscountPct: p.firstMonthDiscountPct,
+            deliveriesPerMonth: p.deliveriesPerMonth,
+            deliveryPriceCents: p.deliveryPriceCents,
             features: p.features,
             // O selo e o destaque vêm do banco (planos.selo), não do nome do plano.
             highlighted: Boolean(p.badge),

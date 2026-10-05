@@ -2,7 +2,7 @@
 
 import { usePlanos } from '@/hooks/usePlanos';
 import { urlAssinar } from '@/lib/api';
-import { formatarReais, textoDesconto, textoFrescor, textoFrete } from '@/lib/formatar';
+import { formatarReais, textoDesconto, textoMensal, textoFrescor, textoFrete } from '@/lib/formatar';
 import { Botao, Cartao, Secao, Selo } from './ui';
 
 export function PlansSection() {
@@ -41,9 +41,10 @@ export function PlansSection() {
             {plan.badge && <Selo>{plan.badge}</Selo>}
             <h3>{plan.name}</h3>
             <p className="text-[length:var(--texto-titulo)]">
-              {formatarReais(plan.priceCents)}
-              <span className="text-[length:var(--texto-pequeno)] text-suave"> /mês</span>
+              {formatarReais(plan.deliveryPriceCents)}
+              <span className="text-[length:var(--texto-pequeno)] text-suave"> por entrega</span>
             </p>
+            <p className="text-[length:var(--texto-pequeno)] text-suave">{textoMensal(plan)}</p>
             <ul className="m-0 list-none p-0 text-suave">
               <li>{textoFrescor(plan)}</li>
               <li>{textoFrete(plan)}</li>
