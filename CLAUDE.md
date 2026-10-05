@@ -24,6 +24,7 @@ For detailed architecture, routing, data flow and conventions, see [docs/CODEBAS
 ## Key Decisions
 
 - **Security:** RLS no banco é a proteção real; middleware e sessão são conveniência.
+  Veja [docs/SEGURANCA.md](docs/SEGURANCA.md) para threat model, mitigações, rate limit e runbook de incident.
 - **Data:** nenhuma política de `insert`, `update` ou `delete` a `app_anon` ou `app_usuario`; toda escrita passa por função SQL com lista fechada.
 - **Audit:** auditoria imutável, gatilho `auditar()` em 8 tabelas, inclui antes/depois e quem agiu.
 - **Preço:** hardcoded em SQL (semanal 16400¢, quinzenal 8200¢, mensal 4100¢); cliente não envia preço.

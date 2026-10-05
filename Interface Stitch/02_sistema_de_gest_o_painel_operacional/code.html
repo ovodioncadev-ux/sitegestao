@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=IBM+Plex+Mono:wght@400;500;600;700&amp;family=Outfit:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"surface-container-lowest":"#ffffff","error":"#ba1a1a","on-secondary-container":"#546a2e","primary-fixed":"#ffdcc5","surface-variant":"#f5ddd7","background":"#fff8f6","on-secondary":"#ffffff","surface-container-high":"#fbe3dc","primary-fixed-dim":"#ffb783","error-container":"#ffdad6","on-tertiary-container":"#482b00","surface-container-low":"#fff1ed","inverse-on-surface":"#ffede8","on-primary-container":"#502600","tertiary-fixed":"#ffddb9","inverse-primary":"#ffb783","secondary-fixed":"#d2eca2","on-surface":"#251915","surface-tint":"#944a00","on-error-container":"#93000a","surface-bright":"#fff8f6","on-primary-fixed":"#301400","inverse-surface":"#3b2d29","on-tertiary-fixed":"#2b1700","primary-container":"#e67e22","on-primary-fixed-variant":"#713700","secondary-fixed-dim":"#b6d088","tertiary-fixed-dim":"#ffb961","outline-variant":"#dcc1b1","on-background":"#251915","secondary-container":"#cfe99f","tertiary":"#865300","tertiary-container":"#d78800","surface":"#fff8f6","on-tertiary":"#ffffff","on-secondary-fixed-variant":"#394d14","primary":"#944a00","on-error":"#ffffff","surface-container-highest":"#f5ddd7","on-tertiary-fixed-variant":"#663e00","on-surface-variant":"#564337","on-secondary-fixed":"#131f00","secondary":"#50652a","outline":"#897365","on-primary":"#ffffff","surface-container":"#ffe9e3","surface-dim":"#edd5ce"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"margin":"1.5rem","gutter":"1.5rem","gutter-mobile":"1rem","space-xl":"2rem","space-3xl":"4rem","space-sm":"0.5rem","margin-mobile":"1rem","space-lg":"1.5rem","space-xs":"0.25rem","margin-desktop":"1.5rem","space-4xl":"6rem","space-md":"1rem","space-2xl":"3rem"},"fontFamily":{"display-2xl":["Outfit"],"tabular-lg":["IBM Plex Mono"],"display-xl-mobile":["Outfit"],"label-caps":["Archivo"],"body-lg":["Archivo"],"body-sm":["Archivo"],"tabular-sm":["IBM Plex Mono"],"display-lg":["Outfit"],"headline-sm":["Outfit"],"body-bold":["Archivo"],"display-2xl-mobile":["Outfit"],"display-xl":["Outfit"],"tabular-md":["IBM Plex Mono"],"body-base":["Archivo"],"headline-md":["Outfit"]},"fontSize":{"display-2xl":["52px",{"lineHeight":"60px","letterSpacing":"-0.03em","fontWeight":"800"}],"tabular-lg":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"700"}],"display-xl-mobile":["30px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"label-caps":["11px",{"lineHeight":"16px","letterSpacing":"0.08em","fontWeight":"700"}],"body-lg":["18px",{"lineHeight":"28px","letterSpacing":"0em","fontWeight":"400"}],"body-sm":["14px",{"lineHeight":"20px","letterSpacing":"0em","fontWeight":"400"}],"tabular-sm":["14px",{"lineHeight":"20px","letterSpacing":"0.02em","fontWeight":"500"}],"display-lg":["32px",{"lineHeight":"38px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-sm":["20px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"body-bold":["16px",{"lineHeight":"24px","letterSpacing":"0em","fontWeight":"600"}],"display-2xl-mobile":["36px",{"lineHeight":"42px","letterSpacing":"-0.02em","fontWeight":"800"}],"display-xl":["40px",{"lineHeight":"48px","letterSpacing":"-0.02em","fontWeight":"700"}],"tabular-md":["20px",{"lineHeight":"28px","letterSpacing":"0em","fontWeight":"600"}],"body-base":["16px",{"lineHeight":"24px","letterSpacing":"0em","fontWeight":"400"}],"headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"600"}]}}}};</script></head><body class="bg-surface font-body-base text-body-base text-on-surface min-h-screen"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex flex-col justify-between py-space-lg shadow-[0_1px_8px_rgba(43,30,26,0.04)]"><div class="flex flex-col"><div class="px-space-lg pb-space-lg flex items-center gap-space-sm"><span class="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center text-on-primary font-display-lg text-display-lg leading-none">O</span><div class="flex flex-col"><span class="font-headline-sm text-headline-sm tracking-tight text-on-surface font-bold leading-none">Ovo di Onça</span><span class="font-label-caps text-label-caps text-secondary uppercase tracking-widest">Painel da Granja</span></div></div><div class="px-space-lg py-space-sm mb-space-xs"><span class="font-label-caps text-label-caps uppercase text-outline">Operação &amp; Assinaturas</span></div><nav class="flex flex-col gap-space-xs px-space-md" data-active-classes="bg-primary-container text-on-primary font-body-bold rounded-xl shadow-[0_4px_14px_rgba(230,126,34,0.2)]"><a aria-current="page" class="flex items-center px-space-md py-space-sm transition-all gap-space-sm bg-primary-container text-on-primary font-body-bold rounded-xl shadow-[0_4px_14px_rgba(230,126,34,0.2)]" data-path="dashboard-visao-geral" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span class="font-body-bold text-body-sm">Dashboard</span></a><a class="flex items-center px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all gap-space-sm" data-path="gestao-de-clientes" href="#"><span class="material-symbols-outlined text-[20px]">group</span><span class="font-body-bold text-body-sm">Clientes</span></a><a class="flex items-center px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all gap-space-sm" data-path="rotas-de-entregas" href="#"><span class="material-symbols-outlined text-[20px]">local_shipping</span><span class="font-body-bold text-body-sm">Entregas</span></a><a class="flex items-center px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all gap-space-sm" data-path="gestao-de-cobrancas" href="#"><span class="material-symbols-outlined text-[20px]">payments</span><span class="font-body-bold text-body-sm">Cobranças</span></a><a class="flex items-center px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all gap-space-sm" data-path="pausas-programadas" href="#"><span class="material-symbols-outlined text-[20px]">pause_circle</span><span class="font-body-bold text-body-sm">Pausas</span></a><a class="flex items-center px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all gap-space-sm" data-path="substituicoes-e-trocas" href="#"><span class="material-symbols-outlined text-[20px]">swap_horiz</span><span class="font-body-bold text-body-sm">Substituições</span></a><a class="flex items-center px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all gap-space-sm" data-path="historico-de-operacoes" href="#"><span class="material-symbols-outlined text-[20px]">history</span><span class="font-body-bold text-body-sm">Histórico</span></a></nav></div><div class="px-space-md pt-space-md flex flex-col gap-space-sm"><div class="p-space-sm rounded-xl bg-surface-container-lowest flex items-center justify-between shadow-[0_2px_8px_rgba(43,30,26,0.03)]"><div class="flex items-center gap-space-xs"><span class="w-2.5 h-2.5 rounded-full bg-secondary"></span><span class="font-body-sm text-body-sm text-on-surface font-semibold">Postura Ativa</span></div><span class="font-tabular-sm text-tabular-sm text-outline">100%</span></div><a class="flex items-center justify-center gap-space-xs px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-body-sm text-body-sm transition-all" data-path="como-funciona" href="#"><span class="material-symbols-outlined text-[18px]">storefront</span><span>Ir ao Site Público</span></a></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-surface/90 backdrop-blur-md z-40 px-space-xl flex items-center justify-between shadow-[0_1px_8px_rgba(43,30,26,0.03)]"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs font-body-sm text-body-sm text-outline"><span class="material-symbols-outlined text-[18px]">agriculture</span><span>Granja Onça</span><span class="material-symbols-outlined text-[16px]">chevron_right</span><span class="text-on-surface font-semibold">Gestão Integrada</span></div></div><div class="flex items-center gap-space-lg"><div class="relative hidden sm:flex items-center"><span class="material-symbols-outlined absolute left-3 text-outline text-[18px]">search</span><input class="w-64 pl-9 pr-space-md py-1.5 rounded-full bg-surface-container-lowest text-on-surface placeholder:text-outline font-body-sm text-body-sm focus:outline-none focus:ring-1 focus:ring-primary-container shadow-[0_2px_8px_rgba(43,30,26,0.02)]" placeholder="Buscar assinante, rota ou lote..." type="text"/></div><div class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-caps text-label-caps uppercase"><span class="w-2 h-2 rounded-full bg-secondary"></span><span>Granja Normal</span></div><div class="flex items-center gap-space-xs"><button class="p-1.5 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="relative pt-16 bg-surface w-full min-h-screen px-space-xl py-space-xl"><div class="flex flex-col w-full">
+<!-- Breadcrumb & Top Bar -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm mb-space-md">
+<div class="flex items-center gap-space-xs font-body-sm text-body-sm text-outline">
+<span class="hover:text-on-surface transition-colors cursor-pointer">Início</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-on-surface font-body-bold">Visão Geral da Operação</span>
+</div>
+<div class="flex items-center gap-space-xs font-tabular-sm text-tabular-sm text-outline bg-surface-container-low px-space-sm py-1 rounded-full">
+<span class="material-symbols-outlined text-[16px] text-tertiary">calendar_today</span>
+<span id="live-date">Quinta-feira, 24 de Outubro de 2024</span>
+</div>
+</div>
+<!-- Page Header -->
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-lg mb-space-2xl">
+<div class="flex flex-col gap-space-xs max-w-2xl">
+<span class="font-label-caps text-label-caps uppercase text-secondary tracking-widest flex items-center gap-space-xs">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+        Monitoramento Agropecuário em Tempo Real
+      </span>
+<h1 class="font-display-xl text-display-xl text-on-surface tracking-tight leading-none">
+        Painel Operacional da Granja
+      </h1>
+<p class="font-body-base text-body-base text-on-surface-variant">
+        Controle de postura de aves caipiras, balanceamento de lotes e despachos matinais para Belo Horizonte e Região Metropolitana.
+      </p>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-space-sm shrink-0 flex-wrap sm:flex-nowrap">
+<button class="flex items-center gap-space-xs px-space-lg py-3 rounded-xl bg-surface-container-high hover:bg-surface-variant text-on-surface font-body-bold text-body-sm transition-all shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px] text-primary">download</span>
+<span>Exportar Relatório Diário</span>
+</button>
+<button class="flex items-center gap-space-xs px-space-lg py-3 rounded-xl bg-primary-container hover:bg-tertiary text-on-surface font-body-bold text-body-sm transition-all shadow-[0_4px_14px_rgba(230,126,34,0.28)]" type="button">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+<span>Novo Registro de Coleta</span>
+</button>
+</div>
+</div>
+<!-- Stat Cards Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md mb-space-2xl">
+<!-- Stat 1 -->
+<div class="p-space-lg rounded-xl bg-surface-container-lowest shadow-[0_10px_30px_rgba(43,30,26,0.04)] flex flex-col justify-between relative overflow-hidden group">
+<div class="absolute -right-3 -top-3 w-20 h-20 bg-secondary-container/30 rounded-full blur-xl pointer-events-none"></div>
+<div class="flex items-start justify-between mb-space-md">
+<span class="font-label-caps text-label-caps uppercase text-outline">Assinaturas Ativas</span>
+<span class="w-9 h-9 rounded-lg bg-surface-container-low flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[20px]">groups</span>
+</span>
+</div>
+<div>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-tabular-lg text-tabular-lg text-on-surface font-bold">842</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">clientes</span>
+</div>
+<div class="flex items-center gap-space-xs mt-space-xs font-tabular-sm text-tabular-sm text-secondary">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+<span>+12 nesta semana</span>
+</div>
+</div>
+</div>
+<!-- Stat 2 -->
+<div class="p-space-lg rounded-xl bg-surface-container-lowest shadow-[0_10px_30px_rgba(43,30,26,0.04)] flex flex-col justify-between relative overflow-hidden group">
+<div class="absolute -right-3 -top-3 w-20 h-20 bg-primary-fixed/30 rounded-full blur-xl pointer-events-none"></div>
+<div class="flex items-start justify-between mb-space-md">
+<span class="font-label-caps text-label-caps uppercase text-outline">Ovos Coletados Hoje</span>
+<span class="w-9 h-9 rounded-lg bg-surface-container-low flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[20px]">egg</span>
+</span>
+</div>
+<div>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-tabular-lg text-tabular-lg text-on-surface font-bold">3.240</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">unidades</span>
+</div>
+<div class="flex items-center gap-space-xs mt-space-xs font-tabular-sm text-tabular-sm text-primary">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span>98.2% postura esperada</span>
+</div>
+</div>
+</div>
+<!-- Stat 3 -->
+<div class="p-space-lg rounded-xl bg-surface-container-lowest shadow-[0_10px_30px_rgba(43,30,26,0.04)] flex flex-col justify-between relative overflow-hidden group">
+<div class="absolute -right-3 -top-3 w-20 h-20 bg-tertiary-fixed/40 rounded-full blur-xl pointer-events-none"></div>
+<div class="flex items-start justify-between mb-space-md">
+<span class="font-label-caps text-label-caps uppercase text-outline">Entregas Previstas Hoje</span>
+<span class="w-9 h-9 rounded-lg bg-surface-container-low flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-[20px]">local_shipping</span>
+</span>
+</div>
+<div>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-tabular-lg text-tabular-lg text-on-surface font-bold">128</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">cestas</span>
+</div>
+<div class="flex items-center gap-space-xs mt-space-xs font-tabular-sm text-tabular-sm text-outline">
+<span class="material-symbols-outlined text-[16px]">alt_route</span>
+<span>4 rotas ativas (BH e Nova Lima)</span>
+</div>
+</div>
+</div>
+<!-- Stat 4 -->
+<div class="p-space-lg rounded-xl bg-surface-container-lowest shadow-[0_10px_30px_rgba(43,30,26,0.04)] flex flex-col justify-between relative overflow-hidden group">
+<div class="absolute -right-3 -top-3 w-20 h-20 bg-surface-container-high/60 rounded-full blur-xl pointer-events-none"></div>
+<div class="flex items-start justify-between mb-space-md">
+<span class="font-label-caps text-label-caps uppercase text-outline">Pausas Solicitadas</span>
+<span class="w-9 h-9 rounded-lg bg-surface-container-low flex items-center justify-center text-outline">
+<span class="material-symbols-outlined text-[20px]">pause_circle</span>
+</span>
+</div>
+<div>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-tabular-lg text-tabular-lg text-on-surface font-bold">14</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">clientes ausentes</span>
+</div>
+<div class="flex items-center gap-space-xs mt-space-xs font-tabular-sm text-tabular-sm text-outline">
+<span class="material-symbols-outlined text-[16px]">inventory_2</span>
+<span>38 dúzias realocadas p/ estoque</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Operational Focus: Main Section Split -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- Left Column (8 cols): Data Table and Dispatch Summary -->
+<div class="lg:col-span-8 flex flex-col gap-space-lg">
+<!-- Table Header & Controls -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-[0_10px_30px_rgba(43,30,26,0.04)] flex flex-col">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm mb-space-lg">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">Operação de Despacho do Dia</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Rotas matinais organizadas por janelas de entrega.</p>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="font-label-caps text-label-caps text-outline uppercase">Filtro:</span>
+<div class="inline-flex rounded-lg bg-surface-container-low p-1 gap-1">
+<button class="px-3 py-1 text-on-primary bg-primary-container font-body-bold text-body-sm rounded-md shadow-sm">Todos (128)</button>
+<button class="px-3 py-1 text-on-surface-variant hover:text-on-surface font-body-sm text-body-sm rounded-md transition-colors">Na Rota (42)</button>
+<button class="px-3 py-1 text-on-surface-variant hover:text-on-surface font-body-sm text-body-sm rounded-md transition-colors">Entregue (68)</button>
+<button class="px-3 py-1 text-on-surface-variant hover:text-on-surface font-body-sm text-body-sm rounded-md transition-colors">Aguardando (18)</button>
+</div>
+</div>
+</div>
+<!-- Table Container -->
+<div class="overflow-x-auto -mx-space-lg px-space-lg">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-surface-container-low text-outline font-label-caps text-label-caps uppercase tracking-wider">
+<th class="py-space-sm px-space-md rounded-l-lg">ID Pedido</th>
+<th class="py-space-sm px-space-md">Cliente</th>
+<th class="py-space-sm px-space-md">Bairro / Rota</th>
+<th class="py-space-sm px-space-md">Cesto</th>
+<th class="py-space-sm px-space-md text-right rounded-r-lg">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-transparent font-body-sm text-body-sm">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-space-md px-space-md font-tabular-sm text-tabular-sm text-on-surface font-semibold">
+                  #OD-9402
+                </td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="font-body-bold text-body-sm text-on-surface">Beatriz Silveira Mendes</span>
+<span class="font-tabular-sm text-tabular-sm text-outline">Plano Semanal • 30 ovos</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="text-on-surface font-body-sm">Lourdes</span>
+<span class="font-tabular-sm text-tabular-sm text-outline">(Rota Centro-Sul 1)</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-tabular-sm text-tabular-sm">
+                    Cesto Família
+                  </span>
+</td>
+<td class="py-space-md px-space-md text-right">
+<span class="inline-flex items-center gap-1.5 px-space-sm py-1 rounded-full bg-primary-fixed text-on-primary-fixed font-label-caps text-label-caps uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                    Na rota
+                  </span>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-space-md px-space-md font-tabular-sm text-tabular-sm text-on-surface font-semibold">
+                  #OD-9403
+                </td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="font-body-bold text-body-sm text-on-surface">Cláudio Rezende Pinto</span>
+<span class="font-tabular-sm text-tabular-sm text-outline">Plano Quinzenal • 60 ovos</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="text-on-surface font-body-sm">Savassi</span>
+<span class="font-tabular-sm text-tabular-sm text-outline">(Rota Centro-Sul 1)</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-tabular-sm text-tabular-sm">
+                    Cesto Gastronômico
+                  </span>
+</td>
+<td class="py-space-md px-space-md text-right">
+<span class="inline-flex items-center gap-1.5 px-space-sm py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-caps text-label-caps uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                    Entregue
+                  </span>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-space-md px-space-md font-tabular-sm text-tabular-sm text-on-surface font-semibold">
+                  #OD-9404
+                </td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="font-body-bold text-body-sm text-on-surface">Mariana Drummond</span>
+<span class="font-tabular-sm text-tabular-sm text-outline">Plano Semanal • 20 ovos</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="text-on-surface font-body-sm">Belvedere</span>
+<span class="font-tabular-sm text-tabular-sm text-outline">(Rota Sul-Leste 2)</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-tabular-sm text-tabular-sm">
+                    Cesto Essencial
+                  </span>
+</td>
+<td class="py-space-md px-space-md text-right">
+<span class="inline-flex items-center gap-1.5 px-space-sm py-1 rounded-full bg-surface-container-high text-on-surface font-label-caps text-label-caps uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+                    Aguardando saída
+                  </span>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-space-md px-space-md font-tabular-sm text-tabular-sm text-on-surface font-semibold">
+                  #OD-9405
+                </td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="font-body-bold text-body-sm text-on-surface">Henrique Antunes Neto</span>
+<span class="font-tabular-sm text-tabular-sm text-outline">Plano Mensal • 40 ovos</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="text-on-surface font-body-sm">Funcionários</span>
+<span class="font-tabular-sm text-tabular-sm text-outline">(Rota Centro-Sul 1)</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-tabular-sm text-tabular-sm">
+                    Cesto Casal
+                  </span>
+</td>
+<td class="py-space-md px-space-md text-right">
+<span class="inline-flex items-center gap-1.5 px-space-sm py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-caps text-label-caps uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                    Entregue
+                  </span>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-space-md px-space-md font-tabular-sm text-tabular-sm text-on-surface font-semibold">
+                  #OD-9406
+                </td>
+<td class="py-space-md px-space-md">
+<div class="flex flex-col">
+<span class="font-body-bold text-body-sm text-on-surface">Padaria e Empório Trigo Real</span>
+<span class="font-tabular-sm text-tabular-sm text-outline">B2B Semanal • 180 ovos</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="text-on-surface font-body-sm">Vila da Serra</span>
+<span class="font-tabular-sm text-tabular-sm text-outline">(Rota Especial Nova Lima)</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-tabular-sm text-tabular-sm">
+                    Grade Comercial
+                  </span>
+</td>
+<td class="py-space-md px-space-md text-right">
+<span class="inline-flex items-center gap-1.5 px-space-sm py-1 rounded-full bg-primary-fixed text-on-primary-fixed font-label-caps text-label-caps uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                    Na rota
+                  </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="mt-space-md pt-space-md flex flex-col sm:flex-row items-center justify-between gap-space-sm">
+<span class="font-tabular-sm text-tabular-sm text-outline">
+            Mostrando 5 de 128 despachos programados
+          </span>
+<div class="flex items-center gap-space-xs">
+<button class="px-space-md py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container-high font-body-sm text-body-sm text-on-surface transition-colors">Anterior</button>
+<button class="px-space-md py-1.5 rounded-lg bg-primary-container text-on-primary font-body-bold text-body-sm shadow-sm">1</button>
+<button class="px-space-md py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container-high font-body-sm text-body-sm text-on-surface transition-colors">2</button>
+<button class="px-space-md py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container-high font-body-sm text-body-sm text-on-surface transition-colors">3</button>
+<button class="px-space-md py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container-high font-body-sm text-body-sm text-on-surface transition-colors">Próximo</button>
+</div>
+</div>
+</div>
+<!-- Pasture & Collection Snapshot -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+<!-- Visual 1: Pasture Image & Status -->
+<div class="p-space-lg rounded-xl bg-surface-container-lowest shadow-[0_10px_30px_rgba(43,30,26,0.04)] flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-caps text-label-caps uppercase text-secondary font-bold">Manejo de Pastoreio</span>
+<span class="font-tabular-sm text-tabular-sm text-outline">Piquete 03 • Leste</span>
+</div>
+<div class="relative w-full h-36 rounded-lg overflow-hidden my-space-xs">
+<img class="w-full h-full object-cover" data-alt="Free-range heritage hens grazing on lush green sunlit morning pasture in Minas Gerais, organic farm with clay soil, warm golden sunlight, artisanal rustic atmosphere" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUPoAIiaU_Yhd0KXsYeaFoNasjWEYo1XjBFa4o21ETPlkzcGwQuibCKtfiCFfc5CKWhwfT_TRSEVxajLJZyBEmI3CDD5zkbD2vSkMOxqFW7YWecoaE9qniWRoVtyTaE-yo65E8qGATucwJHSgsA3-OfRCGf3fmPiEFbhOW-C-1Q41VgMBzbJXuCOZFweonq2oILVowMHBQjnZxduVDynVb5JpwaAElXgKtoqIVYtV6fnCc6bl_dJijwA"/>
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/80 via-transparent to-transparent flex items-end p-space-sm">
+<span class="font-body-bold text-body-sm text-inverse-on-surface">Lote Araucária • 1.450 Aves</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs font-tabular-sm text-tabular-sm">
+<span class="text-outline">Ração: Milho não-transgênico</span>
+<span class="text-secondary font-bold">Pastagem Ativa</span>
+</div>
+</div>
+<!-- Visual 2: Inline SVG Posture Curve / Hourly stats -->
+<div class="p-space-lg rounded-xl bg-surface-container-lowest shadow-[0_10px_30px_rgba(43,30,26,0.04)] flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-xs">
+<div>
+<span class="font-label-caps text-label-caps uppercase text-outline">Fluxo Horário de Postura</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">Coleta Matinal</h3>
+</div>
+<span class="font-tabular-md text-tabular-md text-primary font-bold">78% total</span>
+</div>
+<!-- Sparkline / Bar Graph (Inline SVG strictly < 2KB) -->
+<div class="w-full h-28 flex items-end justify-between gap-2 pt-space-sm">
+<div class="flex-1 flex flex-col items-center gap-1 h-full justify-end">
+<div class="w-full bg-surface-container-high rounded-t-sm h-[20%]"></div>
+<span class="font-tabular-sm text-[11px] text-outline">06h</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-1 h-full justify-end">
+<div class="w-full bg-primary-fixed-dim rounded-t-sm h-[52%]"></div>
+<span class="font-tabular-sm text-[11px] text-outline">07h</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-1 h-full justify-end">
+<div class="w-full bg-primary-container rounded-t-sm h-[94%]"></div>
+<span class="font-tabular-sm text-[11px] text-on-surface font-bold">08h</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-1 h-full justify-end">
+<div class="w-full bg-primary-container rounded-t-sm h-[86%]"></div>
+<span class="font-tabular-sm text-[11px] text-on-surface font-bold">09h</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-1 h-full justify-end">
+<div class="w-full bg-primary-fixed-dim rounded-t-sm h-[40%]"></div>
+<span class="font-tabular-sm text-[11px] text-outline">10h</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-1 h-full justify-end">
+<div class="w-full bg-surface-container-high rounded-t-sm h-[18%]"></div>
+<span class="font-tabular-sm text-[11px] text-outline">11h</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs font-tabular-sm text-tabular-sm text-outline">
+<span>Pico: 08:15 (820 ovos)</span>
+<span>Triagem: 100% inspecionados</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column (4 cols): Operational Alerts & Quick Inventory -->
+<div class="lg:col-span-4 flex flex-col gap-space-lg">
+<!-- Operational Alerts Block -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-[0_10px_30px_rgba(43,30,26,0.04)] flex flex-col">
+<div class="flex items-center justify-between mb-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="w-2.5 h-2.5 rounded-full bg-primary-container"></span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">Alertas Operacionais</h3>
+</div>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-surface-container-low text-outline uppercase">Tempo Real</span>
+</div>
+<div class="flex flex-col gap-space-sm">
+<!-- Alert 1 -->
+<div class="p-space-md rounded-lg bg-surface-container-low flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-[20px] text-secondary shrink-0 mt-0.5">inventory</span>
+<div class="flex flex-col">
+<span class="font-body-bold text-body-sm text-on-surface">Lote 44B liberado para embalagem</span>
+<span class="font-tabular-sm text-tabular-sm text-outline mt-0.5">Postura das 07:00 • 1.120 ovos clasificados</span>
+<span class="font-label-caps text-[10px] text-outline uppercase tracking-wider mt-1">Há 14 minutos</span>
+</div>
+</div>
+<!-- Alert 2 -->
+<div class="p-space-md rounded-lg bg-surface-container-low flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-[20px] text-tertiary shrink-0 mt-0.5">4mp</span>
+<div class="flex flex-col">
+<span class="font-body-bold text-body-sm text-on-surface">3 solicitações de pausa programada para a próxima semana</span>
+<span class="font-tabular-sm text-tabular-sm text-outline mt-0.5">Bairros: Anchieta (1), Sion (2) • Período de 7 dias</span>
+<span class="font-label-caps text-[10px] text-outline uppercase tracking-wider mt-1">Há 42 minutos</span>
+</div>
+</div>
+<!-- Alert 3 -->
+<div class="p-space-md rounded-lg bg-surface-container-low flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-[20px] text-primary shrink-0 mt-0.5">directions_car</span>
+<div class="flex flex-col">
+<span class="font-body-bold text-body-sm text-on-surface">Rota Centro-Sul 1 iniciou entrega</span>
+<span class="font-tabular-sm text-tabular-sm text-outline mt-0.5">Veículo Strada 02 • 34 clientes na sequência</span>
+<span class="font-label-caps text-[10px] text-outline uppercase tracking-wider mt-1">Há 1 hora</span>
+</div>
+</div>
+<!-- Alert 4 -->
+<div class="p-space-md rounded-lg bg-surface-container-low flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-[20px] text-outline shrink-0 mt-0.5">thermostat</span>
+<div class="flex flex-col">
+<span class="font-body-bold text-body-sm text-on-surface">Câmara fria 01 em temperatura ideal</span>
+<span class="font-tabular-sm text-tabular-sm text-outline mt-0.5">Estável em 14.8°C com umidade controlada de 72%</span>
+<span class="font-label-caps text-[10px] text-outline uppercase tracking-wider mt-1">Há 2 horas</span>
+</div>
+</div>
+</div>
+<button class="mt-space-md py-2 w-full text-center text-primary hover:text-on-primary-container font-body-bold text-body-sm transition-colors" type="button">
+          Ver todos os registros operacionais
+        </button>
+</div>
+<!-- Quick Route Load & Dispatch Status -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-[0_10px_30px_rgba(43,30,26,0.04)] flex flex-col">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold mb-space-sm">Ocupação das Rotas</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-md">Capacidade dos veículos no ciclo matinal.</p>
+<div class="flex flex-col gap-space-md">
+<!-- Rota 1 -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex justify-between font-body-sm text-body-sm">
+<span class="font-body-bold text-on-surface">Rota 1: Centro-Sul</span>
+<span class="font-tabular-sm text-tabular-sm text-outline">34 / 35 cestas (97%)</span>
+</div>
+<div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary-container rounded-full" style="width: 97%;"></div>
+</div>
+</div>
+<!-- Rota 2 -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex justify-between font-body-sm text-body-sm">
+<span class="font-body-bold text-on-surface">Rota 2: Sul-Leste</span>
+<span class="font-tabular-sm text-tabular-sm text-outline">28 / 30 cestas (93%)</span>
+</div>
+<div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary-container rounded-full" style="width: 93%;"></div>
+</div>
+</div>
+<!-- Rota 3 -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex justify-between font-body-sm text-body-sm">
+<span class="font-body-bold text-on-surface">Rota 3: Oeste &amp; Pampulha</span>
+<span class="font-tabular-sm text-tabular-sm text-outline">42 / 45 cestas (93%)</span>
+</div>
+<div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 93%;"></div>
+</div>
+</div>
+<!-- Rota 4 -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex justify-between font-body-sm text-body-sm">
+<span class="font-body-bold text-on-surface">Rota 4: Nova Lima (Vila da Serra)</span>
+<span class="font-tabular-sm text-tabular-sm text-outline">24 / 30 cestas (80%)</span>
+</div>
+<div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 80%;"></div>
+</div>
+</div>
+</div>
+<!-- Packaging Station Card -->
+<div class="mt-space-lg p-space-md rounded-lg bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="Artisanal unbleached recycled egg cartons stacked neatly with rustic stamp logo in a sunlit packing room" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQIoZWy0knNZOVB7UeumxHn3Yp2GRMNMkiziaME5qF35y-sImA2fHIiXqsPGCdDr5rLfozHzFLFFv9sQiXtR8cgIFaG3qFitttcFOH-UoXrJcMa0MzCK2rHiR5OQrrX8Vpl-aFJmht-40hW35cMdxFGOExOK08PJb-Plu2lf03MqOmkJMBKCH--e9IzfrVi7X9Skk1ydPkwF4casiiGn3IkeF9THJhLQKlsvgAzNz8qJ-UXfMU-fas2g"/>
+</div>
+<div class="flex flex-col">
+<span class="font-body-bold text-body-sm text-on-surface">Embalagens Kraft</span>
+<span class="font-tabular-sm text-tabular-sm text-outline">Estoque: 1.480 caixas</span>
+</div>
+</div>
+<span class="font-label-caps text-label-caps uppercase text-secondary font-bold">Normal</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  (function () {
+    // Dynamic Date Formatting localized in pt-BR
+    const dateEl = document.getElementById('live-date');
+    if (dateEl) {
+      const now = new Date();
+      const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+      const formatted = now.toLocaleDateString('pt-BR', options);
+      // Capitalize first letter
+      dateEl.textContent = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+    }
+  })();
+</script></main></div></body></html>

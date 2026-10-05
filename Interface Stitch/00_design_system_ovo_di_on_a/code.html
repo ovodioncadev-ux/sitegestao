@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=IBM+Plex+Mono:wght@400;500;600;700&amp;family=Outfit:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"surface-container-lowest":"#ffffff","error":"#ba1a1a","on-secondary-container":"#546a2e","primary-fixed":"#ffdcc5","surface-variant":"#f5ddd7","background":"#fff8f6","on-secondary":"#ffffff","surface-container-high":"#fbe3dc","primary-fixed-dim":"#ffb783","error-container":"#ffdad6","on-tertiary-container":"#482b00","surface-container-low":"#fff1ed","inverse-on-surface":"#ffede8","on-primary-container":"#502600","tertiary-fixed":"#ffddb9","inverse-primary":"#ffb783","secondary-fixed":"#d2eca2","on-surface":"#251915","surface-tint":"#944a00","on-error-container":"#93000a","surface-bright":"#fff8f6","on-primary-fixed":"#301400","inverse-surface":"#3b2d29","on-tertiary-fixed":"#2b1700","primary-container":"#e67e22","on-primary-fixed-variant":"#713700","secondary-fixed-dim":"#b6d088","tertiary-fixed-dim":"#ffb961","outline-variant":"#dcc1b1","on-background":"#251915","secondary-container":"#cfe99f","tertiary":"#865300","tertiary-container":"#d78800","surface":"#fff8f6","on-tertiary":"#ffffff","on-secondary-fixed-variant":"#394d14","primary":"#944a00","on-error":"#ffffff","surface-container-highest":"#f5ddd7","on-tertiary-fixed-variant":"#663e00","on-surface-variant":"#564337","on-secondary-fixed":"#131f00","secondary":"#50652a","outline":"#897365","on-primary":"#ffffff","surface-container":"#ffe9e3","surface-dim":"#edd5ce"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"margin":"1.5rem","gutter":"1.5rem","gutter-mobile":"1rem","space-xl":"2rem","space-3xl":"4rem","space-sm":"0.5rem","margin-mobile":"1rem","space-lg":"1.5rem","space-xs":"0.25rem","margin-desktop":"1.5rem","space-4xl":"6rem","space-md":"1rem","space-2xl":"3rem"},"fontFamily":{"display-2xl":["Outfit"],"tabular-lg":["IBM Plex Mono"],"display-xl-mobile":["Outfit"],"label-caps":["Archivo"],"body-lg":["Archivo"],"body-sm":["Archivo"],"tabular-sm":["IBM Plex Mono"],"display-lg":["Outfit"],"headline-sm":["Outfit"],"body-bold":["Archivo"],"display-2xl-mobile":["Outfit"],"display-xl":["Outfit"],"tabular-md":["IBM Plex Mono"],"body-base":["Archivo"],"headline-md":["Outfit"]},"fontSize":{"display-2xl":["52px",{"lineHeight":"60px","letterSpacing":"-0.03em","fontWeight":"800"}],"tabular-lg":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"700"}],"display-xl-mobile":["30px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"label-caps":["11px",{"lineHeight":"16px","letterSpacing":"0.08em","fontWeight":"700"}],"body-lg":["18px",{"lineHeight":"28px","letterSpacing":"0em","fontWeight":"400"}],"body-sm":["14px",{"lineHeight":"20px","letterSpacing":"0em","fontWeight":"400"}],"tabular-sm":["14px",{"lineHeight":"20px","letterSpacing":"0.02em","fontWeight":"500"}],"display-lg":["32px",{"lineHeight":"38px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-sm":["20px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"body-bold":["16px",{"lineHeight":"24px","letterSpacing":"0em","fontWeight":"600"}],"display-2xl-mobile":["36px",{"lineHeight":"42px","letterSpacing":"-0.02em","fontWeight":"800"}],"display-xl":["40px",{"lineHeight":"48px","letterSpacing":"-0.02em","fontWeight":"700"}],"tabular-md":["20px",{"lineHeight":"28px","letterSpacing":"0em","fontWeight":"600"}],"body-base":["16px",{"lineHeight":"24px","letterSpacing":"0em","fontWeight":"400"}],"headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"600"}]}}}};</script></head><body class="bg-surface font-body-base text-body-base text-on-surface min-h-screen"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex flex-col justify-between py-space-lg shadow-[0_1px_8px_rgba(43,30,26,0.04)]"><div class="flex flex-col"><div class="px-space-lg pb-space-lg flex items-center gap-space-sm"><span class="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center text-on-primary font-display-lg text-display-lg leading-none">O</span><div class="flex flex-col"><span class="font-headline-sm text-headline-sm tracking-tight text-on-surface font-bold leading-none">Ovo di Onça</span><span class="font-label-caps text-label-caps text-secondary uppercase tracking-widest">Painel da Granja</span></div></div><div class="px-space-lg py-space-sm mb-space-xs"><span class="font-label-caps text-label-caps uppercase text-outline">Operação &amp; Assinaturas</span></div><nav class="flex flex-col gap-space-xs px-space-md" data-active-classes="bg-primary-container text-on-primary font-body-bold rounded-xl shadow-[0_4px_14px_rgba(230,126,34,0.2)]"><a aria-current="page" class="flex items-center px-space-md py-space-sm transition-all gap-space-sm bg-primary-container text-on-primary font-body-bold rounded-xl shadow-[0_4px_14px_rgba(230,126,34,0.2)]" data-path="dashboard-visao-geral" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span class="font-body-bold text-body-sm">Dashboard</span></a><a class="flex items-center px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all gap-space-sm" data-path="gestao-de-clientes" href="#"><span class="material-symbols-outlined text-[20px]">group</span><span class="font-body-bold text-body-sm">Clientes</span></a><a class="flex items-center px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all gap-space-sm" data-path="rotas-de-entregas" href="#"><span class="material-symbols-outlined text-[20px]">local_shipping</span><span class="font-body-bold text-body-sm">Entregas</span></a><a class="flex items-center px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all gap-space-sm" data-path="gestao-de-cobrancas" href="#"><span class="material-symbols-outlined text-[20px]">payments</span><span class="font-body-bold text-body-sm">Cobranças</span></a><a class="flex items-center px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all gap-space-sm" data-path="pausas-programadas" href="#"><span class="material-symbols-outlined text-[20px]">pause_circle</span><span class="font-body-bold text-body-sm">Pausas</span></a><a class="flex items-center px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all gap-space-sm" data-path="substituicoes-e-trocas" href="#"><span class="material-symbols-outlined text-[20px]">swap_horiz</span><span class="font-body-bold text-body-sm">Substituições</span></a><a class="flex items-center px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all gap-space-sm" data-path="historico-de-operacoes" href="#"><span class="material-symbols-outlined text-[20px]">history</span><span class="font-body-bold text-body-sm">Histórico</span></a></nav></div><div class="px-space-md pt-space-md flex flex-col gap-space-sm"><div class="p-space-sm rounded-xl bg-surface-container-lowest flex items-center justify-between shadow-[0_2px_8px_rgba(43,30,26,0.03)]"><div class="flex items-center gap-space-xs"><span class="w-2.5 h-2.5 rounded-full bg-secondary"></span><span class="font-body-sm text-body-sm text-on-surface font-semibold">Postura Ativa</span></div><span class="font-tabular-sm text-tabular-sm text-outline">100%</span></div><a class="flex items-center justify-center gap-space-xs px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-body-sm text-body-sm transition-all" data-path="como-funciona" href="#"><span class="material-symbols-outlined text-[18px]">storefront</span><span>Ir ao Site Público</span></a></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-surface/90 backdrop-blur-md z-40 px-space-xl flex items-center justify-between shadow-[0_1px_8px_rgba(43,30,26,0.03)]"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs font-body-sm text-body-sm text-outline"><span class="material-symbols-outlined text-[18px]">agriculture</span><span>Granja Onça</span><span class="material-symbols-outlined text-[16px]">chevron_right</span><span class="text-on-surface font-semibold">Gestão Integrada</span></div></div><div class="flex items-center gap-space-lg"><div class="relative hidden sm:flex items-center"><span class="material-symbols-outlined absolute left-3 text-outline text-[18px]">search</span><input class="w-64 pl-9 pr-space-md py-1.5 rounded-full bg-surface-container-lowest text-on-surface placeholder:text-outline font-body-sm text-body-sm focus:outline-none focus:ring-1 focus:ring-primary-container shadow-[0_2px_8px_rgba(43,30,26,0.02)]" placeholder="Buscar assinante, rota ou lote..." type="text"/></div><div class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-caps text-label-caps uppercase"><span class="w-2 h-2 rounded-full bg-secondary"></span><span>Granja Normal</span></div><div class="flex items-center gap-space-xs"><button class="p-1.5 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="relative pt-16 bg-surface w-full min-h-screen px-space-xl py-space-xl"><div class="flex flex-col w-full gap-space-3xl max-w-7xl mx-auto pb-space-4xl">
+<section class="flex flex-col gap-space-md pt-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="px-space-sm py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-caps text-label-caps uppercase tracking-wider">
+        Documentação Oficial • v2.4
+      </span>
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="font-tabular-sm text-tabular-sm text-outline">SSOT_DESIGN_TOKENS</span>
+</div>
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-lg">
+<div class="flex flex-col gap-space-xs max-w-3xl">
+<h1 class="font-display-2xl text-display-2xl text-on-surface font-extrabold tracking-tight">
+          00 — Design System Ovo di Onça
+        </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant font-normal leading-relaxed">
+          Fundação visual oficial: tokens, componentes estruturais e padrões de consistência para Site e Gestão da Granja Onça.
+        </p>
+</div>
+<div class="flex items-center gap-space-sm shrink-0">
+<div class="flex items-center gap-space-xs bg-surface-container-low px-space-md py-space-sm rounded-xl">
+<span class="material-symbols-outlined text-secondary text-[20px]">verified</span>
+<span class="font-label-caps text-label-caps text-on-surface uppercase">Aderência: Agro-Artesanal 100%</span>
+</div>
+</div>
+</div>
+</section>
+<section class="flex flex-col gap-space-lg">
+<div class="flex items-center justify-between pb-space-xs border-b border-surface-container-high">
+<div class="flex items-center gap-space-sm">
+<span class="w-7 h-7 rounded-lg bg-surface-container-highest flex items-center justify-center font-tabular-sm text-tabular-sm text-on-surface font-semibold">01</span>
+<h2 class="font-display-lg text-display-lg text-on-surface font-bold">Paleta Cromática &amp; Semântica</h2>
+</div>
+<span class="font-label-caps text-label-caps uppercase text-outline">Sem Gradientes Sintéticos • Alta Solidez</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-space-md">
+<div class="flex flex-col bg-surface-container-lowest rounded-xl p-space-md shadow-sm gap-space-md">
+<div class="h-28 rounded-lg bg-[#FDFBF7] flex flex-col justify-between p-space-sm shadow-inner">
+<span class="font-label-caps text-label-caps text-[#3E2723] uppercase">Canvas Base</span>
+<span class="font-tabular-sm text-tabular-sm text-[#3E2723] font-semibold">#FDFBF7</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<span class="font-body-bold text-body-bold text-on-surface">Creme Mineral</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Superfície plana principal, cartão secundário neutro e fundo editorial.</p>
+<div class="mt-space-xs flex items-center justify-between font-tabular-sm text-tabular-sm text-outline">
+<span>surface</span>
+<span>100% Opaco</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col bg-surface-container-lowest rounded-xl p-space-md shadow-sm gap-space-md">
+<div class="h-28 rounded-lg bg-[#3E2723] flex flex-col justify-between p-space-sm text-surface-container-lowest">
+<span class="font-label-caps text-label-caps uppercase text-[#ffdcc5]">Estrutura Forte</span>
+<span class="font-tabular-sm text-tabular-sm font-semibold">#3E2723</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<span class="font-body-bold text-body-bold text-on-surface">Marrom-Terra</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Tipografia com alto contraste, molduras austeras, contornos e cabeçalhos.</p>
+<div class="mt-space-xs flex items-center justify-between font-tabular-sm text-tabular-sm text-outline">
+<span>on-surface</span>
+<span>Alta densidade</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col bg-surface-container-lowest rounded-xl p-space-md shadow-sm gap-space-md">
+<div class="h-28 rounded-lg bg-[#E5A93C] flex flex-col justify-between p-space-sm text-[#251915]">
+<span class="font-label-caps text-label-caps uppercase font-bold text-[#502600]">Destaque Primário</span>
+<span class="font-tabular-sm text-tabular-sm font-semibold">#E5A93C</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<span class="font-body-bold text-body-bold text-on-surface">Dourado-Gema</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Ações resolutivas, botões primários, alertas solenes e taxas monetárias.</p>
+<div class="mt-space-xs flex items-center justify-between font-tabular-sm text-tabular-sm text-outline">
+<span>primary-container</span>
+<span>Saturado</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col bg-surface-container-lowest rounded-xl p-space-md shadow-sm gap-space-md">
+<div class="h-28 rounded-lg bg-[#556B2F] flex flex-col justify-between p-space-sm text-surface-container-lowest">
+<span class="font-label-caps text-label-caps uppercase text-[#d2eca2]">Pastagem</span>
+<span class="font-tabular-sm text-tabular-sm font-semibold">#556B2F</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<span class="font-body-bold text-body-bold text-on-surface">Verde-Oliva</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Apoio botânico, indicadores de bem-estar livre de gaiola e rotas ativas.</p>
+<div class="mt-space-xs flex items-center justify-between font-tabular-sm text-tabular-sm text-outline">
+<span>secondary</span>
+<span>Agrícola</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col bg-surface-container-lowest rounded-xl p-space-md shadow-sm gap-space-md">
+<div class="h-28 rounded-lg bg-[#fbe3dc] flex flex-col justify-between p-space-sm">
+<div class="flex justify-between items-center">
+<span class="w-3.5 h-3.5 rounded-full bg-secondary"></span>
+<span class="w-3.5 h-3.5 rounded-full bg-error"></span>
+</div>
+<div class="flex justify-between items-end font-tabular-sm text-tabular-sm text-on-surface font-semibold">
+<span>#D2ECA2</span>
+<span>#BA1A1A</span>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs">
+<span class="font-body-bold text-body-bold text-on-surface">Semântica Orgânica</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Oliva claro para sucesso pontual; terracota profundo para erros.</p>
+<div class="mt-space-xs flex items-center justify-between font-tabular-sm text-tabular-sm text-outline">
+<span>isento de SaaS azul/roxo</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="flex flex-col gap-space-lg">
+<div class="flex items-center justify-between pb-space-xs border-b border-surface-container-high">
+<div class="flex items-center gap-space-sm">
+<span class="w-7 h-7 rounded-lg bg-surface-container-highest flex items-center justify-center font-tabular-sm text-tabular-sm text-on-surface font-semibold">02</span>
+<h2 class="font-display-lg text-display-lg text-on-surface font-bold">Arquitetura Tipográfica Tripartite</h2>
+</div>
+<span class="font-label-caps text-label-caps uppercase text-outline">Outfit • Archivo • IBM Plex Mono</span>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-space-lg">
+<div class="bg-surface-container-lowest rounded-xl p-space-xl flex flex-col justify-between shadow-sm">
+<div class="flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<span class="px-space-sm py-1 bg-surface-container rounded font-label-caps text-label-caps text-on-surface uppercase font-bold">Display &amp; Títulos</span>
+<span class="font-tabular-sm text-tabular-sm text-outline">Outfit</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<span class="font-display-2xl text-display-2xl text-on-surface font-extrabold leading-none">Aa</span>
+<span class="font-headline-md text-headline-md text-on-surface font-semibold">Criação a Pasto &amp; Frescor Real</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              Utilizada para dar impacto sensorial imediato, manchetes da granja, números de grandes banners e títulos de seções.
+            </p>
+</div>
+</div>
+<div class="pt-space-lg mt-space-lg bg-surface-container-low p-space-sm rounded-lg flex flex-col gap-1 font-label-caps text-label-caps text-outline uppercase">
+<span>font-display-2xl (52px / 800)</span>
+<span>font-headline-md (24px / 600)</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-xl flex flex-col justify-between shadow-sm">
+<div class="flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<span class="px-space-sm py-1 bg-surface-container rounded font-label-caps text-label-caps text-on-surface uppercase font-bold">Interface &amp; Leitura</span>
+<span class="font-tabular-sm text-tabular-sm text-outline">Archivo</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<span class="font-body-bold text-display-xl text-on-surface leading-none">Aa</span>
+<span class="font-body-bold text-body-bold text-on-surface">Legibilidade, Ações, Formulários</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              Garante clareza estrita em botões, campos de texto, corpo editorial de e-mails, menus de rotas e micro-labels operacionais.
+            </p>
+</div>
+</div>
+<div class="pt-space-lg mt-space-lg bg-surface-container-low p-space-sm rounded-lg flex flex-col gap-1 font-label-caps text-label-caps text-outline uppercase">
+<span>font-body-bold (16px / 600)</span>
+<span>font-body-base (16px / 400)</span>
+<span>font-label-caps (11px / 700)</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-xl flex flex-col justify-between shadow-sm">
+<div class="flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<span class="px-space-sm py-1 bg-surface-container rounded font-label-caps text-label-caps text-on-surface uppercase font-bold">Técnico &amp; Tabular</span>
+<span class="font-tabular-sm text-tabular-sm text-outline">IBM Plex Mono</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<span class="font-tabular-lg text-display-xl text-on-surface leading-none">0123</span>
+<span class="font-tabular-md text-tabular-md text-on-surface">SKU-BR-7892 • R$ 94,80</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              Alinhamento métrico exato para rastreabilidade de postura, carimbos de lote, deltas de volume, CEPs e tabelas logísticas.
+            </p>
+</div>
+</div>
+<div class="pt-space-lg mt-space-lg bg-surface-container-low p-space-sm rounded-lg flex flex-col gap-1 font-label-caps text-label-caps text-outline uppercase">
+<span>font-tabular-lg (36px / 700)</span>
+<span>font-tabular-md (20px / 600)</span>
+<span>font-tabular-sm (14px / 500)</span>
+</div>
+</div>
+</div>
+</section>
+<section class="flex flex-col gap-space-lg">
+<div class="flex items-center justify-between pb-space-xs border-b border-surface-container-high">
+<div class="flex items-center gap-space-sm">
+<span class="w-7 h-7 rounded-lg bg-surface-container-highest flex items-center justify-center font-tabular-sm text-tabular-sm text-on-surface font-semibold">03</span>
+<h2 class="font-display-lg text-display-lg text-on-surface font-bold">Matriz de Botões &amp; Estados de Interação</h2>
+</div>
+<span class="font-label-caps text-label-caps uppercase text-outline">Gema Dourada • Marrom Contorno • Fantasma</span>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-xl shadow-sm">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-space-lg items-end">
+<div class="flex flex-col gap-space-md">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-outline uppercase">Variante 01</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Ação Primária</span>
+</div>
+<button class="w-full h-[52px] px-space-lg rounded-xl bg-primary-container hover:bg-[#d35400] active:bg-[#b94a00] text-on-surface font-body-bold text-body-base transition-all flex items-center justify-center gap-space-xs shadow-[0_4px_14px_rgba(230,126,34,0.25)]" type="button">
+<span class="material-symbols-outlined text-[20px]">add_shopping_cart</span>
+<span>Confirmar Assinatura</span>
+</button>
+<span class="font-tabular-sm text-tabular-sm text-outline">Dourado-gema (#E67E22)</span>
+</div>
+<div class="flex flex-col gap-space-md">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-outline uppercase">Variante 02</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Secundário Estrutural</span>
+</div>
+<button class="w-full h-[52px] px-space-lg rounded-xl bg-transparent hover:bg-surface-container-high text-on-surface font-body-bold text-body-base transition-all flex items-center justify-center gap-space-xs shadow-[inset_0_0_0_1.5px_#251915]" type="button">
+<span class="material-symbols-outlined text-[20px]">tune</span>
+<span>Ajustar Frequência</span>
+</button>
+<span class="font-tabular-sm text-tabular-sm text-outline">Contorno Marrom (#251915)</span>
+</div>
+<div class="flex flex-col gap-space-md">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-outline uppercase">Variante 03</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Terciário / Fantasma</span>
+</div>
+<button class="w-full h-[52px] px-space-lg rounded-xl hover:bg-surface-container-high text-on-surface font-body-bold text-body-base transition-all flex items-center justify-center gap-space-xs" type="button">
+<span class="material-symbols-outlined text-[20px]">description</span>
+<span>Ver Laudo de Lote</span>
+</button>
+<span class="font-tabular-sm text-tabular-sm text-outline">Hover sutil em creme-alto</span>
+</div>
+<div class="flex flex-col gap-space-md">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-outline uppercase">Variante 04</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Desabilitado</span>
+</div>
+<button class="w-full h-[52px] px-space-lg rounded-xl bg-surface-container text-outline cursor-not-allowed font-body-bold text-body-base flex items-center justify-center gap-space-xs opacity-70" disabled="" type="button">
+<span class="material-symbols-outlined text-[20px]">block</span>
+<span>Entrega Esgotada</span>
+</button>
+<span class="font-tabular-sm text-tabular-sm text-outline">Pointer inativo + opaco</span>
+</div>
+</div>
+</div>
+</section>
+<section class="flex flex-col gap-space-lg">
+<div class="flex items-center justify-between pb-space-xs border-b border-surface-container-high">
+<div class="flex items-center gap-space-sm">
+<span class="w-7 h-7 rounded-lg bg-surface-container-highest flex items-center justify-center font-tabular-sm text-tabular-sm text-on-surface font-semibold">04</span>
+<h2 class="font-display-lg text-display-lg text-on-surface font-bold">Badges &amp; Tags de Rastreio Operacional</h2>
+</div>
+<span class="font-label-caps text-label-caps uppercase text-outline">Status Canônico do Ciclo</span>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-space-md">
+<div class="bg-surface-container-lowest rounded-xl p-space-md flex flex-col gap-space-sm shadow-sm">
+<span class="font-label-caps text-label-caps text-outline uppercase">Status • Regular</span>
+<div class="inline-flex items-center gap-space-xs px-space-md py-1.5 rounded-full bg-secondary-container text-on-secondary-container w-fit">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-label-caps text-label-caps uppercase tracking-wider font-bold">Assinatura Ativa</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Postura e entrega programadas no cronograma normal da semana.</p>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-md flex flex-col gap-space-sm shadow-sm">
+<span class="font-label-caps text-label-caps text-outline uppercase">Status • Suspensão</span>
+<div class="inline-flex items-center gap-space-xs px-space-md py-1.5 rounded-full bg-surface-container-highest text-on-surface-variant w-fit">
+<span class="w-2 h-2 rounded-full bg-outline"></span>
+<span class="font-label-caps text-label-caps uppercase tracking-wider font-bold">Pausa Programada</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Férias do assinante informadas com congelamento de faturamento.</p>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-md flex flex-col gap-space-sm shadow-sm">
+<span class="font-label-caps text-label-caps text-outline uppercase">Status • Finalizado</span>
+<div class="inline-flex items-center gap-space-xs px-space-md py-1.5 rounded-full bg-[#EDF1E6] text-[#283618] w-fit shadow-[inset_0_0_0_1px_rgba(85,107,47,0.2)]">
+<span class="material-symbols-outlined text-[14px]">done_all</span>
+<span class="font-label-caps text-label-caps uppercase tracking-wider font-bold">Lote Entregue</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Comprovante biométrico ou assinatura do recebedor na portaria.</p>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-md flex flex-col gap-space-sm shadow-sm">
+<span class="font-label-caps text-label-caps text-outline uppercase">Status • Atenção</span>
+<div class="inline-flex items-center gap-space-xs px-space-md py-1.5 rounded-full bg-primary-fixed text-on-primary-fixed-variant w-fit">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+<span class="font-label-caps text-label-caps uppercase tracking-wider font-bold">Postura Pendente</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Aguardando colheita matinal no galpão livre de gaiolas.</p>
+</div>
+</div>
+</section>
+<section class="flex flex-col gap-space-lg">
+<div class="flex items-center justify-between pb-space-xs border-b border-surface-container-high">
+<div class="flex items-center gap-space-sm">
+<span class="w-7 h-7 rounded-lg bg-surface-container-highest flex items-center justify-center font-tabular-sm text-tabular-sm text-on-surface font-semibold">05</span>
+<h2 class="font-display-lg text-display-lg text-on-surface font-bold">Inputs &amp; Seletores Estruturais</h2>
+</div>
+<span class="font-label-caps text-label-caps uppercase text-outline">Formulários com foco áureo e validação</span>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-xl shadow-sm">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-lg">
+<div class="flex flex-col gap-space-xs">
+<label class="font-body-bold text-body-sm text-on-surface">Estado Regular</label>
+<div class="relative flex items-center">
+<input class="w-full h-12 px-space-md rounded-xl bg-surface-container-low text-on-surface font-body-base text-body-sm shadow-[inset_0_0_0_1px_rgba(43,30,26,0.12)] focus:outline-none focus:shadow-[inset_0_0_0_2px_#E67E22]" type="text" value="Rua Bernardo Guimarães, Lourdes"/>
+</div>
+<span class="font-body-sm text-body-sm text-outline">Endereço de entrega semanal</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<label class="font-body-bold text-body-sm text-on-surface">Foco Ativo (Demonstração)</label>
+<div class="relative flex items-center">
+<input class="w-full h-12 px-space-md rounded-xl bg-surface-container-lowest text-on-surface font-tabular-sm text-tabular-sm shadow-[inset_0_0_0_2px_#E67E22,0_0_0_3px_rgba(230,126,34,0.18)] focus:outline-none" type="text" value="30140-081"/>
+<span class="material-symbols-outlined absolute right-3 text-primary-container text-[20px]">pin_drop</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant font-medium">Borda reforçada em gema</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<label class="font-body-bold text-body-sm text-error">Validação com Erro</label>
+<div class="relative flex items-center">
+<input class="w-full h-12 px-space-md rounded-xl bg-error-container/30 text-on-surface font-body-base text-body-sm shadow-[inset_0_0_0_1.5px_#ba1a1a] focus:outline-none" type="text" value="12 Dúzias / Semana"/>
+<span class="material-symbols-outlined absolute right-3 text-error text-[20px]">warning</span>
+</div>
+<span class="font-body-sm text-body-sm text-error">Limite excedido para cota residencial</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<label class="font-body-bold text-body-sm text-outline">Estado Desabilitado</label>
+<div class="relative flex items-center">
+<input class="w-full h-12 px-space-md rounded-xl bg-surface-container-high text-outline cursor-not-allowed font-tabular-sm text-tabular-sm shadow-[inset_0_0_0_1px_rgba(43,30,26,0.06)]" disabled="" type="text" value="LOTE-EXPEDIDO-778"/>
+<span class="material-symbols-outlined absolute right-3 text-outline text-[18px]">lock</span>
+</div>
+<span class="font-body-sm text-body-sm text-outline">Bloqueado pela expedição</span>
+</div>
+</div>
+</div>
+</section>
+<section class="flex flex-col gap-space-lg">
+<div class="flex items-center justify-between pb-space-xs border-b border-surface-container-high">
+<div class="flex items-center gap-space-sm">
+<span class="w-7 h-7 rounded-lg bg-surface-container-highest flex items-center justify-center font-tabular-sm text-tabular-sm text-on-surface font-semibold">06</span>
+<h2 class="font-display-lg text-display-lg text-on-surface font-bold">StatCard Oficial de Métricas</h2>
+</div>
+<span class="font-label-caps text-label-caps uppercase text-outline">IBM Plex Mono + Outfit + Rastreio</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-lg">
+<div class="bg-surface-container-lowest rounded-xl p-space-xl flex flex-col justify-between shadow-sm relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-outline">Postura / Semana Atual</span>
+<span class="material-symbols-outlined text-secondary text-[22px]">egg</span>
+</div>
+<div class="flex flex-col gap-space-xs my-space-md">
+<span class="font-tabular-lg text-tabular-lg text-on-surface font-bold tracking-tight">14.820</span>
+<div class="flex items-center gap-space-xs">
+<span class="font-tabular-sm text-tabular-sm text-secondary font-semibold">+6,4%</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">vs. ciclo anterior</span>
+</div>
+</div>
+<div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[84%]"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-xl flex flex-col justify-between shadow-sm relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-outline">Receita Recorrente (MRR)</span>
+<span class="material-symbols-outlined text-primary-container text-[22px]">payments</span>
+</div>
+<div class="flex flex-col gap-space-xs my-space-md">
+<div class="flex items-baseline gap-space-xs">
+<span class="font-tabular-sm text-tabular-sm text-on-surface-variant font-bold">R$</span>
+<span class="font-tabular-lg text-tabular-lg text-on-surface font-bold tracking-tight">68.450</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="font-tabular-sm text-tabular-sm text-secondary font-semibold">99.1%</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">adimplência comprovada</span>
+</div>
+</div>
+<div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[92%]"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-xl flex flex-col justify-between shadow-sm relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-outline">Assinantes Ativos BH</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[22px]">hub</span>
+</div>
+<div class="flex flex-col gap-space-xs my-space-md">
+<span class="font-tabular-lg text-tabular-lg text-on-surface font-bold tracking-tight">1.240</span>
+<div class="flex items-center gap-space-xs">
+<span class="font-tabular-sm text-tabular-sm text-primary font-semibold">0.4%</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">taxa de cancelamento</span>
+</div>
+</div>
+<div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-on-surface w-[96%]"></div>
+</div>
+</div>
+</div>
+</section>
+<section class="flex flex-col gap-space-lg">
+<div class="flex items-center justify-between pb-space-xs border-b border-surface-container-high">
+<div class="flex items-center gap-space-sm">
+<span class="w-7 h-7 rounded-lg bg-surface-container-highest flex items-center justify-center font-tabular-sm text-tabular-sm text-on-surface font-semibold">07</span>
+<h2 class="font-display-lg text-display-lg text-on-surface font-bold">Tabela de Dados (DataTable) Exemplar</h2>
+</div>
+<span class="font-label-caps text-label-caps uppercase text-outline">Cabeçalho Marrom Sóbrio • Tipografia Numérica Estrita</span>
+</div>
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm">
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-[#3E2723] text-surface-container-lowest">
+<tr>
+<th class="py-space-md px-space-lg font-label-caps text-label-caps uppercase tracking-wider">Cód. Rastreio</th>
+<th class="py-space-md px-space-lg font-label-caps text-label-caps uppercase tracking-wider">Assinante / Bairro</th>
+<th class="py-space-md px-space-lg font-label-caps text-label-caps uppercase tracking-wider">Plano de Postura</th>
+<th class="py-space-md px-space-lg font-label-caps text-label-caps uppercase tracking-wider">Dia / Janela</th>
+<th class="py-space-md px-space-lg font-label-caps text-label-caps uppercase tracking-wider">Status</th>
+<th class="py-space-md px-space-lg font-label-caps text-label-caps uppercase tracking-wider text-right">Valor Mensal</th>
+</tr>
+</thead>
+<tbody class="divide-y-0 text-on-surface font-body-base text-body-sm">
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="py-space-md px-space-lg font-tabular-sm text-tabular-sm font-semibold text-primary">#BH-8921</td>
+<td class="py-space-md px-space-lg">
+<div class="flex flex-col">
+<span class="font-body-bold text-body-bold text-on-surface">Beatriz Guimarães Silveira</span>
+<span class="font-body-sm text-body-sm text-outline">Lourdes, Belo Horizonte</span>
+</div>
+</td>
+<td class="py-space-md px-space-lg font-body-sm text-body-sm">Cesta Ouro Caipira (4 Dúzias/mês)</td>
+<td class="py-space-md px-space-lg font-body-sm text-body-sm">Terça • 07h às 11h</td>
+<td class="py-space-md px-space-lg">
+<span class="inline-flex items-center gap-1.5 px-space-sm py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-caps text-label-caps uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Ativo
+                </span>
+</td>
+<td class="py-space-md px-space-lg font-tabular-sm text-tabular-sm font-bold text-right">R$ 118,00</td>
+</tr>
+<tr class="bg-surface-container-low/40 hover:bg-surface-container-low transition-colors">
+<td class="py-space-md px-space-lg font-tabular-sm text-tabular-sm font-semibold text-primary">#BH-8924</td>
+<td class="py-space-md px-space-lg">
+<div class="flex flex-col">
+<span class="font-body-bold text-body-bold text-on-surface">Restaurante Roça Viva</span>
+<span class="font-body-sm text-body-sm text-outline">Savassi, Belo Horizonte</span>
+</div>
+</td>
+<td class="py-space-md px-space-lg font-body-sm text-body-sm">Institucional Granja (30 Dúzias/mês)</td>
+<td class="py-space-md px-space-lg font-body-sm text-body-sm">Quinta • 06h às 09h</td>
+<td class="py-space-md px-space-lg">
+<span class="inline-flex items-center gap-1.5 px-space-sm py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-caps text-label-caps uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Ativo
+                </span>
+</td>
+<td class="py-space-md px-space-lg font-tabular-sm text-tabular-sm font-bold text-right">R$ 690,00</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="py-space-md px-space-lg font-tabular-sm text-tabular-sm font-semibold text-outline">#BH-7810</td>
+<td class="py-space-md px-space-lg">
+<div class="flex flex-col">
+<span class="font-body-bold text-body-bold text-on-surface">Eduardo Vasconcellos</span>
+<span class="font-body-sm text-body-sm text-outline">Anchieta, Belo Horizonte</span>
+</div>
+</td>
+<td class="py-space-md px-space-lg font-body-sm text-body-sm">Cesta Familiar Caipira (6 Dúzias/mês)</td>
+<td class="py-space-md px-space-lg font-body-sm text-body-sm">Sexta • 14h às 18h</td>
+<td class="py-space-md px-space-lg">
+<span class="inline-flex items-center gap-1.5 px-space-sm py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant font-label-caps text-label-caps uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span> Pausado
+                </span>
+</td>
+<td class="py-space-md px-space-lg font-tabular-sm text-tabular-sm font-bold text-right text-outline">R$ 174,00</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section class="flex flex-col gap-space-lg">
+<div class="flex items-center justify-between pb-space-xs border-b border-surface-container-high">
+<div class="flex items-center gap-space-sm">
+<span class="w-7 h-7 rounded-lg bg-surface-container-highest flex items-center justify-center font-tabular-sm text-tabular-sm text-on-surface font-semibold">08</span>
+<h2 class="font-display-lg text-display-lg text-on-surface font-bold">EmptyState Padronizado de Busca</h2>
+</div>
+<span class="font-label-caps text-label-caps uppercase text-outline">Resolução Direta Sem Ruído</span>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-3xl flex flex-col items-center justify-center text-center shadow-sm">
+<div class="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant mb-space-md">
+<span class="material-symbols-outlined text-[32px]">filter_alt_off</span>
+</div>
+<div class="max-w-md flex flex-col gap-space-xs mb-space-lg">
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold">Nenhum pedido neste filtro</h3>
+<p class="font-body-base text-body-base text-on-surface-variant">
+          Não identificamos assinaturas ou entregas com os critérios informados para a rota de Belo Horizonte nesta data.
+        </p>
+</div>
+<div class="flex flex-col sm:flex-row items-center gap-space-sm">
+<button class="h-11 px-space-lg rounded-xl bg-primary-container hover:bg-[#d35400] text-on-surface font-body-bold text-body-sm transition-all shadow-[0_4px_14px_rgba(230,126,34,0.25)] flex items-center gap-space-xs" type="button">
+<span class="material-symbols-outlined text-[18px]">restart_alt</span>
+<span>Limpar Todos os Filtros</span>
+</button>
+<button class="h-11 px-space-lg rounded-xl bg-transparent hover:bg-surface-container-high text-on-surface font-body-bold text-body-sm transition-all shadow-[inset_0_0_0_1.5px_#251915] flex items-center gap-space-xs" type="button">
+<span>Ver Todas as Rotas</span>
+</button>
+</div>
+</div>
+</section>
+</div></main></div></body></html>
