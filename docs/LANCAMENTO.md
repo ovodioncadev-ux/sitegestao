@@ -16,13 +16,13 @@ Legenda: ☐ a fazer · 🔒 só você pode fazer (credencial/decisão) · ⚠�
 | Pagamento online | adaptador da InfinitePay **escrito sem a documentação oficial: não liga sozinho** (ver §6) |
 | Limite de tentativas | login/cadastro e rotas públicas compartilhados entre instâncias (no Postgres) |
 | CSP | **imposta** sem violações nas telas principais; padrão continua "relatório" (ver §8) |
-| CI | `ci/github-actions-ci.yml` (ver §1) |
+| CI | `.github/workflows/ci.yml`, 4 jobs (ver §1) |
 
 ---
 
 ## 1. Antes de qualquer deploy
 
-- ☐ 🔒 **Ativar o CI.** Copie `ci/github-actions-ci.yml` para `.github/workflows/ci.yml` (o token usado para enviar este código não tinha permissão `workflow`). Abra um PR e confira os 4 jobs verdes. ⚠️ Esta é a **primeira execução real** do workflow: ele foi validado (sintaxe, scripts referenciados e simulação passo a passo num Postgres local), mas não rodou no GitHub.
+- ☐ **Conferir o CI.** O workflow já está em `.github/workflows/ci.yml` (roda em push na `main` e em todo pull request). ⚠️ Ele foi validado (sintaxe, scripts referenciados e simulação passo a passo num Postgres local), mas **nunca rodou no GitHub**: abra um pull request e confira os 4 jobs verdes antes de confiar nele.
 - ☐ Rode localmente, num banco **de teste**: `pnpm db:migrar:teste && pnpm teste:banco && pnpm seguranca`.
   ⚠️ `teste:banco` espera um banco de teste **sem dados soltos**: a Fase 10 conta linhas (assinaturas, faixas de CEP) e falha se sobrou coisa de um E2E ou de uso manual. Rode os E2E (`scripts/e2e/*`) num banco **separado**, ou recrie o branch de teste antes. No CI isso já é garantido: cada job tem o próprio Postgres.
 

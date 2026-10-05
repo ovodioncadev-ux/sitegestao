@@ -1,10 +1,7 @@
 # ═══════════════════════════════════════════════════════════════════════════
 # CI — Ovo di Onça
 #
-# Este é o workflow ativo (cópia de ci/github-actions-ci.yml).
-# (Ele fica em ci/ porque o token usado para enviar este código não tem a
-#  permissão `workflow` do GitHub, que é exigida para criar arquivos em
-#  .github/workflows. Se você tiver essa permissão, basta mover o arquivo.)
+# Roda em push na main e em todo pull request.
 #
 # Quatro jobs, independentes:
 #   seguranca  segredos no código/histórico e dependências vulneráveis

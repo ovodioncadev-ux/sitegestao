@@ -282,3 +282,21 @@ O adaptador (`apps/assinante/src/lib/pagamento/infinitepay.ts`) foi escrito **se
 
 ### Fora desta rodada
 D1/D2/D10 (ciclo por mês de calendário e inadimplência), D3–D7 (pausa com crédito, troca de plano, cancelamento no fim do mês), D11 (dúzia pedida pelo assinante) e D15 (indicação). Com a chave ligada, o texto do FAQ "como funciona o pagamento" fica desatualizado: ajuste em `/faq`.
+
+
+---
+
+## Bloco 8 — entrada no ar (05/10/2026)
+
+Migration `1758758428000_bloco8-rate-limit-auth.sql`. **Aplicada só no banco de teste local; ainda não no Neon.** Passo a passo de lançamento: `docs/LANCAMENTO.md`.
+
+| Item | Como ficou |
+|---|---|
+| CI | `.github/workflows/ci.yml`, 4 jobs (segurança, qualidade, banco, e2e), com Postgres 16 descartável por job. **Nunca rodou no GitHub**: foi validado por sintaxe e por simulação passo a passo local (278 verificações SQL, fumaça 82/82, CSP, e2e). Confira os jobs verdes num pull request antes de confiar nele. |
+| Limite de login | O contador saiu da memória do processo: `consumir_rate_limit()` (upsert atômico) via `customStorage` do Better Auth. Prova: 60 tentativas simultâneas com limite 10 → passam exatamente 10; o bloqueio sobrevive a reinício do servidor. Se o contador falhar, **libera** (não tranca o login). |
+| CSP | `CSP_MODO=relatorio` (padrão) \| `impor`, **lida no build**. Imposta: 0 violações nas telas principais dos 3 apps (`scripts/e2e/csp.mjs`; o verificador foi provado com um controle negativo). Ligar em produção continua sendo decisão sua. |
+| Saúde e fumaça | `GET /api/saude` nos 3 apps (só `{ok}`); `scripts/smoke.mjs` confere o que um visitante vê (e o que não pode ver) depois de cada deploy. |
+| Rotina | `scripts/rodar-rotina.sh` serve a qualquer agendador. **Ninguém agenda ainda** (depende da hospedagem). |
+| Removido | `packages/database/src/auth/rate-limit-server-action.ts`: nunca foi usado, não compilava e prometia proteção que não existia. O `pnpm typecheck` da raiz passa pela primeira vez. |
+
+**Pendente (depende de você):** hospedagem e agendador da rotina, ferramenta de monitoramento de erros, ligar `CSP_MODO=impor` e a chave D8, aplicar as migrations 424–428 no Neon e rodar `db:papel-servidor` de novo.

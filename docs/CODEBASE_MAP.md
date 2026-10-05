@@ -33,7 +33,7 @@ total_tokens: 267465
 
 **Front do site** — `apps/site/src/components/ui` (Botao, Cartao, Secao, Selo, Icone, Container); tokens em `@ovo/ui` com contraste AA; fontes por `next/font`.
 
-**Operação** — [docs/LANCAMENTO.md](LANCAMENTO.md) (checklist e como reverter); CI em `ci/github-actions-ci.yml` (ainda não ativado).
+**Operação** — [docs/LANCAMENTO.md](LANCAMENTO.md) (checklist e como reverter); CI em `.github/workflows/ci.yml` (nunca rodou no GitHub ainda).
 
 ---
 
