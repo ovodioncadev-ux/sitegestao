@@ -34,6 +34,26 @@ export async function cepAtendido(cep: string): Promise<boolean> {
   return data.atendido;
 }
 
+export type PedidoInteresse = {
+  nome?: string;
+  telefone?: string;
+  email?: string;
+  cep: string;
+  website?: string; // campo-isca: tem de ir vazio
+};
+
+/** Pede aviso para um CEP fora da área. Lança Error com a mensagem a mostrar. */
+export async function registrarInteresse(pedido: PedidoInteresse): Promise<void> {
+  const res = await fetch('/api/interesse', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...pedido, origem: 'site', consentimento: true }),
+  });
+  if (res.ok) return;
+  const corpo = (await res.json().catch(() => ({}))) as { erro?: string };
+  throw new Error(corpo.erro ?? 'Não foi possível registrar agora. Tente de novo em instantes.');
+}
+
 /**
  * Conta o clique em "Assinar" (funil, sem dado pessoal). sendBeacon sobrevive à
  * navegação para outro site; qualquer falha é ignorada: nunca atrapalha o clique.

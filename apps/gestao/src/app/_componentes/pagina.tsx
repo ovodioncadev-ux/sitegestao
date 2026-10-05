@@ -10,6 +10,7 @@ const LINKS = [
   ['/faturas', 'Faturas'],
   ['/historico', 'Histórico'],
   ['/area-de-entrega', 'Área de entrega'],
+  ['/interessados', 'Interessados'],
   ['/faq', 'FAQ do site'],
   ['/configuracoes', 'Configurações'],
 ] as const;

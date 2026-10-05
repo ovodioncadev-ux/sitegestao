@@ -9,6 +9,7 @@ import { FormAcao } from '../_componentes/form-acao';
 import { CabecalhoFunil } from '../_componentes/funil';
 import { CampoCep } from '../_componentes/campo-cep';
 import { CampoMascara } from '../_componentes/campo-mascara';
+import { FormInteresse } from '../_componentes/form-interesse';
 import { confirmarAssinatura, criarMeuCadastro } from './acoes';
 
 // Depende da sessão: nunca cacheada nem compartilhada entre pessoas.
@@ -214,6 +215,9 @@ export default async function Assinar({ searchParams }: { searchParams: Promise<
               Falar com a Ovo di Onça
             </a>
           </p>
+        </section>
+        <section className="cartao">
+          <FormInteresse cep={cliente.cep ?? ''} nome={cliente.nome} telefone={cliente.telefone ?? ''} />
         </section>
       </main>
       </>

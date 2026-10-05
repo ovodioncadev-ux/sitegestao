@@ -241,3 +241,20 @@ Migration `1758758425000_bloco4-funil-de-conversao.sql`. **Aplicada só no banco
 | E2E | `scripts/e2e/assinatura.mjs` (Playwright): site → plano → conta → endereço → confirmação → contagem do funil. Roda só contra banco de teste; precisa de uma faixa de CEP ativa. |
 
 **Pendente:** "fora da área → deixar contato" (Bloco 5); e-mail de confirmação de conta e fatura gerada ao assinar (Bloco 6, D8); o E2E ainda não roda no CI.
+
+
+---
+
+## Bloco 5 — interessados fora da área (05/10/2026)
+
+Migration `1758758426000_bloco5-interessados.sql`. **Aplicada só no banco de teste local; ainda não no Neon.**
+
+| Item | O que existe agora |
+|---|---|
+| Captação | CEP fora da área no site (e na tela "Ainda não entregamos aí" do `/assinar`) abre o formulário "Avise-me": telefone **ou** e-mail (nome opcional) + caixa de consentimento nunca pré-marcada. `POST /api/interesse` → `registrar_interesse()` (valida, normaliza, exige consentimento). |
+| Consentimento | Texto e versão em `packages/config/src/privacidade.mjs` (v1). O banco grava a versão aceita; **quem decide a versão é o servidor**, não o navegador. **O texto precisa de revisão jurídica antes de ir ao ar** (não sou advogado e não validei LGPD). |
+| Abuso | Campo-isca (robô recebe 204 sem gravar), limite de 5 pedidos/min por IP, pedido repetido não duplica e a resposta é a mesma de um sucesso (não revela quem já está na lista), CEP já atendido também responde igual. |
+| Painel | `/interessados`: "prontos para avisar" (a faixa nova passou a cobrir o CEP, marcado por gatilho), aguardando, todos; link de conversa por WhatsApp, marcar avisado, descartar, **remover de vez** (com confirmação) e exportar CSV (só o dono; células neutralizadas contra injeção de fórmula). Contador no painel inicial. |
+| Privacidade | **Sem auditoria** nesta tabela, de propósito: a auditoria é imutável e copiaria telefone e e-mail para onde não dá apagar. Remover apaga de verdade. Quem mudou a situação não fica registrado. |
+
+**Não feito:** aviso automático (precisa de serviço de e-mail ou WhatsApp API — hoje o dono avisa à mão, pelo link); prazo de retenção (os dados ficam até o dono avisar, descartar ou remover; defina um prazo e eu automatizo a limpeza).

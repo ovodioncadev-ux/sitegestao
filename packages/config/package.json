@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     "./headers": "./src/headers.mjs",
-    "./whatsapp": "./src/whatsapp.mjs"
+    "./whatsapp": "./src/whatsapp.mjs",
+    "./privacidade": "./src/privacidade.mjs"
   }
 }

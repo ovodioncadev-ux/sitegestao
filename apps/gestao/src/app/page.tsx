@@ -31,7 +31,7 @@ export default async function PainelInicial() {
     return <SemPermissao mensagem="Você não tem permissão para realizar esta ação." />;
   }
 
-  const { planos, totalClientes, hoje, pendencias, funil } = await comoUsuario(usuario.usuarioId, async (bd) => {
+  const { planos, totalClientes, hoje, pendencias, funil, interessados } = await comoUsuario(usuario.usuarioId, async (bd) => {
     const planos = await bd.consultar<Plano>(
       `select nome, frete_centavos, desconto_primeiro_mes_pct, freshness_max_dias, intervalo_dias
          from planos where ativo order by intervalo_dias`,
@@ -52,11 +52,17 @@ export default async function PainelInicial() {
               (select count(*) from faturas where status in ('pendente', 'atrasada') and vencimento < $1::date) as devendo`,
       [hojeEmSaoPaulo()],
     );
+    const i = await bd.umaLinha<{ aguardando: string; prontos: string }>(
+      `select count(*) filter (where status = 'novo') as aguardando,
+              count(*) filter (where status = 'novo' and area_atendida_em is not null) as prontos
+         from interessados`,
+    );
     const funilLinhas = await bd.consultar<{ etapa: string; total: string }>(
       `select etapa, count(*) as total from eventos_funil
         where criado_em > now() - interval '30 days' group by etapa`,
     );
     return {
+      interessados: { aguardando: Number(i?.aguardando ?? 0), prontos: Number(i?.prontos ?? 0) },
       funil: Object.fromEntries(funilLinhas.map((l) => [l.etapa, Number(l.total)])) as Record<string, number>,
       pendencias: {
         pedidos: Number(p?.pedidos ?? 0),
@@ -95,6 +101,10 @@ export default async function PainelInicial() {
           <Link href="/assinaturas">{pendencias.pedidos} pedido(s) de assinante</Link> aguardando resposta
         </li>
         <li>{pendencias.reposicoes} reposição(ões) de defeito a entregar</li>
+        <li>
+          <Link href="/interessados">{interessados.aguardando} interessado(s) fora da área</Link> aguardando aviso
+          {interessados.prontos > 0 && <> ({interessados.prontos} já com área atendida)</>}
+        </li>
         <li>{pendencias.cobrar} assinatura(s) com cobrança do período a gerar</li>
         <li>
           <Link href="/faturas">{pendencias.devendo} fatura(s) vencida(s)</Link> sem pagamento

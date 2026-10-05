@@ -4,6 +4,7 @@ import { useState, type FormEvent } from 'react';
 import { useBairros } from '@/hooks/useBairros';
 import { cepAtendido } from '@/lib/api';
 import { mascararCep } from '@/lib/formatar';
+import { FormInteresse } from './FormInteresse';
 import { Botao, Secao } from './ui';
 
 export function NeighborhoodSection() {
@@ -11,17 +12,21 @@ export function NeighborhoodSection() {
   const { bairros, carregando, erro } = useBairros();
   const [cep, setCep] = useState('');
   const [resultadoCep, setResultadoCep] = useState<string | null>(null);
+  const [foraDaArea, setForaDaArea] = useState<string | null>(null); // CEP (8 dígitos) conferido e não atendido
 
   async function conferirCep(evento: FormEvent) {
     evento.preventDefault();
     const digitos = cep.replace(/\D/g, '');
+    setForaDaArea(null);
     if (digitos.length !== 8) {
       setResultadoCep('Informe um CEP com 8 dígitos.');
       return;
     }
     setResultadoCep('Conferindo…');
     try {
-      setResultadoCep((await cepAtendido(digitos)) ? 'Entregamos no seu CEP.' : 'Ainda não entregamos neste CEP.');
+      const atendido = await cepAtendido(digitos);
+      setResultadoCep(atendido ? 'Entregamos no seu CEP.' : 'Ainda não entregamos neste CEP.');
+      if (!atendido) setForaDaArea(digitos);
     } catch {
       setResultadoCep('Não foi possível conferir agora. Tente de novo em instantes.');
     }
@@ -44,7 +49,10 @@ export function NeighborhoodSection() {
             type="text"
             inputMode="numeric"
             value={cep}
-            onChange={(e) => setCep(mascararCep(e.target.value))}
+            onChange={(e) => {
+              setCep(mascararCep(e.target.value));
+              setForaDaArea(null);
+            }}
             autoComplete="postal-code"
             placeholder="30000-000"
             className="rounded-controle border border-borda px-3 min-h-controle"
@@ -59,6 +67,8 @@ export function NeighborhoodSection() {
           </p>
         )}
       </form>
+
+      {foraDaArea && <FormInteresse key={foraDaArea} cep={foraDaArea} />}
 
       <input
         type="text"

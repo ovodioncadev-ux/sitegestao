@@ -70,7 +70,8 @@ begin
       'assinar_plano',             -- assina para o PROPRIO cliente (identidade vem da sessao)
       'site_conteudo',             -- vitrine: frescor, frete, desconto e corte derivados dos planos ativos
       'limitar_acesso_publico',    -- contador por IP de rotas publicas; rotas e limites fixos no corpo
-      'registrar_evento_funil'     -- conta etapa e plano publico do funil; sem dado pessoal, etapas em lista fechada
+      'registrar_evento_funil',    -- conta etapa e plano publico do funil; sem dado pessoal, etapas em lista fechada
+      'registrar_interesse'        -- pedido de aviso de quem esta fora da area; valida, exige consentimento, sem leitura
     )
     and (
       has_function_privilege('app_anon', p.oid, 'execute')
