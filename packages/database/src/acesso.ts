@@ -25,9 +25,9 @@ import { exigirEnv } from './env';
  */
 
 /** Os únicos papéis que o servidor pode vestir. Lista fechada, ver abaixo. */
-export type PapelDeConexao = 'app_anon' | 'app_usuario';
+export type PapelDeConexao = 'app_anon' | 'app_usuario' | 'app_pagamentos';
 
-const PAPEIS_PERMITIDOS: readonly PapelDeConexao[] = ['app_anon', 'app_usuario'];
+const PAPEIS_PERMITIDOS: readonly PapelDeConexao[] = ['app_anon', 'app_usuario', 'app_pagamentos'];
 
 let poolServidor: Pool | undefined;
 let poolAdmin: Pool | undefined;
@@ -139,6 +139,19 @@ async function emTransacao<T>(
 /** Visitante sem login. Alcança só o que tiver policy para app_anon. */
 export function comoAnonimo<T>(trabalho: (bd: Executor) => Promise<T>): Promise<T> {
   return emTransacao(conexaoServidor(), 'app_anon', null, trabalho);
+}
+
+/**
+ * Webhook de pagamento. Veste o papel app_pagamentos, que só executa
+ * confirmar_pagamento_online() e não lê nem escreve mais nada.
+ *
+ * Só chame depois de CONFERIR o pagamento junto ao provedor: a função do banco
+ * confia em quem a chama. O corpo do aviso, sozinho, nunca é prova de pagamento.
+ * Fica em um arquivo só (apps/assinante/src/app/api/pagamento/webhook), e
+ * scripts/verificar-segredos.sh reprova o uso em qualquer outro lugar.
+ */
+export function comoPagamentos<T>(trabalho: (bd: Executor) => Promise<T>): Promise<T> {
+  return emTransacao(conexaoServidor(), 'app_pagamentos', null, trabalho);
 }
 
 /** Pessoa logada. É por aqui que passa quase tudo. */

@@ -5,6 +5,7 @@ import { Pool } from 'pg';
 import { exigirEnv, envOpcional } from '../env';
 import { OCIOSIDADE_CONEXAO_MS, ouvirErrosDoPool } from '../acesso';
 import { emailConfigurado, enviarEmail } from '../email';
+import { criarArmazenamentoDeLimite } from './rate-limit-storage';
 
 /**
  * ═══════════════════════════════════════════════════════════════════════
@@ -37,18 +38,20 @@ const provedoresSociais = googleId && googleSecret
   ? { google: { clientId: googleId, clientSecret: googleSecret } }
   : {};
 
+const poolAuth = ouvirErrosDoPool(
+  new Pool({
+    connectionString: exigirEnv('DATABASE_ADMIN_URL'),
+    max: 4,
+    // Toda página logada começa lendo a sessão por aqui; o padrão do pg
+    // (10 s) fazia quase todo clique reabrir a conexão. Ver acesso.ts.
+    idleTimeoutMillis: OCIOSIDADE_CONEXAO_MS,
+    keepAlive: true,
+  }),
+  'auth',
+);
+
 export const auth = betterAuth({
-  database: ouvirErrosDoPool(
-    new Pool({
-      connectionString: exigirEnv('DATABASE_ADMIN_URL'),
-      max: 4,
-      // Toda página logada começa lendo a sessão por aqui; o padrão do pg
-      // (10 s) fazia quase todo clique reabrir a conexão. Ver acesso.ts.
-      idleTimeoutMillis: OCIOSIDADE_CONEXAO_MS,
-      keepAlive: true,
-    }),
-    'auth',
-  ),
+  database: poolAuth,
 
   baseURL: exigirEnv('BETTER_AUTH_URL'),
   secret: exigirEnv('BETTER_AUTH_SECRET'),
@@ -90,10 +93,8 @@ export const auth = betterAuth({
   // série (chute de senha, criação de conta em massa), então têm limite próprio
   // e bem mais baixo que o geral. Vale para os dois apps: usam este mesmo auth().
   //
-  // ⚠️  O contador fica na memória do processo. Num servidor único isso basta;
-  //     em ambiente serverless (várias instâncias) cada uma conta separado, e o
-  //     limite real fica mais frouxo. Se for o caso, troque por
-  //     `storage: 'database'` (exige uma tabela `rateLimit`) ou 'secondary-storage'.
+  // O contador mora no Postgres (consumir_rate_limit, migration do Bloco 8): vale entre
+  // todas as instâncias, não só dentro de um processo, e sobrevive a reinício.
   rateLimit: {
     enabled: true,
     window: 60,
@@ -102,6 +103,7 @@ export const auth = betterAuth({
       '/sign-in/email': { window: 60, max: 5 },
       '/sign-up/email': { window: 3600, max: 5 },
     },
+    customStorage: criarArmazenamentoDeLimite((sql, parametros) => poolAuth.query(sql, parametros)),
   },
 
   account: {

@@ -7,6 +7,17 @@ import { authClient } from '@ovo/database/auth-cliente';
 
 const SENHA_MINIMA = 12; // o mesmo valor que o servidor exige (better-auth.ts)
 
+/** Contagem anônima do funil (sem e-mail, nome ou id). Falha em silêncio: não atrapalha o cadastro. */
+function contarContaCriada(proximo: string) {
+  const plano = new URLSearchParams(proximo.split('?')[1] ?? '').get('plano');
+  fetch('/api/evento', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ etapa: 'conta_criada', ...(plano ? { plano } : {}) }),
+    keepalive: true,
+  }).catch(() => {});
+}
+
 export function FormCadastro({
   proximo,
   exigeConfirmacaoDeEmail,
@@ -54,6 +65,8 @@ export function FormCadastro({
       );
       return;
     }
+
+    contarContaCriada(proximo);
 
     if (exigeConfirmacaoDeEmail) {
       setAguardandoConfirmacao(true);

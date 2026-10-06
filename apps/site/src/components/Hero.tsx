@@ -1,39 +1,32 @@
 'use client';
 
-import { urlAssinar } from '@/lib/api';
+import { registrarCliquePlano, urlAssinar } from '@/lib/api';
+import { Botao, Container } from './ui';
 
 export function Hero() {
   return (
-    <section
-      id="inicio"
-      style={{
-        maxWidth: 'var(--largura-conteudo)',
-        margin: '0 auto',
-        padding: `var(--esp-24) var(--esp-6)`,
-        textAlign: 'center',
-      }}
-    >
-      <h1 style={{ fontSize: 'var(--texto-hero)' }}>Ovos caipiras, da fazenda direto pra sua casa</h1>
-      <p style={{ color: 'var(--cor-texto-suave)', marginTop: 'var(--esp-4)', fontSize: 'var(--texto-medio)' }}>
-        Máx. 7 dias entre a colheita e a entrega. Frete grátis na área atendida.
-      </p>
-      <a
-        href={urlAssinar('semanal')}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          textDecoration: 'none',
-          marginTop: 'var(--esp-8)',
-          background: 'var(--cor-ouro)',
-          color: '#fff',
-          borderRadius: 'var(--raio-controle)',
-          padding: `var(--esp-3) var(--esp-8)`,
-          minHeight: 'var(--altura-controle)',
-          fontSize: 'var(--texto-medio)',
-        }}
-      >
-        Assinar agora
-      </a>
+    <section id="inicio" className="bg-superficie">
+      <Container className="py-24 text-center">
+        <p className="mb-4 text-[length:var(--texto-pequeno)] font-semibold uppercase tracking-widest text-secundaria">
+          Ovos caipiras por assinatura
+        </p>
+        <h1>Ovos caipiras, da fazenda direto pra sua casa</h1>
+        <p className="mx-auto mt-4 max-w-2xl text-[length:var(--texto-medio)] text-suave">
+          Máx. 7 dias entre a colheita e a entrega. Frete grátis na área atendida.
+        </p>
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <Botao
+            href={urlAssinar('semanal')}
+            onClick={() => registrarCliquePlano('semanal')}
+            className="text-[length:var(--texto-medio)]"
+          >
+            Assinar agora
+          </Botao>
+          <Botao href="#planos" variante="contorno" className="text-[length:var(--texto-medio)]">
+            Ver planos
+          </Botao>
+        </div>
+      </Container>
     </section>
   );
 }

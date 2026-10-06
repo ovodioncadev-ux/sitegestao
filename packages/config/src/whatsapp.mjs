@@ -21,6 +21,18 @@ export function urlWhatsapp(mensagem) {
 
 export const WHATSAPP_URL = urlWhatsapp();
 
+/**
+ * Link de conversa com UMA PESSOA (cliente ou interessado), a partir do telefone
+ * nacional (DDD + número, 10 ou 11 dígitos). É o outro sentido do link acima: aqui
+ * o número é o da pessoa, não o da Ovo di Onça. Fica neste arquivo para que `wa.me`
+ * continue escrito num lugar só.
+ */
+export function urlWhatsappDe(telefoneNacional, mensagem) {
+  const digitos = String(telefoneNacional).replace(/\D/g, '');
+  const base = `https://wa.me/55${digitos}`;
+  return mensagem ? `${base}?text=${encodeURIComponent(mensagem)}` : base;
+}
+
 /** 55 + DDD(2) + número(8 ou 9) → "(DD) NNNN-NNNN" ou "(DD) NNNNN-NNNN". */
 export function formatarNacional(e164) {
   const d = String(e164).replace(/\D/g, '').replace(/^55/, '');

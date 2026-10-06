@@ -6,8 +6,10 @@ import { buscarCliente } from '@/lib/assinante';
 import { formatarReais, formatarTelefone, WHATSAPP_URL } from '@/lib/formatar';
 import { ehFrequencia, lerPlanosPublicos, type PlanoPublico } from '@/lib/planos';
 import { FormAcao } from '../_componentes/form-acao';
+import { CabecalhoFunil } from '../_componentes/funil';
 import { CampoCep } from '../_componentes/campo-cep';
 import { CampoMascara } from '../_componentes/campo-mascara';
+import { FormInteresse } from '../_componentes/form-interesse';
 import { confirmarAssinatura, criarMeuCadastro } from './acoes';
 
 // Depende da sessão: nunca cacheada nem compartilhada entre pessoas.
@@ -23,13 +25,15 @@ function ResumoDoPlano({ plano }: { plano: PlanoPublico }) {
       <dl className="lista-dados">
         <dt>Valor</dt>
         <dd>
-          {formatarReais(plano.precoCentavos)} por mês
-          {plano.descontoPrimeiroMesPct > 0 && ` (${formatarReais(primeiroMes)} no 1º mês)`}
+          {formatarReais(plano.precoEntregaCentavos)} por entrega
+          <br />
+          {plano.entregasPorMes} {plano.entregasPorMes === 1 ? 'entrega' : 'entregas'} por mês · {plano.frequencia === 'semanal' ? 'cerca de ' : ''}
+          {formatarReais(plano.precoCentavos)}/mês
+          {plano.descontoPrimeiroMesPct > 0 &&
+            ` (${plano.descontoPrimeiroMesPct}% de desconto no 1º mês: ${formatarReais(primeiroMes)})`}
         </dd>
         <dt>Entrega</dt>
-        <dd>
-          A cada {plano.intervaloDias} dias{plano.ancorarEmQuarta && ', sempre às quartas-feiras'}
-        </dd>
+        <dd>Sempre às quartas-feiras</dd>
         <dt>Frete</dt>
         <dd>{plano.freteCentavos === 0 ? 'Incluso' : formatarReais(plano.freteCentavos)}</dd>
         <dt>Frescor</dt>
@@ -47,19 +51,25 @@ export default async function Assinar({ searchParams }: { searchParams: Promise<
   // 1. Sem plano escolhido: vitrine simples.
   if (!plano) {
     return (
+      <>
+      <CabecalhoFunil passo={1} />
       <main className="pagina">
         <h1>Escolha seu plano</h1>
         {planos.length === 0 && <p className="suave">Nenhum plano disponível no momento.</p>}
         {planos.map((p) => (
           <section key={p.frequencia} className="cartao">
             <h2>{p.nome}</h2>
-            <p>{formatarReais(p.precoCentavos)} por mês</p>
+            <p>
+              {formatarReais(p.precoEntregaCentavos)} por entrega · {p.entregasPorMes}{' '}
+              {p.entregasPorMes === 1 ? 'entrega' : 'entregas'} por mês
+            </p>
             <Link className="botao" href={`/assinar?plano=${p.frequencia}`}>
               Escolher {p.nome}
             </Link>
           </section>
         ))}
       </main>
+      </>
     );
   }
 
@@ -69,6 +79,8 @@ export default async function Assinar({ searchParams }: { searchParams: Promise<
   // 2. Sem conta/sessão: mostra o plano e leva ao cadastro, voltando para cá.
   if (!usuario) {
     return (
+      <>
+      <CabecalhoFunil passo={2} />
       <main className="pagina">
         <h1>Assinar</h1>
         <ResumoDoPlano plano={plano} />
@@ -84,6 +96,7 @@ export default async function Assinar({ searchParams }: { searchParams: Promise<
           </p>
         </section>
       </main>
+      </>
     );
   }
 
@@ -98,10 +111,16 @@ export default async function Assinar({ searchParams }: { searchParams: Promise<
   }
 
   const dados = await comoUsuario(usuario.usuarioId, async (bd) => {
+    // D8: com a chave ligada, a assinatura nasce aguardando o 1º pagamento (sem entrega agendada).
+    const cfg = await bd.umaLinha<{ espera: boolean; dias: number }>(
+      'select exigir_pagamento_antes_da_1a_entrega as espera, dias_para_pagar_1a_fatura as dias from config_negocio where id = 1',
+    );
+    const espera = Boolean(cfg?.espera);
+    const dias = cfg?.dias ?? 7;
     const cliente = await buscarCliente(bd, usuario.usuarioId);
     if (!cliente) {
       const perfil = await bd.umaLinha<{ nome: string }>('select nome from perfis where id = $1', [usuario.usuarioId]);
-      return { cliente: null, nome: perfil?.nome ?? '', vigente: false, naArea: false };
+      return { cliente: null, nome: perfil?.nome ?? '', vigente: false, naArea: false, espera, dias };
     }
     const vigente = await bd.umaLinha<{ id: string }>(
       `select id from assinaturas where cliente_id = $1 and status in ('ativa', 'pausada') limit 1`,
@@ -110,7 +129,7 @@ export default async function Assinar({ searchParams }: { searchParams: Promise<
     const area = await bd.umaLinha<{ atendido: boolean }>('select cep_dentro_area_entrega($1) as atendido', [
       cliente.cep,
     ]);
-    return { cliente, nome: cliente.nome, vigente: Boolean(vigente), naArea: Boolean(area?.atendido) };
+    return { cliente, nome: cliente.nome, vigente: Boolean(vigente), naArea: Boolean(area?.atendido), espera, dias };
   });
 
   // 4. Já assina: nada a fazer aqui.
@@ -119,6 +138,8 @@ export default async function Assinar({ searchParams }: { searchParams: Promise<
   // 5. Falta o cadastro (endereço validado).
   if (!dados.cliente) {
     return (
+      <>
+      <CabecalhoFunil passo={3} />
       <main className="pagina">
         <h1>Seu endereço</h1>
         <ResumoDoPlano plano={plano} />
@@ -174,6 +195,7 @@ export default async function Assinar({ searchParams }: { searchParams: Promise<
           </FormAcao>
         </section>
       </main>
+      </>
     );
   }
 
@@ -182,6 +204,8 @@ export default async function Assinar({ searchParams }: { searchParams: Promise<
   // 6. Cadastro feito, mas o CEP está fora da área: sem assinatura.
   if (!dados.naArea) {
     return (
+      <>
+      <CabecalhoFunil passo={3} />
       <main className="pagina">
         <h1>Ainda não entregamos aí</h1>
         <section className="cartao">
@@ -198,12 +222,18 @@ export default async function Assinar({ searchParams }: { searchParams: Promise<
             </a>
           </p>
         </section>
+        <section className="cartao">
+          <FormInteresse cep={cliente.cep ?? ''} nome={cliente.nome} telefone={cliente.telefone ?? ''} />
+        </section>
       </main>
+      </>
     );
   }
 
   // 7. Confirmação.
   return (
+    <>
+    <CabecalhoFunil passo={4} />
     <main className="pagina">
       <h1>Confirmar assinatura</h1>
       <ResumoDoPlano plano={plano} />
@@ -229,15 +259,24 @@ export default async function Assinar({ searchParams }: { searchParams: Promise<
       </section>
 
       <section className="cartao">
-        <p className="suave">
-          Ao confirmar, sua assinatura é criada e a primeira entrega é agendada
-          {plano.ancorarEmQuarta && ' para a próxima quarta-feira disponível'}. O pagamento online ainda não está
-          disponível: a cobrança é confirmada pela Ovo di Onça (PIX com comprovante enviado pelo WhatsApp).
-        </p>
+        {dados.espera ? (
+          <p className="suave">
+            Ao confirmar, sua assinatura é criada e geramos a <strong>1ª fatura</strong> (com {plano.descontoPrimeiroMesPct}% de
+            desconto). A <strong>primeira entrega é agendada depois que o pagamento for confirmado</strong>, na próxima
+            quarta-feira disponível. Você tem {dados.dias} dias para pagar; passado o prazo, a assinatura é cancelada.
+          </p>
+        ) : (
+          <p className="suave">
+            Ao confirmar, sua assinatura é criada e a primeira entrega é agendada
+            {plano.ancorarEmQuarta && ' para a próxima quarta-feira disponível'}. O pagamento online ainda não está
+            disponível: a cobrança é confirmada pela Ovo di Onça (PIX com comprovante enviado pelo WhatsApp).
+          </p>
+        )}
         <FormAcao acao={confirmarAssinatura} rotulo="Confirmar assinatura">
           <input type="hidden" name="plano" value={plano.frequencia} />
         </FormAcao>
       </section>
     </main>
+    </>
   );
 }

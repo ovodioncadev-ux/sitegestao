@@ -8,6 +8,7 @@ import {
   alterarPlanoAssinatura,
   cancelarAssinatura,
   definirFormaCobranca,
+  desfazerCancelamentoAgendado,
   gerarProximaCobranca,
   pausarAssinatura,
   reativarAssinatura,
@@ -48,6 +49,14 @@ type Assinatura = {
   proxima_cobranca: string | null;
   pausada_em: string | null;
   data_retorno_prevista: string | null;
+  aguardando_pagamento_desde: string | null;
+  bloqueada_desde: string | null;
+  cancelamento_agendado_para: string | null;
+  plano_proximo_nome: string | null;
+  plano_proximo_a_partir_de: string | null;
+  saldo_credito: number;
+  dias_pausa: number | null;
+  dias_max_pausa: number;
 };
 
 type ReposicaoLinha = {
@@ -110,11 +119,19 @@ export default async function DetalheAssinatura({ params }: { params: Promise<{ 
       `select a.id, a.cliente_id, c.nome as cliente_nome, a.plano_id, p.nome as plano_nome,
               a.status::text, a.data_inicio::text, a.data_fim::text, a.proxima_entrega::text,
               a.data_cancelamento::text, a.motivo_cancelamento, a.forma_cobranca::text,
-              a.proxima_cobranca::text, a.pausada_em::text, a.data_retorno_prevista::text
+              a.proxima_cobranca::text, a.pausada_em::text, a.data_retorno_prevista::text,
+              a.aguardando_pagamento_desde::text, a.bloqueada_desde::text,
+              a.cancelamento_agendado_para::text, pp.nome as plano_proximo_nome, a.plano_proximo_a_partir_de::text,
+              (select coalesce(sum(cr.valor_centavos), 0)::int from creditos_assinatura cr where cr.assinatura_id = a.id) as saldo_credito,
+              case when a.status = 'pausada' then (hoje_ref.d - a.pausada_em)::int end as dias_pausa,
+              cfg.dias_max_pausa
          from assinaturas a
          join clientes c on c.id = a.cliente_id
          join planos p on p.id = a.plano_id
-        where a.id = $1`,
+         left join planos pp on pp.id = a.plano_proximo_id
+         cross join config_negocio cfg
+         cross join (select (now() at time zone 'America/Sao_Paulo')::date as d) hoje_ref
+        where a.id = $1 and cfg.id = 1`,
       [id],
     );
     const planos = await bd.consultar<{ id: number; nome: string }>(
@@ -146,13 +163,14 @@ export default async function DetalheAssinatura({ params }: { params: Promise<{ 
       [id],
     );
     const pedidos = await bd.consultar<Solicitacao & { status: string; resposta: string | null; resolvida_em: string | null }>(
-      `select s.id, s.tipo::text, s.motivo, to_char(s.criado_em at time zone 'America/Sao_Paulo', 'DD/MM/YYYY HH24:MI') as criado_em,
+      `select s.id, s.tipo::text, s.motivo, s.preferencia, s.duzias_pedidas, pd.nome as plano_destino_nome, to_char(s.criado_em at time zone 'America/Sao_Paulo', 'DD/MM/YYYY HH24:MI') as criado_em,
               c.nome as cliente_nome, s.assinatura_id, a.status::text as assinatura_status,
               s.status::text, s.resposta,
               to_char(s.resolvida_em at time zone 'America/Sao_Paulo', 'DD/MM/YYYY HH24:MI') as resolvida_em
          from solicitacoes_assinatura s
          join clientes c on c.id = s.cliente_id
          join assinaturas a on a.id = s.assinatura_id
+         left join planos pd on pd.id = s.plano_destino_id
         where s.assinatura_id = $1
         order by s.criado_em desc`,
       [id],
@@ -164,7 +182,10 @@ export default async function DetalheAssinatura({ params }: { params: Promise<{ 
 
   const vigente = assinatura.status === 'ativa' || assinatura.status === 'pausada';
   const hoje = hojeEmSaoPaulo();
-  const semProxima = assinatura.status === 'ativa' && !assinatura.proxima_entrega;
+  const aguardando = Boolean(assinatura.aguardando_pagamento_desde) && assinatura.status === 'ativa';
+  // "Sem próxima entrega" é alerta; aguardar o 1º pagamento é esperado (D8) e tem aviso próprio.
+  const bloqueada = Boolean(assinatura.bloqueada_desde);
+  const semProxima = assinatura.status === 'ativa' && !assinatura.proxima_entrega && !aguardando && !bloqueada;
 
   // Valor sugerido para a próxima fatura (regra única, calculada pelo banco).
   const valorSugerido = assinatura.status === 'ativa' ? await valorSugeridoPromessa : null;
@@ -181,7 +202,7 @@ export default async function DetalheAssinatura({ params }: { params: Promise<{ 
         <tbody>
           <tr>
             <th>Situação</th>
-            <td>{rotulo(STATUS_ASSINATURA, assinatura.status)}</td>
+            <td>{bloqueada ? 'Ativa, bloqueada por inadimplência' : rotulo(STATUS_ASSINATURA, assinatura.status)}</td>
           </tr>
           <tr>
             <th>Plano</th>
@@ -193,7 +214,13 @@ export default async function DetalheAssinatura({ params }: { params: Promise<{ 
           </tr>
           <tr>
             <th>Próxima entrega</th>
-            <td>{formatarData(assinatura.proxima_entrega)}</td>
+            <td>
+              {bloqueada
+                ? `Paradas por inadimplência desde ${formatarData(assinatura.bloqueada_desde)}: voltam quando as faturas em atraso forem pagas`
+                : aguardando
+                ? `Aguardando o 1º pagamento (desde ${formatarData(assinatura.aguardando_pagamento_desde)}): registre o pagamento da 1ª fatura para agendar a entrega`
+                : formatarData(assinatura.proxima_entrega)}
+            </td>
           </tr>
           <tr>
             <th>Forma de cobrança</th>
@@ -203,6 +230,29 @@ export default async function DetalheAssinatura({ params }: { params: Promise<{ 
             <th>Próxima cobrança</th>
             <td>{assinatura.status === 'ativa' ? formatarData(assinatura.proxima_cobranca) : '— (parada)'}</td>
           </tr>
+          {assinatura.cancelamento_agendado_para && (
+            <tr>
+              <th>Cancelamento</th>
+              <td>
+                <strong>Agendado:</strong> vale até {formatarData(assinatura.cancelamento_agendado_para)} (fim do mês pago).
+                Entregas continuam até lá; sem cobrança nova.
+              </td>
+            </tr>
+          )}
+          {assinatura.plano_proximo_nome && (
+            <tr>
+              <th>Troca de plano</th>
+              <td>
+                Passa para <strong>{assinatura.plano_proximo_nome}</strong> em {formatarData(assinatura.plano_proximo_a_partir_de)}
+              </td>
+            </tr>
+          )}
+          {assinatura.saldo_credito !== 0 && (
+            <tr>
+              <th>Crédito</th>
+              <td>{formatarReais(assinatura.saldo_credito)} (abate a próxima fatura sem desconto percentual)</td>
+            </tr>
+          )}
           {assinatura.status === 'pausada' && (
             <tr>
               <th>Pausa</th>
@@ -226,6 +276,13 @@ export default async function DetalheAssinatura({ params }: { params: Promise<{ 
         </tbody>
       </table>
 
+      {assinatura.status === 'pausada' && assinatura.dias_pausa !== null && assinatura.dias_pausa > assinatura.dias_max_pausa && (
+        <p className="msg-erro" role="alert">
+          Esta pausa já dura {assinatura.dias_pausa} dias (o limite é {assinatura.dias_max_pausa}). Decida: reative a
+          assinatura ou cancele.
+        </p>
+      )}
+
       <h2>Situação da assinatura</h2>
       {assinatura.status === 'ativa' && (
         <>
@@ -237,10 +294,16 @@ export default async function DetalheAssinatura({ params }: { params: Promise<{ 
               <input id="motivo-pausa" name="motivo" maxLength={500} />
               <label htmlFor="retorno-previsto">Retorno previsto (opcional)</label>
               <input id="retorno-previsto" name="retorno_previsto" type="date" min={hoje} />
+              <label htmlFor="destino-pausa">Entregas já pagas e não feitas</label>
+              <select id="destino-pausa" name="destino" defaultValue="credito">
+                <option value="credito">Viram crédito na próxima fatura</option>
+                <option value="pentes">O cliente recebe os pentes depois</option>
+              </select>
             </FormAcao>
             <p className="suave">
               Entregas e faturas pendentes serão canceladas, a cobrança para e o cliente ficará “suspenso”. Com
-              retorno previsto, a rotina diária reativa a assinatura nessa data.
+              retorno previsto (no máximo {assinatura.dias_max_pausa} dias), a rotina diária reativa a assinatura nessa
+              data. A fatura em aberto do mês fica só com as entregas já feitas.
             </p>
           </details>
           <details>
@@ -249,8 +312,19 @@ export default async function DetalheAssinatura({ params }: { params: Promise<{ 
               <input type="hidden" name="assinatura_id" value={assinatura.id} />
               <label htmlFor="motivo-cancelamento">Motivo (opcional)</label>
               <input id="motivo-cancelamento" name="motivo" maxLength={500} />
+              <label>
+                <input type="checkbox" name="imediato" /> Cancelar agora (sem esperar o fim do mês pago)
+              </label>
             </FormAcao>
-            <p className="suave">O histórico é mantido. O cliente ficará “cancelado”.</p>
+            <p className="suave">
+              Por padrão, o cancelamento vale no fim do mês já pago: as entregas continuam até lá e nada novo é
+              cobrado. O histórico é mantido.
+            </p>
+            {assinatura.cancelamento_agendado_para && (
+              <FormAcao acao={desfazerCancelamentoAgendado} rotulo="Desfazer cancelamento agendado">
+                <input type="hidden" name="assinatura_id" value={assinatura.id} />
+              </FormAcao>
+            )}
           </details>
         </>
       )}

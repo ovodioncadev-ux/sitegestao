@@ -20,6 +20,8 @@ export function FormAcao({
   children,
   limpar = false,
   linha = false,
+  perigo = false,
+  confirmar,
 }: {
   acao: AcaoDeFormulario;
   rotulo: string;
@@ -28,6 +30,10 @@ export function FormAcao({
   limpar?: boolean;
   /** Campos e botão lado a lado (botões de ação dentro de tabela). */
   linha?: boolean;
+  /** Ação destrutiva: botão em vermelho. */
+  perigo?: boolean;
+  /** Pergunta de confirmação antes de enviar (use em ações que não têm volta). */
+  confirmar?: string;
 }) {
   const [estado, despachar, pendente] = useActionState(acao, null);
   const formulario = useRef<HTMLFormElement>(null);
@@ -38,6 +44,7 @@ export function FormAcao({
 
   function aoEnviar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
+    if (confirmar && !window.confirm(confirmar)) return;
     const dados = new FormData(evento.currentTarget);
     startTransition(() => despachar(dados));
   }
@@ -45,7 +52,7 @@ export function FormAcao({
   return (
     <form ref={formulario} onSubmit={aoEnviar} className={linha ? 'form-linha' : undefined}>
       {children}
-      <button type="submit" disabled={pendente}>
+      <button type="submit" disabled={pendente} className={perigo ? 'perigo' : undefined}>
         {pendente ? 'Enviando…' : rotulo}
       </button>
       {estado && (

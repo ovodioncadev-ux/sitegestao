@@ -77,16 +77,17 @@ export async function pausarAssinatura(_estado: Estado, dados: FormData): Promis
     const assinaturaId = uuid(campo(dados, 'assinatura_id'), 'Assinatura');
     const motivo = textoOpcional(campo(dados, 'motivo'), 'Motivo', 500);
     const retorno = dataOpcional(campo(dados, 'retorno_previsto'), 'Retorno previsto');
+    const destino = escolha(campo(dados, 'destino') || 'credito', ['credito', 'pentes'] as const, 'Compensação');
 
     await comoDono((bd) =>
-      bd.consultar('select pausar_assinatura($1::uuid, $2::text, $3::date)', [assinaturaId, motivo, retorno]),
+      bd.consultar('select pausar_assinatura($1::uuid, $2::text, $3::date, $4::text)', [assinaturaId, motivo, retorno, destino]),
     );
 
     const l = await ligacoes(assinaturaId);
     if (l) atualizarTudo(l.cliente_id, assinaturaId);
     return retorno
       ? `Assinatura pausada até ${formatarData(retorno)}. A rotina diária reativa nessa data.`
-      : 'Assinatura pausada sem data de retorno. Entregas e cobranças pendentes foram canceladas.';
+      : 'Assinatura pausada sem data de retorno. Entregas e cobranças pendentes foram canceladas. Avise o cliente: passados 60 dias, o painel pede a sua decisão.';
   });
 }
 
@@ -95,13 +96,32 @@ export async function cancelarAssinatura(_estado: Estado, dados: FormData): Prom
     const assinaturaId = uuid(campo(dados, 'assinatura_id'), 'Assinatura');
     const motivo = textoOpcional(campo(dados, 'motivo'), 'Motivo', 500);
 
-    await comoDono((bd) =>
-      bd.consultar('select cancelar_assinatura($1::uuid, $2::text)', [assinaturaId, motivo]),
-    );
+    const imediato = dados.get('imediato') === 'on';
+
+    const agendado = await comoDono(async (bd) => {
+      await bd.consultar('select cancelar_assinatura($1::uuid, $2::text, $3::boolean)', [assinaturaId, motivo, imediato]);
+      return bd.umaLinha<{ agendado: string | null }>(
+        'select cancelamento_agendado_para::text as agendado from assinaturas where id = $1',
+        [assinaturaId],
+      );
+    });
 
     const l = await ligacoes(assinaturaId);
     if (l) atualizarTudo(l.cliente_id, assinaturaId);
+    if (agendado?.agendado) {
+      return `Cancelamento agendado: vale até ${formatarData(agendado.agendado)} (fim do mês pago). As entregas continuam até lá e nenhuma cobrança nova será gerada.`;
+    }
     return 'Assinatura cancelada. O histórico foi mantido; entregas e faturas pendentes foram canceladas.';
+  });
+}
+
+export async function desfazerCancelamentoAgendado(_estado: Estado, dados: FormData): Promise<Estado> {
+  return rodar(async () => {
+    const assinaturaId = uuid(campo(dados, 'assinatura_id'), 'Assinatura');
+    await comoDono((bd) => bd.consultar('select desfazer_cancelamento_agendado($1::uuid)', [assinaturaId]));
+    const l = await ligacoes(assinaturaId);
+    if (l) atualizarTudo(l.cliente_id, assinaturaId);
+    return 'Cancelamento agendado desfeito. A cobrança volta a ser gerada pela rotina diária.';
   });
 }
 

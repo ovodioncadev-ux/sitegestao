@@ -16,9 +16,9 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/:path*',
-        // CSP em report-only por enquanto: ela avisa no console o que
-        // bloquearia, sem quebrar a página. Quando o relatório vier limpo
-        // por alguns dias, passe { modoRelatorio: false }.
+        // O modo da CSP vem de CSP_MODO (relatorio | impor), lido NO BUILD.
+        // Padrão: relatório (só avisa no console). Para impor, defina
+        // CSP_MODO=impor antes de `pnpm build` e rode scripts/e2e/csp.mjs.
         headers: cabecalhosDeSeguranca(),
       },
     ];

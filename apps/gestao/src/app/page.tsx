@@ -7,6 +7,13 @@ import { FormAcao } from './_componentes/form-acao';
 import { rodarRotinaDiaria } from './acoes-painel';
 import { formatarReais, hojeEmSaoPaulo } from '@/lib/formatar';
 
+const ETAPAS_DO_FUNIL = [
+  ['plano_clicado', 'Clicaram em um plano no site'],
+  ['conta_criada', 'Criaram a conta'],
+  ['endereco_salvo', 'Informaram o endereço'],
+  ['assinatura_confirmada', 'Confirmaram a assinatura'],
+] as const;
+
 type Plano = {
   nome: string;
   frete_centavos: number;
@@ -24,7 +31,7 @@ export default async function PainelInicial() {
     return <SemPermissao mensagem="Você não tem permissão para realizar esta ação." />;
   }
 
-  const { planos, totalClientes, hoje, pendencias } = await comoUsuario(usuario.usuarioId, async (bd) => {
+  const { planos, totalClientes, hoje, pendencias, funil, interessados, espera, pagamentosComProblema } = await comoUsuario(usuario.usuarioId, async (bd) => {
     const planos = await bd.consultar<Plano>(
       `select nome, frete_centavos, desconto_primeiro_mes_pct, freshness_max_dias, intervalo_dias
          from planos where ativo order by intervalo_dias`,
@@ -45,7 +52,33 @@ export default async function PainelInicial() {
               (select count(*) from faturas where status in ('pendente', 'atrasada') and vencimento < $1::date) as devendo`,
       [hojeEmSaoPaulo()],
     );
+    const i = await bd.umaLinha<{ aguardando: string; prontos: string }>(
+      `select count(*) filter (where status = 'novo') as aguardando,
+              count(*) filter (where status = 'novo' and area_atendida_em is not null) as prontos
+         from interessados`,
+    );
+    const e = await bd.umaLinha<{ aguardando: string; problemas: string; bloqueadas: string; pausas_longas: string }>(
+      `select (select count(*) from assinaturas where status = 'ativa' and aguardando_pagamento_desde is not null) as aguardando,
+              (select count(*) from pagamentos_online where status <> 'confirmado') as problemas,
+              (select count(*) from assinaturas where bloqueada_desde is not null) as bloqueadas,
+              (select count(*) from pausas_assinatura pa cross join config_negocio cn
+                where pa.status = 'ativa' and cn.id = 1
+                  and pa.inicio + cn.dias_max_pausa < (now() at time zone 'America/Sao_Paulo')::date) as pausas_longas`,
+    );
+    const pagamentosComProblema = await bd.consultar<{ id: string; fatura_id: string; status: string; valor_pago_centavos: number; criado_em: string; fatura_centavos: number }>(
+      `select p.id, p.fatura_id, p.status, p.valor_pago_centavos, p.criado_em::text, f.valor_centavos as fatura_centavos
+         from pagamentos_online p join faturas f on f.id = p.fatura_id
+        where p.status <> 'confirmado' order by p.criado_em desc limit 20`,
+    );
+    const funilLinhas = await bd.consultar<{ etapa: string; total: string }>(
+      `select etapa, count(*) as total from eventos_funil
+        where criado_em > now() - interval '30 days' group by etapa`,
+    );
     return {
+      espera: { aguardando: Number(e?.aguardando ?? 0), problemas: Number(e?.problemas ?? 0), bloqueadas: Number(e?.bloqueadas ?? 0), pausasLongas: Number(e?.pausas_longas ?? 0) },
+      pagamentosComProblema,
+      interessados: { aguardando: Number(i?.aguardando ?? 0), prontos: Number(i?.prontos ?? 0) },
+      funil: Object.fromEntries(funilLinhas.map((l) => [l.etapa, Number(l.total)])) as Record<string, number>,
       pendencias: {
         pedidos: Number(p?.pedidos ?? 0),
         reposicoes: Number(p?.reposicoes ?? 0),
@@ -83,11 +116,67 @@ export default async function PainelInicial() {
           <Link href="/assinaturas">{pendencias.pedidos} pedido(s) de assinante</Link> aguardando resposta
         </li>
         <li>{pendencias.reposicoes} reposição(ões) de defeito a entregar</li>
+        <li>
+          <Link href="/interessados">{interessados.aguardando} interessado(s) fora da área</Link> aguardando aviso
+          {interessados.prontos > 0 && <> ({interessados.prontos} já com área atendida)</>}
+        </li>
+        {espera.aguardando > 0 && <li>{espera.aguardando} assinatura(s) aguardando o 1º pagamento</li>}
+        {espera.bloqueadas > 0 && (
+          <li>
+            <Link href="/assinaturas">{espera.bloqueadas} assinatura(s) bloqueada(s) por inadimplência</Link> (entregas paradas até o pagamento)
+          </li>
+        )}
+        {espera.pausasLongas > 0 && (
+          <li>
+            <Link href="/assinaturas?status=pausada">{espera.pausasLongas} pausa(s) além do limite de dias</Link>: reative
+            ou cancele
+          </li>
+        )}
+        {espera.problemas > 0 && (
+          <li>
+            <strong>{espera.problemas} pagamento(s) online com problema</strong> (valor menor que o da fatura, ou pago a
+            mais): veja a lista abaixo
+          </li>
+        )}
         <li>{pendencias.cobrar} assinatura(s) com cobrança do período a gerar</li>
         <li>
           <Link href="/faturas">{pendencias.devendo} fatura(s) vencida(s)</Link> sem pagamento
         </li>
       </ul>
+
+      {pagamentosComProblema.length > 0 && (
+        <>
+          <h2>Pagamentos online com problema</h2>
+          <p className="suave">
+            “Divergente”: o cliente pagou menos que a fatura e nada foi baixado (combine o restante ou devolva).
+            “Sem efeito”: chegou pagamento para fatura que já estava paga ou cancelada (avalie o estorno).
+          </p>
+          <div className="tabela-rolavel">
+            <table>
+              <thead>
+                <tr>
+                  <th>Quando</th>
+                  <th>Situação</th>
+                  <th>Pago</th>
+                  <th>Fatura</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pagamentosComProblema.map((p) => (
+                  <tr key={p.id}>
+                    <td>{p.criado_em.slice(0, 16)}</td>
+                    <td>{p.status === 'divergente' ? 'Divergente' : 'Sem efeito'}</td>
+                    <td>{formatarReais(p.valor_pago_centavos)}</td>
+                    <td>
+                      <Link href={`/faturas?visao=todas`}>{formatarReais(p.fatura_centavos)}</Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
 
       <h2>Rotina diária</h2>
       <p className="suave">
@@ -108,6 +197,30 @@ export default async function PainelInicial() {
           </>
         )}
       </p>
+
+      <h2>Funil de assinatura (30 dias)</h2>
+      <p className="suave">
+        Contagem por etapa, sem identificar pessoas: não dá para saber se quem criou conta é a mesma pessoa que clicou
+        no plano.
+      </p>
+      <div className="tabela-rolavel">
+        <table>
+          <thead>
+            <tr>
+              <th>Etapa</th>
+              <th>Pessoas</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ETAPAS_DO_FUNIL.map(([etapa, rotulo]) => (
+              <tr key={etapa}>
+                <td>{rotulo}</td>
+                <td>{funil[etapa] ?? 0}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <h2>Planos</h2>
       <div className="tabela-rolavel">

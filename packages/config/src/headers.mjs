@@ -5,45 +5,54 @@
  * de qualquer bundler entrar em ação, então importar TypeScript de outro
  * pacote aqui quebra. JavaScript puro com JSDoc resolve.
  *
- * A CSP começa em report-only, como manda o item 12 da seção 5 do prompt:
- * ela avisa no console o que bloquearia, sem quebrar a página. Quando o
- * relatório vier limpo por alguns dias, troque para modoRelatorio: false.
+ * A CSP começa em report-only: ela avisa no console o que bloquearia, sem
+ * quebrar a página. O modo vem de CSP_MODO (relatorio | impor); sem a variável,
+ * continua em relatório — nada muda sozinho. Para IMPOR, defina CSP_MODO=impor
+ * no ambiente (scripts/e2e/csp.mjs prova que as telas principais não violam a política).
  */
 
 /**
  * @typedef {Object} Opcoes
- * @property {boolean} [modoRelatorio]  CSP em Content-Security-Policy-Report-Only. Padrão: true.
+ * @property {boolean} [modoRelatorio]  CSP em Content-Security-Policy-Report-Only. Padrão: true, salvo CSP_MODO=impor.
  */
 
 // O banco (Neon) é falado só pelo servidor — nenhuma origem externa de dado
 // precisa ser liberada para o navegador aqui.
-const DIRETIVAS_CSP = [
+/**
+ * `upgrade-insecure-requests` só vale quando a política é IMPOSTA: no
+ * desenvolvimento (http://localhost) ele reescreveria as chamadas para https e
+ * quebraria tudo, e em relatório ele nem é aplicado.
+ */
+function diretivasCsp(imposta) {
+  return [
   "default-src 'self'",
   // 'unsafe-inline' e 'unsafe-eval' são necessários para o runtime do Next
   // enquanto não houver nonce por requisição. Reavaliar ao sair do report-only.
   "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "font-src 'self' https://fonts.gstatic.com",
+  // As fontes são servidas pelo próprio app (next/font): nenhum domínio externo.
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self'",
   "img-src 'self' data: blob:",
   "connect-src 'self'",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
   "object-src 'none'",
-  "upgrade-insecure-requests",
-].join('; ');
+  ...(imposta ? ["upgrade-insecure-requests"] : []),
+  ].join('; ');
+}
 
 /**
  * @param {Opcoes} [opcoes]
  * @returns {{ key: string, value: string }[]}
  */
 export function cabecalhosDeSeguranca(opcoes = {}) {
-  const modoRelatorio = opcoes.modoRelatorio ?? true;
+  const modoRelatorio = opcoes.modoRelatorio ?? process.env.CSP_MODO !== 'impor';
 
   return [
     {
       key: modoRelatorio ? 'Content-Security-Policy-Report-Only' : 'Content-Security-Policy',
-      value: DIRETIVAS_CSP,
+      value: diretivasCsp(!modoRelatorio),
     },
     {
       // HTTPS forçado por dois anos, incluindo subdomínios.

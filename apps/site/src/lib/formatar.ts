@@ -11,6 +11,13 @@ export function textoFrescor(plan: Plan): string {
   return `Máx. ${plan.freshnessMaxDays} dias entre a colheita e a entrega`;
 }
 
+/** D10: no semanal o mês tem 4 ou 5 quartas, então o total é estimativa; quinzenal e mensal têm calendário fixo. */
+export function textoMensal(plan: Plan): string {
+  const entregas = `${plan.deliveriesPerMonth} ${plan.deliveriesPerMonth === 1 ? 'entrega' : 'entregas'} por mês`;
+  const aproximado = plan.id === 'semanal' ? 'cerca de ' : '';
+  return `${entregas} · ${aproximado}${formatarReais(plan.priceCents)}/mês`;
+}
+
 export function textoFrete(plan: Plan): string {
   return plan.freightCents === 0
     ? 'Frete grátis'
@@ -51,4 +58,9 @@ export function mascararTelefone(valor: string): string {
 export function telefoneValido(valor: string): boolean {
   const digitos = somenteDigitos(valor);
   return digitos.length === 10 || digitos.length === 11;
+}
+
+export function mascararCep(valor: string): string {
+  const digitos = somenteDigitos(valor).slice(0, 8);
+  return digitos.length > 5 ? `${digitos.slice(0, 5)}-${digitos.slice(5)}` : digitos;
 }

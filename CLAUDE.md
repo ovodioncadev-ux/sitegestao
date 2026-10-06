@@ -10,16 +10,23 @@
 
 For detailed architecture, routing, data flow and conventions, see [docs/CODEBASE_MAP.md](docs/CODEBASE_MAP.md).
 
-## Current State (29/09/2026)
+## Current State (05/10/2026)
 
-- **Database:** 22 migrations (Fases 0–9 + Etapas 1–2; a 421 aplicada também no principal em 30/09/2026). Testes SQL: `pnpm teste:banco` (fase1..10) + `pnpm seguranca`. Os testes SQL exigem `DATABASE_TEST_URL` (branch de teste do Neon; sem fallback para o principal). `pnpm db:migrar:teste` migra só o teste. Ver README, "Banco de testes".
-- **Auditoria de estabilidade (30/09/2026):** rotina diária serializada por advisory lock e resistente a falha isolada; defeito duplicado recusado; `dentro_area_entrega` recalculado por gatilho ao mexer nas faixas; pools do `pg` com ouvinte de erro (o Neon derruba conexões ociosas); `/api/plans` e `/api/neighborhoods` com cache de 30 s. Dados `[TESTE]` ainda no banco: `pnpm db:limpar-teste` remove (não toca na auditoria).
-- **Fase 9:** cobrança do período (`gerar_cobranca`, forma pix|cartao), pausa com retorno previsto, reposição de defeitos (`reposicoes`), resposta aos pedidos do assinante, horário de entrega, `/configuracoes`, rotina diária (`processar_rotina_diaria`; botão no painel e `POST /api/rotina` com `CRON_SECRET`).
-- **Fluxo de assinatura pelo site:** site (`Assinar`) → `assinante:/assinar?plano=<semanal|quinzenal|mensal>` → conta (`/cadastro`) → endereço (`criar_meu_cadastro`) → confirmação (`assinar_plano`). Nenhum dado pessoal vai por URL; o site não coleta nada.
-- **Site** lê planos/bairros/área por rewrites para o assinante (sem CORS). **Preço** vem de `planos_publicos()` (pente × entregas_por_mes), sem valor no código. **Bairros** = faixas de CEP ativas (hoje 0 → lista vazia, e todo CEP é "fora da área").
-- **Vínculo conta↔cliente por e-mail só com e-mail confirmado** (migration 13). Sem serviço de e-mail ninguém tem e-mail confirmado: o dono vincula na ficha do cliente.
-- **Não existe:** integração de pagamento (InfinitePay/Asaas), serviço de e-mail configurado, faixas de CEP. Ver DECISOES.md ("Fase 8").
-- **Testes unitários:** `pnpm test` (assinante: `caminhoInterno`, `ehFrequencia`).
+- **Database:** 32 migrations (Fases 0–10, Etapas 1–2 e Blocos 3–11; as migrations 424–431 só foram aplicadas no banco de teste local, **não no Neon**). Testes SQL: `pnpm teste:banco` (~280 verificações + concorrência do limite de login) + `pnpm seguranca`. Exigem `DATABASE_TEST_URL` (branch de teste; sem fallback para o principal). `pnpm db:migrar:teste` migra só o teste. Ver README, "Banco de testes".
+- **CI:** (4 jobs: segurança, qualidade, banco, e2e). `.github/workflows/ci.yml`: roda em push na `main` e em pull request. **Nunca rodou no GitHub ainda** (foi simulado passo a passo localmente). Passo a passo de lançamento: [docs/LANCAMENTO.md](docs/LANCAMENTO.md).
+- **Site (Blocos 1–2):** `apps/site` com componentes base (`components/ui`), fontes via `next/font`, seções do Stitch. Conteúdo público (planos por entrega, frescor, frete, desconto, corte, FAQ) vem de `GET /api/site` e `/api/plans` (Bloco 3). Contraste AA nos tokens (`--cor-sobre-ouro`, `--cor-ouro-escuro`, `--cor-whatsapp`).
+- **Fluxo de assinatura (Bloco 4):** site → `assinante:/assinar` com indicador de etapas → conta → endereço → confirmação. Funil anônimo (`eventos_funil`, `POST /api/evento`); `scripts/e2e/assinatura.mjs`.
+- **Fora da área (Bloco 5):** "Avise-me" (`POST /api/interesse`, `registrar_interesse`), consentimento versionado (`@ovo/config/privacidade`), `/interessados` no painel. Sem auditoria nesta tabela, de propósito (LGPD).
+- **D8 (Bloco 6):** chave `exigir_pagamento_antes_da_1a_entrega` em `/configuracoes` (**desligada** por padrão): ligada, a assinatura nasce aguardando o 1º pagamento (`aguardando_pagamento_desde`), com a 1ª fatura e sem entrega; pagar libera a entrega (corte D9 no instante da confirmação); quem não paga em N dias é cancelado pela rotina. **Pagamento online:** papel `app_pagamentos` + `confirmar_pagamento_online`, webhook `POST /api/pagamento/webhook` que **nunca confia no corpo** (consulta o provedor). Provedores: `nenhum` (padrão) | `simulado` (dev) | `infinitepay` (**contrato A CONFIRMAR**, só liga com `INFINITEPAY_CONTRATO_CONFIRMADO=sim`).
+- **Entrada no ar (Bloco 8):** limite de login no Postgres (`consumir_rate_limit` + `customStorage` do Better Auth), CSP com `CSP_MODO=relatorio|impor` (lido no build), `GET /api/saude`, `scripts/smoke.mjs`, `scripts/rodar-rotina.sh`, `scripts/e2e/{assinatura,pagamento,csp}.mjs`.
+- **SEO e desempenho (Bloco 7):** a home do site é renderizada no servidor (`force-dynamic`; dados de `/api/plans`, `/api/site`, `/api/neighborhoods` com cache de 30 s e prazo de 4 s, caindo para a busca no navegador se falhar), então planos/FAQ/bairros estão no HTML. Metadata (canonical, Open Graph, `metadataBase` de `NEXT_PUBLIC_URL_SITE`), JSON-LD escapado (`lib/seo.ts`), `sitemap.xml`, `robots.txt` (assinante e gestão: `Disallow: /`), `icon.svg`, 404 em pt-BR, `/privacidade` e `/termos` (**rascunhos, precisam de revisão jurídica e do CNPJ/razão social**). Orçamento: `scripts/e2e/desempenho.mjs` (LCP ≤ 2,5 s, CLS ≤ 0,1, JS ≤ 150 KB, ≤ 25 requisições); `pnpm test` agora inclui o site.
+- **Ciclo e inadimplência (Bloco 9):** `gerar_cobranca` cobre o mês do calendário (valor = entregas do calendário × valor da entrega, snapshot `calendario-v1`); `fatura_atrasada_em`, `bloquear_inadimplentes` e `reavaliar_bloqueio` (gatilho em `faturas`); `assinaturas.bloqueada_desde`. Constantes em `config_negocio` (`dias_tolerancia_atraso`=5, `dias_bloqueio_apos_tolerancia`=20, `dias_antecedencia_fatura`=7). Detalhes e interpretações a confirmar em `DECISOES.md`.
+- **Pausa, troca e cancelamento (Bloco 10):** `cancelar_assinatura` agenda para o fim do mês pago (`cancelamento_agendado_para`; `cancelar_assinatura_agora` é a interna); `pausar_assinatura(…, p_destino)` calcula crédito (`creditos_assinatura`, livro-razão) ou pentes a repor; `alterar_plano_assinatura` (aumento na hora com fatura de diferença; redução agendada em `plano_proximo_id`); a rotina executa `executar_cancelamentos_agendados` e `aplicar_trocas_agendadas`. Pedidos do assinante ganharam `troca_plano` e a preferência da pausa. `scripts/e2e/ciclo.mjs`.
+- **Dúzia e indicação (Bloco 11):** pedido `duzia` em `solicitacoes_assinatura` + `aplicar_duzias` (só entregas depois do corte); `bonus_indicacao` + gatilho `faturas_conceder_bonus_indicacao`; `calcular_detalhe_fatura(…, p_mes)` aplica o bônus do indicador (origem `indicacao`, nunca soma com o 1º mês).
+- **Auditoria de estabilidade (30/09/2026):** rotina diária serializada por advisory lock e resistente a falha isolada; defeito duplicado recusado; `dentro_area_entrega` recalculado por gatilho ao mexer nas faixas; pools do `pg` com ouvinte de erro; `/api/plans` e `/api/neighborhoods` com cache de 30 s.
+- **Regras de cobrança D1–D15:** decididas em `DECISOES.md`; **implementadas todas (D1–D15)**: Bloco 9 (fatura do mês, vence dia 3, atrasada dia 8, bloqueio dia 28), Bloco 10 (pausa com crédito/pentes, troca de plano, cancelamento no fim do mês pago), Bloco 11 (dúzia pedida pelo assinante, bônus do indicador).
+- **Não existe:** serviço de e-mail configurado, faixas de CEP cadastradas (sem elas ninguém assina), fotos/depoimentos reais, ferramenta de monitoramento de erros.
+- **Testes unitários:** `pnpm test` (assinante: segurança, whatsapp, cache, funil, interesse, pagamento, limite; gestão: csv).
 
 ## Key Decisions
 
@@ -27,7 +34,7 @@ For detailed architecture, routing, data flow and conventions, see [docs/CODEBAS
   Veja [docs/SEGURANCA.md](docs/SEGURANCA.md) para threat model, mitigações, rate limit e runbook de incident.
 - **Data:** nenhuma política de `insert`, `update` ou `delete` a `app_anon` ou `app_usuario`; toda escrita passa por função SQL com lista fechada.
 - **Audit:** auditoria imutável, gatilho `auditar()` em 8 tabelas, inclui antes/depois e quem agiu.
-- **Preço:** hardcoded em SQL (semanal 16400¢, quinzenal 8200¢, mensal 4100¢); cliente não envia preço.
+- **Preço:** vem do banco (`config_negocio.preco_pente_centavos` × entregas por mês, via `planos_publicos()`); o cliente nunca envia preço.
 - **Datas:** sem `Date` do JS; tudo via `::text` ou `::timestamp` com fuso São Paulo no SQL.
 - **Limites:** listas do gestão sem paginação (200/300/500 linhas).
 
@@ -57,23 +64,25 @@ pnpm --filter @ovo/database teste:estrutura   # Run structure tests
 4. All writes go through functions with closed list of fields (never `update(req.body)`).
 
 ### Fix a security issue
-1. Check `scripts/verificar-segredos.sh` (8 verifications).
+1. Check `scripts/verificar-segredos.sh` (9 verifications, incl. `comoPagamentos` só no webhook).
 2. Test: `pnpm seguranca` and `pnpm typecheck`.
 3. CI runs these automatically.
 
 ## Gotchas
 
-- Rate limit do Better Auth é em memória (por instância).
+- Rate limit de login/cadastro (Better Auth) mora no Postgres (`consumir_rate_limit`, via `customStorage`): vale entre instâncias e sobrevive a reinício. O IP vem de `x-forwarded-for`: só confiável atrás de proxy que o **reescreva** (ver `docs/LANCAMENTO.md` §3).
 - `.env` na raiz; `next.config.ts` de assinante e site o carregam.
 - Bash do Claude Code colapsa `\` em heredocs: para código com barra invertida use a ferramenta de edição.
-- CSP em report-only; para aplicar, `{ modoRelatorio: false }` em `next.config.ts`.
+- CSP: `CSP_MODO=relatorio` (padrão) ou `impor`, lida **no build** (defina antes de `pnpm build`). Prove com `scripts/e2e/csp.mjs` antes de impor em produção.
+- `pnpm teste:banco` exige banco de teste **sem dados soltos** (a Fase 10 conta linhas): rode os E2E num banco separado.
+- Papéis do Postgres valem para o **cluster**: com vários bancos no mesmo servidor, `drop role` das migrations pode ser recusado (o `down` da 427 tolera isso).
 - `Ovo di Onça Design System/` (85 MB) e `_tmp_*` continuam fora do fluxo.
 
 ## Key Files
 
 - `packages/database/src/acesso.ts:82–118` — `emTransacao`, como os papéis são definidos
 - `packages/database/src/auth/papel.ts:30–50` — `usuarioAtual`, `exigirDono`
-- `packages/database/migrations/` — Fases 0–9
+- `packages/database/migrations/` — Fases 0–10, Etapas 1–2 e Blocos 3–8
 - **`apps/assinante/src/app/assinar/`** — passos de cadastro e confirmação (`acoes.ts` chama `criar_meu_cadastro` / `assinar_plano`)
 - `apps/assinante/src/lib/seguranca.ts` — `caminhoInterno()` (anti open redirect)
 - `apps/gestao/src/lib/dono.ts` — `comoDono(fn)` = `exigirDono() + comoAdmin`

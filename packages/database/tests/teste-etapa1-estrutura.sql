@@ -54,13 +54,14 @@ begin
      and v_f.calculo_plano_id = v_plano_q
      and v_f.calculo_plano_frequencia = 'quinzenal'
      and v_f.calculo_plano_nome = 'Quinzenal'
-     and v_f.calculo_entregas = 2
+     and v_f.calculo_entregas = entregas_do_calendario_no_periodo(v_f.periodo_inicio, v_f.periodo_fim, 'quinzenal')
+     and v_f.calculo_regra = 'calendario-v1'
      and v_f.calculo_pentes_por_entrega = 1
      and v_f.calculo_duzias_por_entrega = 0
      and v_f.calculo_valor_pente_centavos = (select preco_pente_centavos from config_negocio)
      and v_f.calculo_valor_entrega_centavos = v_f.calculo_valor_pente_centavos
      and v_f.calculo_preco_plano_centavos = v_f.calculo_valor_pente_centavos * 2
-     and v_f.calculo_valor_bruto_centavos = v_f.calculo_valor_pente_centavos * 2
+     and v_f.calculo_valor_bruto_centavos = v_f.calculo_valor_pente_centavos * v_f.calculo_entregas
      and v_f.calculo_desconto_pct = 10
      and v_f.calculo_desconto_origem = 'primeiro_mes'
      and v_f.calculo_credito_centavos = 0
@@ -104,10 +105,10 @@ begin
   fat_2 := gerar_cobranca(ass);
   select * into v_f from faturas where id = fat_2;
   if v_f.calculo_plano_nome = 'Quinzenal (renomeado)'
-     and v_f.calculo_entregas = 3
+     and v_f.calculo_entregas = 2   -- D10: quinzenal = sempre 2 no mês; entregas_por_mes não manda mais na fatura
      and v_f.calculo_valor_pente_centavos = v_antes.calculo_valor_pente_centavos + 500
      and v_f.calculo_desconto_centavos = 0
-     and v_f.valor_centavos = v_f.calculo_valor_pente_centavos * 3 then
+     and v_f.valor_centavos = v_f.calculo_valor_pente_centavos * 2 then
     raise notice '  OK    E1.4  a fatura seguinte registra o plano e o preço novos, sem desconto (não é a 1ª)';
   else
     v_falhas := v_falhas + 1;

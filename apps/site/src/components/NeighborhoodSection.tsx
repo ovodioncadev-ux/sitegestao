@@ -3,23 +3,31 @@
 import { useState, type FormEvent } from 'react';
 import { useBairros } from '@/hooks/useBairros';
 import { cepAtendido } from '@/lib/api';
+import { mascararCep } from '@/lib/formatar';
+import { FormInteresse } from './FormInteresse';
+import type { Neighborhood } from '@/types';
+import { Botao, Secao } from './ui';
 
-export function NeighborhoodSection() {
+export function NeighborhoodSection({ inicial }: { inicial?: Neighborhood[] | null }) {
   const [busca, setBusca] = useState('');
-  const { bairros, carregando, erro } = useBairros();
+  const { bairros, carregando, erro } = useBairros(inicial);
   const [cep, setCep] = useState('');
   const [resultadoCep, setResultadoCep] = useState<string | null>(null);
+  const [foraDaArea, setForaDaArea] = useState<string | null>(null); // CEP (8 dígitos) conferido e não atendido
 
   async function conferirCep(evento: FormEvent) {
     evento.preventDefault();
     const digitos = cep.replace(/\D/g, '');
+    setForaDaArea(null);
     if (digitos.length !== 8) {
       setResultadoCep('Informe um CEP com 8 dígitos.');
       return;
     }
     setResultadoCep('Conferindo…');
     try {
-      setResultadoCep((await cepAtendido(digitos)) ? 'Entregamos no seu CEP.' : 'Ainda não entregamos neste CEP.');
+      const atendido = await cepAtendido(digitos);
+      setResultadoCep(atendido ? 'Entregamos no seu CEP.' : 'Ainda não entregamos neste CEP.');
+      if (!atendido) setForaDaArea(digitos);
     } catch {
       setResultadoCep('Não foi possível conferir agora. Tente de novo em instantes.');
     }
@@ -30,86 +38,54 @@ export function NeighborhoodSection() {
   );
 
   return (
-    <section
-      id="entrega"
-      style={{ maxWidth: 'var(--largura-conteudo)', margin: '0 auto', padding: `var(--esp-16) var(--esp-6)` }}
-    >
-      <h2 style={{ textAlign: 'center', fontSize: 'var(--texto-titulo)' }}>Área de entrega</h2>
-      <p style={{ textAlign: 'center', color: 'var(--cor-texto-suave)', marginTop: 'var(--esp-2)' }}>
+    <Secao id="entrega" titulo="Área de entrega">
+      <p className="-mt-6 text-center text-suave">
         Frete grátis nos bairros atendidos. Fora dessa área ainda não conseguimos entregar.
       </p>
 
-      <form onSubmit={conferirCep} style={{ textAlign: 'center', marginTop: 'var(--esp-6)' }}>
+      <form onSubmit={conferirCep} className="mt-6 text-center">
         <label>
           Seu CEP{' '}
           <input
             type="text"
             inputMode="numeric"
             value={cep}
-            onChange={(e) => setCep(e.target.value.replace(/[^\d-]/g, '').slice(0, 9))}
-            placeholder="30000-000"
-            style={{
-              minHeight: 'var(--altura-controle)',
-              borderRadius: 'var(--raio-controle)',
-              border: '1px solid var(--cor-borda)',
-              padding: `0 var(--esp-3)`,
+            onChange={(e) => {
+              setCep(mascararCep(e.target.value));
+              setForaDaArea(null);
             }}
+            autoComplete="postal-code"
+            placeholder="30000-000"
+            className="rounded-controle border border-borda px-3 min-h-controle"
           />
         </label>{' '}
-        <button
-          type="submit"
-          style={{
-            minHeight: 'var(--altura-controle)',
-            borderRadius: 'var(--raio-controle)',
-            border: '1px solid var(--cor-ouro)',
-            background: 'transparent',
-            color: 'var(--cor-ouro-escuro)',
-            padding: `0 var(--esp-4)`,
-          }}
-        >
+        <Botao type="submit" variante="contorno">
           Conferir
-        </button>
+        </Botao>
         {resultadoCep && (
-          <p role="status" style={{ marginTop: 'var(--esp-2)', color: 'var(--cor-texto-suave)' }}>
+          <p role="status" className="mt-2 text-suave">
             {resultadoCep}
           </p>
         )}
       </form>
+
+      {foraDaArea && <FormInteresse key={foraDaArea} cep={foraDaArea} />}
 
       <input
         type="text"
         value={busca}
         onChange={(e) => setBusca(e.target.value)}
         placeholder="Digite seu bairro"
-        style={{
-          display: 'block',
-          margin: 'var(--esp-6) auto',
-          width: '100%',
-          maxWidth: '360px',
-          minHeight: 'var(--altura-controle)',
-          borderRadius: 'var(--raio-controle)',
-          border: '1px solid var(--cor-borda)',
-          padding: `0 var(--esp-3)`,
-        }}
+        className="rounded-controle border border-borda px-3 min-h-controle mx-auto my-6 block w-full max-w-[360px]"
       />
 
-      {carregando && <p style={{ textAlign: 'center' }}>Carregando bairros...</p>}
-      {erro && <p style={{ textAlign: 'center', color: 'var(--cor-erro)' }}>Erro: {erro}</p>}
+      {carregando && <p className="text-center">Carregando bairros...</p>}
+      {erro && <p className="text-center text-erro">Erro: {erro}</p>}
 
       {!carregando && !erro && (
-        <ul
-          style={{
-            listStyle: 'none',
-            padding: 0,
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 'var(--esp-2)',
-            justifyContent: 'center',
-            marginTop: 'var(--esp-6)',
-          }}
-        >
+        <ul className="mt-6 flex list-none flex-wrap justify-center gap-2 p-0">
           {bairrosFiltrados.length === 0 ? (
-            <li style={{ color: 'var(--cor-texto-suave)' }}>
+            <li className="text-suave">
               {bairros.length === 0
                 ? 'A lista de bairros atendidos ainda não foi publicada. Confira pelo seu CEP acima.'
                 : 'Nenhum bairro encontrado'}
@@ -118,12 +94,9 @@ export function NeighborhoodSection() {
             bairrosFiltrados.map((bairro) => (
               <li
                 key={bairro.name}
-                style={{
-                  background: bairro.isServed ? 'var(--cor-fundo-alt)' : 'var(--cor-borda)',
-                  borderRadius: 'var(--raio-controle)',
-                  padding: `var(--esp-1) var(--esp-3)`,
-                  fontSize: 'var(--texto-pequeno)',
-                }}
+                className={`rounded-controle px-3 py-1 text-[length:var(--texto-pequeno)] ${
+                  bairro.isServed ? 'bg-fundo-alt' : 'bg-borda'
+                }`}
               >
                 {bairro.name}
               </li>
@@ -131,6 +104,6 @@ export function NeighborhoodSection() {
           )}
         </ul>
       )}
-    </section>
+    </Secao>
   );
 }

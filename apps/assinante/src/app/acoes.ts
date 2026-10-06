@@ -70,8 +70,18 @@ export async function atualizarMeusDados(_estado: Estado, dados: FormData): Prom
  */
 export async function solicitarAlteracao(_estado: Estado, dados: FormData): Promise<Estado> {
   return rodar(async () => {
-    const tipo = escolha(campo(dados, 'tipo'), ['pausa', 'cancelamento'] as const, 'Tipo de pedido');
+    const tipo = escolha(campo(dados, 'tipo'), ['pausa', 'cancelamento', 'troca_plano', 'duzia'] as const, 'Tipo de pedido');
     const motivo = textoOpcional(campo(dados, 'motivo'), 'Motivo', 500);
+    // D3: na pausa, o assinante escolhe como quer ser compensado pelas entregas já pagas.
+    const preferencia = tipo === 'pausa' ? escolha(campo(dados, 'preferencia') || 'credito', ['credito', 'pentes'] as const, 'Compensação') : null;
+    const duzias = tipo === 'duzia' ? Number(campo(dados, 'duzias')) : null;
+    if (duzias !== null && (!Number.isInteger(duzias) || duzias < 0 || duzias > 50)) {
+      throw new ErroNegocio('Informe quantas dúzias por entrega (de 0 a 50).');
+    }
+    const planoDestino = tipo === 'troca_plano' ? Number(campo(dados, 'plano_id')) : null;
+    if (planoDestino !== null && (!Number.isInteger(planoDestino) || planoDestino < 1 || planoDestino > 32767)) {
+      throw new ErroNegocio('Escolha o plano para o qual quer trocar.');
+    }
 
     await comoAssinante(async (bd, usuarioId) => {
       const cliente = await buscarCliente(bd, usuarioId);
@@ -85,16 +95,20 @@ export async function solicitarAlteracao(_estado: Estado, dados: FormData): Prom
       );
       if (!assinatura) throw new ErroNegocio('Você não tem uma assinatura em andamento.');
 
-      await bd.consultar('select solicitar_alteracao_assinatura($1, $2::tipo_solicitacao, $3)', [
+      await bd.consultar('select solicitar_alteracao_assinatura($1, $2::tipo_solicitacao, $3, $4, $5::smallint, $6::smallint)', [
         assinatura.id,
         tipo,
         motivo,
+        preferencia,
+        planoDestino,
+        duzias,
       ]);
     });
 
     revalidatePath('/');
-    return tipo === 'pausa'
-      ? 'Pedido de pausa enviado. Vamos te responder pelo WhatsApp.'
-      : 'Pedido de cancelamento enviado. Vamos te responder pelo WhatsApp.';
+    if (tipo === 'pausa') return 'Pedido de pausa enviado. Vamos te responder pelo WhatsApp.';
+    if (tipo === 'duzia') return 'Pedido de dúzias enviado. Vamos te responder pelo WhatsApp.';
+    if (tipo === 'troca_plano') return 'Pedido de troca de plano enviado. Vamos te responder pelo WhatsApp.';
+    return 'Pedido de cancelamento enviado. Vamos te responder pelo WhatsApp.';
   });
 }

@@ -67,7 +67,13 @@ begin
       'solicitar_alteracao_assinatura',  -- confere a posse da assinatura na primeira instrucao
       'planos_publicos',           -- vitrine: so id, nome, intervalo, preco derivado e regras de exibicao
       'criar_meu_cadastro',        -- cria o cliente da PROPRIA conta (identidade vem da sessao)
-      'assinar_plano'              -- assina para o PROPRIO cliente (identidade vem da sessao)
+      'assinar_plano',             -- assina para o PROPRIO cliente (identidade vem da sessao)
+      'site_conteudo',             -- vitrine: frescor, frete, desconto e corte derivados dos planos ativos
+      'limitar_acesso_publico',    -- contador por IP de rotas publicas; rotas e limites fixos no corpo
+      'registrar_evento_funil',    -- conta etapa e plano publico do funil; sem dado pessoal, etapas em lista fechada
+      'registrar_interesse',       -- pedido de aviso de quem esta fora da area; valida, exige consentimento, sem leitura
+      'iniciar_pagamento_online',  -- devolve valor e referencia so da PROPRIA fatura em aberto (confere a posse)
+      'anexar_link_pagamento'      -- grava o link https na PROPRIA fatura em aberto (confere a posse)
     )
     and (
       has_function_privilege('app_anon', p.oid, 'execute')

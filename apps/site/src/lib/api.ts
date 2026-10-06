@@ -1,3 +1,5 @@
+import type { ConteudoSite } from '@/types';
+
 /**
  * Cliente HTTP da vitrine. Os três endereços são do PRÓPRIO site: o
  * next.config.ts os repassa ao app do assinante no servidor (rewrites).
@@ -17,6 +19,10 @@ export async function buscarPlanos() {
   return data.planos ?? [];
 }
 
+export async function buscarConteudo(): Promise<ConteudoSite> {
+  return pegar<ConteudoSite>('/api/site');
+}
+
 export async function buscarBairros() {
   const data = await pegar<{ bairros: { name: string; isServed: boolean }[] }>('/api/neighborhoods');
   return data.bairros ?? [];
@@ -26,6 +32,39 @@ export async function cepAtendido(cep: string): Promise<boolean> {
   const digitos = cep.replace(/\D/g, '');
   const data = await pegar<{ atendido: boolean }>(`/api/area?cep=${digitos}`);
   return data.atendido;
+}
+
+export type PedidoInteresse = {
+  nome?: string;
+  telefone?: string;
+  email?: string;
+  cep: string;
+  referencia_interna?: string; // campo-isca: tem de ir vazio
+};
+
+/** Pede aviso para um CEP fora da área. Lança Error com a mensagem a mostrar. */
+export async function registrarInteresse(pedido: PedidoInteresse): Promise<void> {
+  const res = await fetch('/api/interesse', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...pedido, origem: 'site', consentimento: true }),
+  });
+  if (res.ok) return;
+  const corpo = (await res.json().catch(() => ({}))) as { erro?: string };
+  throw new Error(corpo.erro ?? 'Não foi possível registrar agora. Tente de novo em instantes.');
+}
+
+/**
+ * Conta o clique em "Assinar" (funil, sem dado pessoal). sendBeacon sobrevive à
+ * navegação para outro site; qualquer falha é ignorada: nunca atrapalha o clique.
+ */
+export function registrarCliquePlano(plano: string): void {
+  try {
+    const corpo = new Blob([JSON.stringify({ etapa: 'plano_clicado', plano })], { type: 'application/json' });
+    navigator.sendBeacon('/api/evento', corpo);
+  } catch {
+    /* só contagem */
+  }
 }
 
 /** Endereço do passo de assinatura, no app do assinante. O plano vai pelo nome público, nunca por id. */
@@ -44,5 +83,7 @@ export type PlanoDaApi = {
   firstMonthDiscountPct: number;
   /** Selo do plano, vindo do banco. Nulo = sem selo. */
   badge: string | null;
+  deliveriesPerMonth: number;
+  deliveryPriceCents: number;
   features: string[];
 };

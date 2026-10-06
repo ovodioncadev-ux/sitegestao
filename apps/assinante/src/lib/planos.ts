@@ -16,6 +16,9 @@ export type PlanoPublico = {
   descontoPrimeiroMesPct: number;
   /** Selo do cartão do plano (ex.: "Recomendado"). Vem do banco (`planos.selo`); nulo = sem selo. */
   selo: string | null;
+  /** Entregas previstas por mês (4/2/1) e preço de UMA entrega: base da exibição por entrega (D10). */
+  entregasPorMes: number;
+  precoEntregaCentavos: number;
 };
 
 export function ehFrequencia(valor: unknown): valor is Frequencia {
@@ -33,6 +36,8 @@ type LinhaPlano = {
   frete_centavos: number;
   desconto_primeiro_mes_pct: string;
   selo: string | null;
+  entregas_por_mes: number;
+  preco_entrega_centavos: number;
 };
 
 /**
@@ -52,5 +57,7 @@ export async function lerPlanosPublicos(bd: Executor): Promise<PlanoPublico[]> {
     freteCentavos: p.frete_centavos,
     descontoPrimeiroMesPct: Number(p.desconto_primeiro_mes_pct),
     selo: p.selo,
+    entregasPorMes: p.entregas_por_mes,
+    precoEntregaCentavos: p.preco_entrega_centavos,
   }));
 }

@@ -1,71 +1,52 @@
 'use client';
 
 import { usePlanos } from '@/hooks/usePlanos';
-import { urlAssinar } from '@/lib/api';
-import { formatarReais, textoDesconto, textoFrescor, textoFrete } from '@/lib/formatar';
+import { registrarCliquePlano, urlAssinar } from '@/lib/api';
+import { formatarReais, textoDesconto, textoMensal, textoFrescor, textoFrete } from '@/lib/formatar';
+import type { Plan } from '@/types';
+import { Botao, Cartao, Secao, Selo } from './ui';
 
-export function PlansSection() {
-  const { planos, carregando, erro } = usePlanos();
+export function PlansSection({ inicial }: { inicial?: Plan[] | null }) {
+  const { planos, carregando, erro, recarregar } = usePlanos(inicial);
 
   if (carregando) {
     return (
-      <section style={{ maxWidth: 'var(--largura-conteudo)', margin: '0 auto', padding: `var(--esp-16) var(--esp-6)` }}>
-        <p>Carregando planos...</p>
-      </section>
+      <Secao id="planos" titulo="Planos">
+        <div role="status" aria-label="Carregando planos" className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="h-72 animate-pulse rounded-card bg-fundo-alt" />
+          ))}
+        </div>
+      </Secao>
     );
   }
 
   if (erro) {
     return (
-      <section style={{ maxWidth: 'var(--largura-conteudo)', margin: '0 auto', padding: `var(--esp-16) var(--esp-6)` }}>
-        <p>Erro ao carregar planos: {erro}</p>
-      </section>
+      <Secao id="planos" titulo="Planos">
+        <div role="alert" className="text-center">
+          <p className="text-suave">{erro}</p>
+          <Botao variante="contorno" className="mt-4" onClick={recarregar}>
+            Tentar de novo
+          </Botao>
+        </div>
+      </Secao>
     );
   }
 
   return (
-    <section
-      id="planos"
-      style={{ maxWidth: 'var(--largura-conteudo)', margin: '0 auto', padding: `var(--esp-16) var(--esp-6)` }}
-    >
-      <h2 style={{ textAlign: 'center', fontSize: 'var(--texto-titulo)' }}>Planos</h2>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-          gap: 'var(--esp-6)',
-          marginTop: 'var(--esp-8)',
-        }}
-      >
+    <Secao id="planos" titulo="Planos">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6">
         {planos.map((plan) => (
-          <article
-            key={plan.id}
-            style={{
-              border: plan.highlighted ? '2px solid var(--cor-ouro)' : '1px solid var(--cor-borda)',
-              borderRadius: 'var(--raio-card)',
-              padding: 'var(--padding-card)',
-              position: 'relative',
-            }}
-          >
-            {plan.badge && (
-              <span
-                style={{
-                  position: 'absolute',
-                  top: 'var(--esp-3)',
-                  right: 'var(--esp-3)',
-                  background: 'var(--cor-ouro-app)',
-                  color: 'var(--cor-texto)',
-                  borderRadius: 'var(--raio-controle)',
-                  padding: `var(--esp-1) var(--esp-2)`,
-                  fontSize: 'var(--texto-rotulo)',
-                }}
-              >
-                {plan.badge}
-              </span>
-            )}
+          <Cartao key={plan.id} destaque={plan.highlighted}>
+            {plan.badge && <Selo>{plan.badge}</Selo>}
             <h3>{plan.name}</h3>
-            <p style={{ fontSize: 'var(--texto-titulo)' }}>{formatarReais(plan.priceCents)}</p>
-            <ul style={{ listStyle: 'none', padding: 0, color: 'var(--cor-texto-suave)' }}>
+            <p className="text-[length:var(--texto-titulo)]">
+              {formatarReais(plan.deliveryPriceCents)}
+              <span className="text-[length:var(--texto-pequeno)] text-suave"> por entrega</span>
+            </p>
+            <p className="text-[length:var(--texto-pequeno)] text-suave">{textoMensal(plan)}</p>
+            <ul className="m-0 list-none p-0 text-suave">
               <li>{textoFrescor(plan)}</li>
               <li>{textoFrete(plan)}</li>
               <li>{textoDesconto(plan)}</li>
@@ -73,28 +54,17 @@ export function PlansSection() {
                 <li key={feature}>{feature}</li>
               ))}
             </ul>
-            <a
+            <Botao
               href={urlAssinar(plan.id)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                textDecoration: 'none',
-                width: '100%',
-                marginTop: 'var(--esp-4)',
-                background: plan.highlighted ? 'var(--cor-ouro)' : 'transparent',
-                color: plan.highlighted ? '#fff' : 'var(--cor-ouro-escuro)',
-                border: plan.highlighted ? 'none' : '1px solid var(--cor-ouro)',
-                borderRadius: 'var(--raio-controle)',
-                padding: `var(--esp-2) var(--esp-4)`,
-                minHeight: 'var(--altura-controle)',
-              }}
+              onClick={() => registrarCliquePlano(plan.id)}
+              variante={plan.highlighted ? 'primario' : 'contorno'}
+              className="mt-4 w-full"
             >
-              Escolher {plan.name}
-            </a>
-          </article>
+              {`Escolher ${plan.name}`}
+            </Botao>
+          </Cartao>
         ))}
       </div>
-    </section>
+    </Secao>
   );
 }

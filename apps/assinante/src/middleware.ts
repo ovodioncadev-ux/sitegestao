@@ -23,7 +23,13 @@ export function middleware(request: NextRequest) {
   if (caminho.startsWith('/api/auth')) return NextResponse.next();
   if (caminho.startsWith('/api/plans')) return NextResponse.next();
   if (caminho.startsWith('/api/neighborhoods')) return NextResponse.next();
+  if (caminho === '/api/saude') return NextResponse.next();
   if (caminho.startsWith('/api/area')) return NextResponse.next();
+  if (caminho.startsWith('/api/site')) return NextResponse.next();
+  if (caminho.startsWith('/api/evento')) return NextResponse.next();
+  if (caminho.startsWith('/api/interesse')) return NextResponse.next();
+  if (caminho.startsWith('/api/pagamento/webhook')) return NextResponse.next();
+  if (caminho.startsWith('/pagamento/simulado')) return NextResponse.next();
   if (ROTAS_PUBLICAS.some((rota) => caminho.startsWith(rota))) return NextResponse.next();
   if (!temCookieDeSessao(request)) return redirecionarParaLogin(request);
 
@@ -31,5 +37,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
 };

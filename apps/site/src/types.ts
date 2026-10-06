@@ -11,6 +11,9 @@ export type Plan = {
   freightCents: number;
   /** Decisão do Fred: 10% no 1º mês, vale cartão e PIX, todos os planos. */
   firstMonthDiscountPct: number;
+  /** Entregas previstas por mês e preço de UMA entrega (D10). */
+  deliveriesPerMonth: number;
+  deliveryPriceCents: number;
   features: string[];
   highlighted: boolean;
   badge?: string;
@@ -30,4 +33,13 @@ export type ComparisonRow = {
 export type FaqItem = {
   question: string;
   answer: string;
+};
+
+/** Texto de vitrine que o banco sabe afirmar. Nulo/falso = o site não afirma. */
+export type ConteudoSite = {
+  freshnessMaxDays: number | null;
+  freeShipping: boolean;
+  firstMonthDiscountPct: number | null;
+  cutoff: { weekday: number; time: string } | null;
+  faq: FaqItem[];
 };

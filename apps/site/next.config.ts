@@ -22,6 +22,9 @@ const nextConfig: NextConfig = {
       { source: '/api/plans', destination: `${URL_ASSINANTE}/api/plans` },
       { source: '/api/neighborhoods', destination: `${URL_ASSINANTE}/api/neighborhoods` },
       { source: '/api/area', destination: `${URL_ASSINANTE}/api/area` },
+      { source: '/api/site', destination: `${URL_ASSINANTE}/api/site` },
+      { source: '/api/evento', destination: `${URL_ASSINANTE}/api/evento` },
+      { source: '/api/interesse', destination: `${URL_ASSINANTE}/api/interesse` },
     ];
   },
   async headers() {

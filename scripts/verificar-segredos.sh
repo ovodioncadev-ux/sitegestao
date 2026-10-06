@@ -115,6 +115,22 @@ else
 fi
 
 echo ""
+echo "── 9. comoPagamentos() fora do webhook ──"
+# O papel app_pagamentos baixa fatura. Só o webhook, DEPOIS de conferir o pagamento no provedor, pode usá-lo.
+ruins=""
+for arq in $(grep -rl 'comoPagamentos' --include='*.ts' --include='*.tsx' apps 2>/dev/null || true); do
+  case "$arq" in
+    apps/assinante/src/app/api/pagamento/webhook/route.ts) ;;
+    *) ruins="$ruins $arq" ;;
+  esac
+done
+if [ -n "$ruins" ]; then
+  aviso "comoPagamentos() usado fora do webhook de pagamento:$ruins"
+else
+  ok "comoPagamentos() só aparece no webhook de pagamento"
+fi
+
+echo ""
 if [ "$falhas" -gt 0 ]; then
   echo "✘ $falhas problema(s) de segredo. Não faça commit assim."
   exit 1

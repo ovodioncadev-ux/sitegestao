@@ -1,5 +1,7 @@
 'use client';
 
+import { Secao } from './ui';
+
 const COMPARISON_ROWS = [
   {
     feature: 'Frescor',
@@ -30,33 +32,27 @@ const COMPARISON_ROWS = [
 
 export function ComparisonTable() {
   return (
-    <section
-      id="comparativo"
-      style={{ maxWidth: 'var(--largura-conteudo)', margin: '0 auto', padding: `var(--esp-16) var(--esp-6)` }}
-    >
-      <h2 style={{ textAlign: 'center', fontSize: 'var(--texto-titulo)' }}>Ovo di Onça x supermercado</h2>
-      <div className="tabela-rolavel" style={{ marginTop: 'var(--esp-8)' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+    <Secao id="comparativo" titulo="Ovo di Onça x supermercado">
+      <div className="tabela-rolavel">
+        <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th style={{ textAlign: 'left', padding: 'var(--padding-celula)' }}>Critério</th>
-              <th style={{ textAlign: 'left', padding: 'var(--padding-celula)' }}>Ovo di Onça</th>
-              <th style={{ textAlign: 'left', padding: 'var(--padding-celula)' }}>Supermercado</th>
+              <th className="p-3 text-left">Critério</th>
+              <th className="p-3 text-left">Ovo di Onça</th>
+              <th className="p-3 text-left">Supermercado</th>
             </tr>
           </thead>
           <tbody>
             {COMPARISON_ROWS.map((row) => (
-              <tr key={row.feature} style={{ borderTop: '1px solid var(--cor-borda)' }}>
-                <td style={{ padding: 'var(--padding-celula)' }}>{row.feature}</td>
-                <td style={{ padding: 'var(--padding-celula)' }}>{row.ovoDiOnca}</td>
-                <td style={{ padding: 'var(--padding-celula)', color: 'var(--cor-texto-suave)' }}>
-                  {row.supermarket}
-                </td>
+              <tr key={row.feature} className="border-t border-borda">
+                <td className="p-3">{row.feature}</td>
+                <td className="p-3">{row.ovoDiOnca}</td>
+                <td className="p-3 text-suave">{row.supermarket}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-    </section>
+    </Secao>
   );
 }

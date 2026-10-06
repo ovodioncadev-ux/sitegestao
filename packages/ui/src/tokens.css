@@ -18,18 +18,25 @@
   --cor-texto: #1c2826;
   --cor-texto-suave: #4a5957;
   --cor-ouro: #e67e22;
-  --cor-ouro-escuro: #b85f12;
+  --cor-ouro-escuro: #a15200;   /* texto/link sobre fundo claro: ≥ 4,7:1 (o #b85f12 anterior dava 4,07:1 no rosado) */
   --cor-ouro-app: #d4a437;
   --cor-borda: rgb(28 40 38 / 12%);
+  --cor-sobre-ouro: #1c2826;    /* texto sobre fundo --cor-ouro: 5,3:1 (branco daria 2,85:1) */
+  --cor-sobre-escuro: #fff;     /* texto sobre fundo escuro (verde, WhatsApp) */
+  --cor-superficie: #fff8f6;
+  --cor-superficie-baixa: #fff1ed;
+  --cor-secundaria: #50652a;
+  --cor-secundaria-suave: #cfe99f;
 
   /* ── Estado ─────────────────────────────────────────────────────── */
   --cor-sucesso: #1e824c;
   --cor-erro: #ba1a1a;
-  --cor-whatsapp: #1a9e4b;
+  --cor-whatsapp: #157f3c;      /* texto branco sobre ele: 5,1:1 (#1a9e4b dava 3,5:1) */
 
   /* ── Tipografia ─────────────────────────────────────────────────── */
-  --fonte-titulo: 'Aclonica', system-ui, sans-serif;  /* só h1 e h2 */
-  --fonte-corpo: 'Poppins', system-ui, sans-serif;    /* todo o resto */
+  /* As variáveis --font-* vêm do next/font de cada layout; sem elas, cai no nome da fonte. */
+  --fonte-titulo: var(--font-aclonica, 'Aclonica'), system-ui, sans-serif;  /* só h1 e h2 */
+  --fonte-corpo: var(--font-poppins, 'Poppins'), system-ui, sans-serif;     /* todo o resto */
 
   /* Escala fechada. Fora dela não existe tamanho.
      Mínimo na área do cliente: 14px.
@@ -41,6 +48,7 @@
   --texto-grande: 24px;
   --texto-titulo: 32px;
   --texto-hero: 44px;
+  --texto-hero-mobile: 32px;
 
   --altura-linha-corpo: 1.6;
   --altura-linha-titulo: 1.2;
@@ -65,6 +73,8 @@
   /* ── Bordas e sombra ────────────────────────────────────────────── */
   --raio-controle: 8px;         /* botão, input */
   --raio-card: 16px;            /* card, modal */
+  --raio-pilula: 9999px;        /* selo, chip */
+  --sombra-card: 0 4px 16px rgb(28 40 38 / 8%);
   --sombra-flutuante: 0 2px 8px rgb(28 40 38 / 8%);  /* só modal e dropdown */
 }
 

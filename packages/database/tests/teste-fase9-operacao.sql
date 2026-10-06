@@ -60,15 +60,21 @@ begin
     raise notice '  FALHA F9.1  proxima_cobranca = %', (select proxima_cobranca from assinaturas where id = ass_1);
   end if;
 
-  -- F9.2 ── 1ª cobrança: R$ 164 com 10% = R$ 147,60, período de 1 mês ──────
+  -- F9.2 ── 1ª cobrança (D1/D10): da 1ª entrega ao fim do mês, vence hoje, 10% off ──────
   v_total := v_total + 1;
   fat_1 := gerar_cobranca(ass_1);
-  if (select valor_centavos from faturas where id = fat_1) = 14760
-     and (select periodo_inicio from faturas where id = fat_1) = v_hoje
-     and (select periodo_fim from faturas where id = fat_1) = (v_hoje + interval '1 month')::date - 1
+  if (select periodo_inicio from faturas where id = fat_1)
+       = (select min(data_prevista) from entregas where assinatura_id = ass_1 and status <> 'cancelada')
+     and (select periodo_fim from faturas where id = fat_1)
+       = (date_trunc('month', (select periodo_inicio from faturas where id = fat_1)) + interval '1 month')::date - 1
+     and (select valor_centavos from faturas where id = fat_1)
+       = round((select preco_pente_centavos from config_negocio) * 0.9
+               * entregas_do_calendario_no_periodo((select periodo_inicio from faturas where id = fat_1),
+                                                   (select periodo_fim from faturas where id = fat_1), 'semanal'))
      and (select vencimento from faturas where id = fat_1) = v_hoje
-     and (select proxima_cobranca from assinaturas where id = ass_1) = (v_hoje + interval '1 month')::date then
-    raise notice '  OK    F9.2  1ª cobrança semanal R$ 147,60 (10%% off), período de 1 mês, próxima avança 1 mês';
+     and (select proxima_cobranca from assinaturas where id = ass_1)
+       = (select periodo_fim + 1 from faturas where id = fat_1) then
+    raise notice '  OK    F9.2  1ª cobrança semanal: da 1ª entrega ao fim do mês, 10%% off, vence hoje, próxima = 1º do mês seguinte';
   else
     v_falhas := v_falhas + 1;
     raise notice '  FALHA F9.2  valor=% proxima=%', (select valor_centavos from faturas where id = fat_1),
@@ -107,12 +113,16 @@ begin
   v_json := processar_rotina_diaria();
   if (v_json ->> 'cobrancas_geradas')::int >= 2
      and (select proxima_cobranca from assinaturas where id = ass_1) > v_hoje
-     and exists (select 1 from faturas where assinatura_id = ass_1 and periodo_inicio = v_hoje - 70 and status = 'atrasada') then
+     and exists (select 1 from faturas where assinatura_id = ass_1 and periodo_inicio between v_hoje - 70 and v_hoje - 56 and status = 'atrasada') then
     raise notice '  OK    F9.5  rotina gera os períodos vencidos (marcados atrasados) e deixa a próxima no futuro';
   else
     v_falhas := v_falhas + 1;
     raise notice '  FALHA F9.5  %', v_json;
   end if;
+
+  -- A rotina acima (D2) bloqueou a assinatura: as faturas de 70 dias atrás estão além de
+  -- tolerância + 20 dias. Os próximos testes (F9.6+) são de outro assunto: limpa o cenário.
+  update faturas set status = 'cancelada' where assinatura_id = ass_1 and status in ('pendente', 'atrasada');
 
   -- F9.6 ── forma de cobrança muda e fica no histórico ──────────────────────
   v_total := v_total + 1;
@@ -130,7 +140,9 @@ begin
 
   -- F9.7 ── trocar plano: histórico e próxima operação ──────────────────────
   v_total := v_total + 1;
-  perform alterar_plano_assinatura(ass_1, v_plano_q);
+  perform alterar_plano_assinatura(ass_1, v_plano_q);      -- redução (D6): fica agendada para o mês seguinte
+  update assinaturas set plano_proximo_a_partir_de = v_hoje where id = ass_1;   -- simula a chegada da data
+  perform aplicar_trocas_agendadas();
   if (select plano_id from assinaturas where id = ass_1) = v_plano_q
      and exists (select 1 from auditoria where acao = 'plano_da_assinatura_alterado' and entidade_id = ass_1::text)
      and calcular_valor_fatura(ass_1) = 8200 then
@@ -255,13 +267,13 @@ begin
      and (v_json ->> 'reativadas')::int = 1
      and (select data_retorno_prevista from assinaturas where id = ass_1) is null
      and extract(dow from v_data) = 3
-     and exists (select 1 from faturas where assinatura_id = ass_1 and periodo_inicio = v_hoje and status <> 'cancelada')
+     and (select proxima_cobranca from assinaturas where id = ass_1) > v_hoje   -- o mês corrente já foi cobrado
      and exists (select 1 from auditoria where acao = 'assinatura_reativada' and entidade_id = ass_1::text
                    and motivo = 'Retorno programado da pausa') then
-    raise notice '  OK    F9.16 retorno programado: reativa, próxima entrega numa quarta (%), cobrança do novo período gerada', v_data;
+    raise notice '  OK    F9.16 retorno programado: reativa, próxima entrega numa quarta (%), sem cobrança repetida do mês já faturado', v_data;
   else
     v_falhas := v_falhas + 1;
-    raise notice '  FALHA F9.16 %', v_json;
+    raise notice '  FALHA F9.16 % prox=% bloq=% status=%', v_json, (select proxima_cobranca from assinaturas where id = ass_1), (select bloqueada_desde from assinaturas where id = ass_1), (select status from assinaturas where id = ass_1);
   end if;
 
   raise notice ' ';
@@ -357,7 +369,7 @@ begin
 
   -- F9.21 ── cancelar: nada mais é cobrado ──────────────────────────────────
   v_total := v_total + 1;
-  perform cancelar_assinatura(ass_1, 'sem fidelidade');
+  perform cancelar_assinatura(ass_1, 'sem fidelidade', true);
   begin
     perform gerar_cobranca(ass_1);
     v_falhas := v_falhas + 1;

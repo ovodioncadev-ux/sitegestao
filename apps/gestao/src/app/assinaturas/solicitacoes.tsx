@@ -7,6 +7,9 @@ export type Solicitacao = {
   id: string;
   tipo: string;
   motivo: string | null;
+  preferencia?: string | null;
+  plano_destino_nome?: string | null;
+  duzias_pedidas?: number | null;
   criado_em: string;
   cliente_nome: string;
   assinatura_id: string;
@@ -44,7 +47,7 @@ export function SolicitacoesPendentes({
           {solicitacoes.map((s) => {
             // Pausa só executa em assinatura ativa; cancelamento, em ativa ou pausada.
             const podeExecutar =
-              s.tipo === 'pausa' ? s.assinatura_status === 'ativa' : ['ativa', 'pausada'].includes(s.assinatura_status);
+              s.tipo === 'cancelamento' ? ['ativa', 'pausada'].includes(s.assinatura_status) : s.assinatura_status === 'ativa';
             return (
               <tr key={s.id}>
                 {mostrarCliente && (
@@ -52,7 +55,16 @@ export function SolicitacoesPendentes({
                     <Link href={`/assinaturas/${s.assinatura_id}`}>{s.cliente_nome}</Link>
                   </td>
                 )}
-                <td>{rotulo(TIPO_SOLICITACAO, s.tipo)}</td>
+                <td>
+                  {rotulo(TIPO_SOLICITACAO, s.tipo)}
+                  {s.tipo === 'troca_plano' && s.plano_destino_nome ? ` → ${s.plano_destino_nome}` : ''}
+                  {s.tipo === 'duzia' && s.duzias_pedidas !== null && s.duzias_pedidas !== undefined
+                    ? `: ${s.duzias_pedidas === 0 ? 'parar de receber' : `${s.duzias_pedidas} por entrega`}`
+                    : ''}
+                  {s.tipo === 'pausa' && s.preferencia
+                    ? ` (${s.preferencia === 'pentes' ? 'quer receber os pentes depois' : 'prefere crédito'})`
+                    : ''}
+                </td>
                 <td>{s.motivo ?? '—'}</td>
                 <td>{s.criado_em}</td>
                 <td>
@@ -64,7 +76,13 @@ export function SolicitacoesPendentes({
                       {podeExecutar ? (
                         <label>
                           <input type="checkbox" name="executar" defaultChecked />{' '}
-                          {s.tipo === 'pausa' ? 'Pausar a assinatura agora' : 'Cancelar a assinatura agora'}
+                          {s.tipo === 'pausa'
+                            ? 'Pausar a assinatura agora'
+                            : s.tipo === 'duzia'
+                              ? 'Aplicar as dúzias a partir da próxima entrega depois do corte'
+                              : s.tipo === 'troca_plano'
+                              ? 'Trocar o plano agora (aumento vale já; redução, no mês seguinte)'
+                              : 'Cancelar (no fim do mês pago)'}
                         </label>
                       ) : (
                         <p className="suave">A assinatura já não está numa situação em que o pedido se aplica.</p>

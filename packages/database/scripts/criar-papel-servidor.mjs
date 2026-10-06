@@ -102,6 +102,13 @@ try {
   // das concessões FUTURAS. Por isso o `with inherit false` vem aqui, na
   // própria concessão, e é reaplicado toda vez que este script roda.
   await cliente.query('grant app_anon, app_usuario to app_servidor with inherit false');
+  // Webhook de pagamento: o papel só existe depois da migration do Bloco 6.
+  const { rows: existe } = await cliente.query("select 1 from pg_roles where rolname = 'app_pagamentos'");
+  if (existe.length > 0) {
+    await cliente.query('grant app_pagamentos to app_servidor with inherit false');
+  } else {
+    console.log('  (app_pagamentos ainda não existe: rode as migrations e este script de novo para liberar o webhook de pagamento)');
+  }
   await cliente.query('grant connect on database ' + (await nomeDoBanco(cliente)) + ' to app_servidor');
 
   // `rolname` é do tipo `name`, e `array_agg` sobre `name` sai como `name[]`
