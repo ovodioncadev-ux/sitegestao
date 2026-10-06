@@ -2,11 +2,13 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { buscarPlanos } from '@/lib/api';
+import { mapearPlanos } from '@/lib/mapear';
 import type { Plan } from '@/types';
 
-export function usePlanos() {
-  const [planos, setPlanos] = useState<Plan[]>([]);
-  const [carregando, setCarregando] = useState(true);
+/** `inicial`: planos já buscados no servidor (estão no HTML). Sem ele, busca no navegador. */
+export function usePlanos(inicial?: Plan[] | null) {
+  const [planos, setPlanos] = useState<Plan[]>(inicial ?? []);
+  const [carregando, setCarregando] = useState(!inicial);
   const [erro, setErro] = useState<string | null>(null);
 
   const [tentativa, setTentativa] = useState(0);
@@ -17,31 +19,18 @@ export function usePlanos() {
   }, []);
 
   useEffect(() => {
+    if (inicial && tentativa === 0) return;
     buscarPlanos()
       .then((dados) => {
-        setPlanos(
-          dados.map((p) => ({
-            id: p.frequencia,
-            name: p.nome,
-            intervalDays: p.intervalDays,
-            priceCents: p.priceCents,
-            freshnessMaxDays: p.freshnessMaxDays,
-            freightCents: p.freightCents,
-            firstMonthDiscountPct: p.firstMonthDiscountPct,
-            deliveriesPerMonth: p.deliveriesPerMonth,
-            deliveryPriceCents: p.deliveryPriceCents,
-            features: p.features,
-            // O selo e o destaque vêm do banco (planos.selo), não do nome do plano.
-            highlighted: Boolean(p.badge),
-            badge: p.badge ?? undefined,
-          })),
-        );
+        setPlanos(mapearPlanos(dados));
       })
       .catch((err: unknown) => {
         console.error('Erro ao carregar planos:', err);
         setErro('Não foi possível carregar os planos agora. Tente de novo em instantes.');
       })
       .finally(() => setCarregando(false));
+  // `inicial` só vale na 1ª carga; não deve refazer a busca ao mudar.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tentativa]);
 
   return { planos, carregando, erro, recarregar };

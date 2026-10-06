@@ -5,11 +5,12 @@ import { useBairros } from '@/hooks/useBairros';
 import { cepAtendido } from '@/lib/api';
 import { mascararCep } from '@/lib/formatar';
 import { FormInteresse } from './FormInteresse';
+import type { Neighborhood } from '@/types';
 import { Botao, Secao } from './ui';
 
-export function NeighborhoodSection() {
+export function NeighborhoodSection({ inicial }: { inicial?: Neighborhood[] | null }) {
   const [busca, setBusca] = useState('');
-  const { bairros, carregando, erro } = useBairros();
+  const { bairros, carregando, erro } = useBairros(inicial);
   const [cep, setCep] = useState('');
   const [resultadoCep, setResultadoCep] = useState<string | null>(null);
   const [foraDaArea, setForaDaArea] = useState<string | null>(null); // CEP (8 dígitos) conferido e não atendido

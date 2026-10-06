@@ -11,7 +11,7 @@
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
-    "test": "pnpm --filter @ovo/assinante test && pnpm --filter @ovo/gestao test",
+    "test": "pnpm --filter @ovo/assinante test && pnpm --filter @ovo/gestao test && pnpm --filter @ovo/site test",
     "teste:banco": "pnpm --filter @ovo/database teste:fase1 && pnpm --filter @ovo/database teste:fase2 && pnpm --filter @ovo/database teste:fase3 && pnpm --filter @ovo/database teste:fase4 && pnpm --filter @ovo/database teste:fase5 && pnpm --filter @ovo/database teste:fase6 && pnpm --filter @ovo/database teste:fase7 && pnpm --filter @ovo/database teste:fase8 && pnpm --filter @ovo/database teste:fase9 && pnpm --filter @ovo/database teste:fase10 && pnpm --filter @ovo/database teste:etapa1 && pnpm --filter @ovo/database teste:etapa2 && pnpm --filter @ovo/database teste:bloco3 && pnpm --filter @ovo/database teste:bloco4 && pnpm --filter @ovo/database teste:bloco5 && pnpm --filter @ovo/database teste:bloco6 && pnpm --filter @ovo/database teste:bloco8 && pnpm --filter @ovo/database teste:concorrencia",
     "db:papel-servidor": "pnpm --filter @ovo/database db:papel-servidor",
     "db:migrar": "pnpm --filter @ovo/database db:migrar",

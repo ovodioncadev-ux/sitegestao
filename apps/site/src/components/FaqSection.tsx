@@ -2,10 +2,11 @@
 
 import { WHATSAPP_EXIBICAO } from '@ovo/config/whatsapp';
 import { useConteudoSite } from '@/hooks/useConteudoSite';
+import type { ConteudoSite } from '@/types';
 import { Secao } from './ui';
 
-export function FaqSection() {
-  const { conteudo, carregando, erro } = useConteudoSite();
+export function FaqSection({ inicial }: { inicial?: ConteudoSite | null }) {
+  const { conteudo, carregando, erro } = useConteudoSite(inicial);
 
   // O contato vem do código (fonte única do número, D12); o resto do banco.
   const itens = [

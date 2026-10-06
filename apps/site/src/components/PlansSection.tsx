@@ -3,10 +3,11 @@
 import { usePlanos } from '@/hooks/usePlanos';
 import { registrarCliquePlano, urlAssinar } from '@/lib/api';
 import { formatarReais, textoDesconto, textoMensal, textoFrescor, textoFrete } from '@/lib/formatar';
+import type { Plan } from '@/types';
 import { Botao, Cartao, Secao, Selo } from './ui';
 
-export function PlansSection() {
-  const { planos, carregando, erro, recarregar } = usePlanos();
+export function PlansSection({ inicial }: { inicial?: Plan[] | null }) {
+  const { planos, carregando, erro, recarregar } = usePlanos(inicial);
 
   if (carregando) {
     return (
@@ -59,7 +60,7 @@ export function PlansSection() {
               variante={plan.highlighted ? 'primario' : 'contorno'}
               className="mt-4 w-full"
             >
-              Escolher {plan.name}
+              {`Escolher ${plan.name}`}
             </Botao>
           </Cartao>
         ))}

@@ -4,12 +4,13 @@ import { useEffect, useState } from 'react';
 import { buscarBairros } from '@/lib/api';
 import type { Neighborhood } from '@/types';
 
-export function useBairros() {
-  const [bairros, setBairros] = useState<Neighborhood[]>([]);
-  const [carregando, setCarregando] = useState(true);
+export function useBairros(inicial?: Neighborhood[] | null) {
+  const [bairros, setBairros] = useState<Neighborhood[]>(inicial ?? []);
+  const [carregando, setCarregando] = useState(!inicial);
   const [erro, setErro] = useState<string | null>(null);
 
   useEffect(() => {
+    if (inicial) return;
     buscarBairros()
       .then((dados) => {
         setBairros(dados || []);
@@ -19,7 +20,7 @@ export function useBairros() {
         setErro(err.message || 'Erro ao carregar bairros');
       })
       .finally(() => setCarregando(false));
-  }, []);
+  }, [inicial]);
 
   return { bairros, carregando, erro };
 }

@@ -18,6 +18,8 @@ export function Footer() {
             <li><a href="#como-funciona">Como funciona</a></li>
             <li><a href="#entrega">Área de entrega</a></li>
             <li><a href="#faq">Perguntas frequentes</a></li>
+            <li><a href="/privacidade">Privacidade</a></li>
+            <li><a href="/termos">Termos de uso</a></li>
           </ul>
         </nav>
         <div>

@@ -1,14 +1,15 @@
 'use client';
 
 import { useConteudoSite } from '@/hooks/useConteudoSite';
+import type { ConteudoSite } from '@/types';
 import { Container, Icone, type NomeIcone } from './ui';
 
 /**
  * Só afirma o que o banco confirma: frescor, frete e desconto vêm de
  * /api/site. Sem resposta (ou sem plano ativo), a promessa simplesmente não aparece.
  */
-export function FaixaConfianca() {
-  const { conteudo } = useConteudoSite();
+export function FaixaConfianca({ inicial }: { inicial?: ConteudoSite | null }) {
+  const { conteudo } = useConteudoSite(inicial);
   if (!conteudo) return null;
 
   const itens: { icone: NomeIcone; texto: string }[] = [];

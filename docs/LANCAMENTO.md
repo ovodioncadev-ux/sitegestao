@@ -1,6 +1,6 @@
 # Checklist de lançamento — Ovo di Onça
 
-Última revisão: 05/10/2026 (Bloco 8). **Nada aqui foi executado em produção nem no Neon**: tudo foi testado num Postgres 16 local e descartável. Cada item diz como conferir e como desfazer.
+Última revisão: 06/10/2026 (Bloco 7). **Nada aqui foi executado em produção nem no Neon**: tudo foi testado num Postgres 16 local e descartável. Cada item diz como conferir e como desfazer.
 
 Legenda: ☐ a fazer · 🔒 só você pode fazer (credencial/decisão) · ⚠️ risco real se pular
 
@@ -117,6 +117,15 @@ Hoje o padrão é **relatório** (só avisa no console). Para impor:
   Confere: o que responde, o que se recusa (visitante sem login é mandado ao `/entrar`, `/api/rotina` sem segredo é 401, o simulador de pagamento não existe), os cabeçalhos de segurança e que nenhuma resposta vaza URL de banco, nome de segredo ou stack trace.
 - ☐ Monitor de disponibilidade: aponte para `GET /api/saude` do assinante e do gestão (200 `{ok:true}` ou 503; só devolve `ok`, sem detalhe). O site também tem `/api/saude`.
 - ☐ Faça **uma assinatura de verdade** com um e-mail seu e confira: conta → endereço → confirmação → portal.
+
+## 9b. SEO e desempenho do site
+
+- ☐ **`NEXT_PUBLIC_URL_SITE` = endereço público real** do site, **antes do build** (canonical, Open Graph, sitemap e robots partem dele; com o padrão `localhost` o buscador receberia endereços inválidos).
+- ☐ O **site precisa alcançar o app do assinante no servidor** (`NEXT_PUBLIC_URL_ASSINANTE`): é de lá que a home busca planos/FAQ/bairros. Se não alcançar, a página ainda funciona (busca pelo navegador), mas o buscador volta a ver a vitrine sem os planos. O smoke reprova nesse caso.
+- ☐ Registre o site no Google Search Console e envie `/sitemap.xml`.
+- 🔒 **`/privacidade` e `/termos` são rascunhos factuais**: faltam razão social/CNPJ do controlador e revisão jurídica antes de valerem como documento final.
+- ☐ Orçamento de desempenho (laboratório): `SITE=https://... node scripts/e2e/desempenho.mjs` (precisa de Playwright + Chromium). Em produção meça também com dados reais de campo.
+- Sem fotos/avaliações reais, **não** foram publicados dados estruturados de avaliação ou endereço (só Organization, WebSite e FAQPage, que espelham o que a página mostra).
 
 ## 10. Monitoramento de erros e backup
 

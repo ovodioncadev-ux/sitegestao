@@ -115,6 +115,18 @@ try {
     conferir(res.status === 200 && /<html[^>]*lang="pt-BR"/.test(texto), 'site: / responde 200 com a página em pt-BR', `HTTP ${res.status}`);
     cabecalhosDeSeguranca('site /', res);
     semVazamento('site /', texto);
+    conferir(/Escolher Semanal|Escolher Quinzenal|Escolher Mensal/.test(texto), 'site: os planos já vêm no HTML (o buscador os vê)');
+    conferir(!/Carregando (planos|perguntas|bairros)/.test(texto), 'site: o HTML não traz estado "carregando"');
+    conferir(/<link rel="canonical"/.test(texto) && /property="og:title"/.test(texto), 'site: tem canonical e Open Graph');
+    conferir(/application\/ld\+json/.test(texto), 'site: tem dados estruturados (JSON-LD)');
+    const robots = await pegar(base, '/robots.txt');
+    conferir(robots.res.status === 200 && /Sitemap:/.test(robots.texto) && /Disallow: \/api\//.test(robots.texto), 'site: /robots.txt aponta o sitemap e bloqueia /api/');
+    const mapa = await pegar(base, '/sitemap.xml');
+    conferir(mapa.res.status === 200 && /<urlset/.test(mapa.texto), 'site: /sitemap.xml responde');
+    for (const caminho of ['/privacidade', '/termos']) {
+      const pagina = await pegar(base, caminho);
+      conferir(pagina.res.status === 200, `site: ${caminho} responde 200`, `HTTP ${pagina.res.status}`);
+    }
     await saude('site', base);
     await jsonDe('site', base, '/api/plans', (c) => Array.isArray(c.planos) && c.planos.length > 0, 'devolve os planos');
     await jsonDe('site', base, '/api/site', (c) => Array.isArray(c.faq), 'devolve o conteúdo (FAQ)');
@@ -135,6 +147,8 @@ try {
 
     const home = await pegar(base, '/');
     mandaParaLogin('assinante /', home.res, home.texto);
+    const robotsA = await pegar(base, '/robots.txt');
+    conferir(robotsA.res.status === 200 && /Disallow: \//.test(robotsA.texto), 'assinante: /robots.txt pede para não indexar nada');
 
     const area = await pegar(base, '/api/area?cep=abc');
     conferir(area.res.status === 400, 'assinante: /api/area recusa CEP inválido (400)', `HTTP ${area.res.status}`);
@@ -158,6 +172,8 @@ try {
     const base = ALVOS.gestao.replace(/\/$/, '');
     console.log(`\nGestão  ${base}`);
     await saude('gestao', base);
+    const robotsG = await pegar(base, '/robots.txt');
+    conferir(robotsG.res.status === 200 && /Disallow: \//.test(robotsG.texto), 'gestão: /robots.txt pede para não indexar nada');
 
     const entrar = await pegar(base, '/entrar');
     conferir(entrar.res.status === 200, 'gestão: /entrar responde 200', `HTTP ${entrar.res.status}`);
