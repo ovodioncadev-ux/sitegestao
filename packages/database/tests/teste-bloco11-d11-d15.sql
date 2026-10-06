@@ -28,7 +28,7 @@ declare
 begin
   select id into v_s from planos where frequencia = 'semanal';
   insert into faixas_cep_atendidas (cep_inicio, cep_fim, bairro) values ('30110000', '30190999', 'Teste B11');
-  update config_negocio set preco_pente_centavos = 4100, preco_duzia_centavos = 1200, bonus_indicador_pct = 10,
+  update config_negocio set preco_pente_centavos = 4100, preco_duzia_centavos = 1200,   -- preço FICTÍCIO de teste (o real é definido pelo dono) bonus_indicador_pct = 10,
                             hora_corte = '18:00', dia_corte = 1;
 
   insert into "user" (id, name, email) values (id_dono, 'Dono B11', 'dono-b11@exemplo.test');

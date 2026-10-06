@@ -1,7 +1,7 @@
 -- ═══════════════════════════════════════════════════════════════════════════
 -- Bloco 11 — D11 (dúzia pedida pelo assinante) e D15 (bônus de indicação).
 --
--- D11  R$ 12,00; só para quem já recebe pente; não aparece no site público. O assinante PEDE na
+-- D11  preço da dúzia vem de config_negocio (definido pelo dono); só para quem já recebe pente; não aparece no site público. O assinante PEDE na
 --      área dele, o dono APROVA; vale a partir da próxima entrega depois do corte (D9).
 -- D15  o indicado tem os mesmos 10% do 1º mês de todo mundo; o INDICADOR ganha 10% na fatura do mês
 --      em que uma pessoa indicada por ele pagou a 1ª fatura. Duas indicações no mesmo mês continuam
@@ -22,8 +22,8 @@ alter type tipo_solicitacao add value if not exists 'duzia';
 alter table solicitacoes_assinatura
   add column duzias_pedidas smallint check (duzias_pedidas is null or duzias_pedidas between 0 and 50);
 
--- D11: R$ 12,00 (só onde ainda não havia preço) e D15: 10% para o indicador (só onde estava zerado).
-update config_negocio set preco_duzia_centavos = 1200 where preco_duzia_centavos = 0;
+-- D15: 10% para o indicador (só onde estava zerado). O PREÇO DA DÚZIA não é mexido aqui: o valor
+-- de R$ 12,00 citado em DECISOES.md era de teste; quem define o preço real é o dono, em /configuracoes.
 update config_negocio set bonus_indicador_pct = 10 where bonus_indicador_pct = 0;
 alter table config_negocio alter column bonus_indicador_pct set default 10;
 comment on column config_negocio.bonus_indicador_pct is

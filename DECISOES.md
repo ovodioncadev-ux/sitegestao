@@ -116,7 +116,7 @@ Só não dá para ter as duas coisas: ou o intervalo é exato, ou o dia é fixo.
 | Vencimento da cobrança | **Decidido em 30/09/2026** — ver "Fechamento das regras de cobrança" (D1). |
 | Crédito por dias de pausa dentro de um período já pago | **Decidido em 30/09/2026** — ver "Fechamento das regras de cobrança" (D3). |
 | Frete no valor da fatura | `planos.frete_centavos` aparece no site, mas `calcular_valor_fatura` não soma frete. O frete do Mensal ficou em R$ 1,00 depois de um teste em 30/09 e contradizia "frete grátis" (site/FAQ); voltou a R$ 0,00 na auditoria de estabilidade do mesmo dia. Frete continua sendo exibido e não cobrado. |
-| Preço da dúzia | **Decidido em 30/09/2026**: R$ 12,00 — ver "Fechamento das regras de cobrança" (D11). |
+| Preço da dúzia | ~~R$ 12,00~~ **Valor de teste, não é o preço real (esclarecido em 06/10/2026): o dono define o preço real em `/configuracoes`.** Ver "Fechamento das regras de cobrança" (D11). |
 | Integração de pagamento e e-mail | Dependem de provedor e credenciais. |
 
 
@@ -141,7 +141,7 @@ coluna "Hoje" diz o que muda.
 | D8 | 1ª entrega | **Só depois do 1º pagamento.** Ao assinar, a 1ª fatura (com os 10%) é gerada na hora; a 1ª entrega é criada quando o pagamento é registrado | Entrega antes de pagar |
 | D9 | Corte | Vale o corte de `config_negocio` (segunda 18h): depois dele, a entrega vai para a quarta seguinte. Vale para 1ª entrega, retorno de pausa e troca de plano | Sem corte |
 | D10 | O que a fatura cobra | **Entregas previstas no mês × valor da entrega.** Entregas presas ao calendário: **semanal = toda quarta** (4 ou 5 por mês), **quinzenal = 1ª e 3ª quarta do mês** (sempre 2), **mensal = 1ª quarta do mês** (sempre 1). Substitui a contagem em dias (7/15/30) da decisão #13. O site deixa de mostrar preço mensal fixo (ex.: "R$ 41 por entrega · cerca de R$ 164/mês no semanal") | Valor fixo por mês; entregas a cada 7/14/28 dias |
-| D11 | Dúzia | **R$ 12,00.** Só para quem já recebe pente; **não aparece no site público**. O **assinante pede** na área dele e o **dono aprova**; vale a partir da próxima entrega depois do corte | R$ 12,00; só o dono cadastra; fatura usa o padrão do cliente |
+| D11 | Dúzia | **Preço a definir pelo dono (os R$ 12,00 eram de teste).** Só para quem já recebe pente; **não aparece no site público**. O **assinante pede** na área dele e o **dono aprova**; vale a partir da próxima entrega depois do corte | R$ 12,00; só o dono cadastra; fatura usa o padrão do cliente |
 | D12 | WhatsApp | **(31) 2516-7561** (link `wa.me/553125167561`; o número tem WhatsApp Business, confirmado). Um lugar só no código | Texto e link com números diferentes, em 5 arquivos |
 | D13 | Selo do semanal | **"Recomendado"** no lugar de "Mais escolhido" | "Mais escolhido" |
 | D14 | Tabela comparativa | **Mantida como está** | — |
@@ -374,7 +374,7 @@ Migration `1758758430000_bloco10-d3-d7-pausa-troca-cancelamento.sql` (**só no b
 Migration `1758758431000_bloco11-d11-d15-duzia-e-indicacao.sql` (**só no banco de teste local**, não no Neon). Testes: `pnpm --filter @ovo/database teste:bloco11` (12 verificações) e o passo de dúzia em `scripts/e2e/ciclo.mjs`. Com isto **todas as regras D1–D15 estão implementadas**.
 
 **D11 — dúzia**
-- O assinante **pede** no portal ("Pedir dúzias", 0 a 50 por entrega; 0 = parar) e o dono **atende** no painel. Só assinatura ativa; o pedido igual ao que já recebe é recusado. O preço da dúzia (R$ 12,00, `config_negocio.preco_duzia_centavos`) **não aparece no site público**; só na fatura.
+- O assinante **pede** no portal ("Pedir dúzias", 0 a 50 por entrega; 0 = parar) e o dono **atende** no painel. Só assinatura ativa; o pedido igual ao que já recebe é recusado. O preço da dúzia (`config_negocio.preco_duzia_centavos`, **definido pelo dono; os R$ 12,00 citados antes eram valor de teste, não o preço real**) **não aparece no site público**; só na fatura.
 - Ao atender, `aplicar_duzias` grava `clientes.duzias_padrao` e muda **só as entregas pendentes a partir da 1ª quarta que o corte permite** (D9). As anteriores ficam como estão.
 
 **D15 — indicação**
@@ -387,5 +387,5 @@ Migration `1758758431000_bloco11-d11-d15-duzia-e-indicacao.sql` (**só no banco 
 2. O bônus vale na primeira fatura do indicador cujo **período é do mês do pagamento do indicado ou posterior**; se a fatura do mês já saiu, vale na seguinte (sem devolução).
 3. O bônus só é concedido a indicador com **assinatura ativa** no momento do pagamento do indicado.
 4. Só a **primeira fatura paga** do indicado gera bônus (renovações e novas assinaturas do mesmo cliente não geram outro).
-5. A migration passou `bonus_indicador_pct` de 0 para 10 e `preco_duzia_centavos` de 0 para 1200 **onde estavam zerados**; confira em `/configuracoes`.
+5. A migration passou `bonus_indicador_pct` de 0 para 10 **onde estava zerado**; confira em `/configuracoes`. O **preço da dúzia não é alterado**: defina o valor real em `/configuracoes` antes de liberar o pedido de dúzia (com preço 0 a dúzia sairia de graça na fatura).
 
