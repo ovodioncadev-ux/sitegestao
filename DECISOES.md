@@ -347,3 +347,22 @@ Migration `1758758429000_bloco9-d1-d2-ciclo-e-inadimplencia.sql` (aplicada **só
 
 **Continua sem implementar:** D3–D7 (pausa com crédito/redução, troca de plano com diferença, cancelamento no fim do mês), D11 e D15. Pausa e bloqueio não se combinam ainda: só assinatura **ativa** é bloqueada.
 
+
+---
+
+## Bloco 10 — D3 a D7: pausa, troca de plano e cancelamento (06/10/2026)
+
+Migration `1758758430000_bloco10-d3-d7-pausa-troca-cancelamento.sql` (**só no banco de teste local**, não no Neon). Testes: `pnpm --filter @ovo/database teste:bloco10` (17 verificações) e `node scripts/e2e/ciclo.mjs` (portal + painel). Testes antigos ajustados: a redução de plano e o cancelamento agora são agendados.
+
+- **D7 cancelamento:** vale no **último dia do mês pago** (maior `periodo_fim` de fatura paga). Segue ativa, com entregas, sem fatura nova (as pendentes futuras são canceladas); a rotina cancela no dia seguinte. É **imediato** se a assinatura está pausada, bloqueada, aguardando o 1º pagamento, sem mês pago pela frente, ou se o dono marca "cancelar agora". O dono pode **desfazer** o agendamento.
+- **D5 pausa:** retorno previsto de no máximo **60 dias** (`config_negocio.dias_max_pausa`); sem data de retorno é permitido, e a pausa que passa de 60 dias **aparece no painel** (tela inicial e na assinatura) para o dono decidir. Nada reativa nem cancela sozinho.
+- **D3 pausa em mês pago:** entregas do calendário que caem na pausa dentro de períodos **já pagos** × valor da entrega congelado na fatura paga. O assinante escolhe ao pedir (e o dono confirma ao atender): **crédito** (livro `creditos_assinatura`, abate a próxima fatura) ou **pentes depois** (os pentes/dúzias devidos vão na 1ª entrega do retorno, máx. 50 por entrega).
+- **D4:** a fatura em aberto (pendente ou atrasada) cujo período contém o dia da pausa fica só com as **entregas feitas** (com o mesmo % de desconto); sem nenhuma entrega feita, é cancelada.
+- **D15c:** uma fatura recebe **ou** o desconto percentual **ou** o crédito; com os 10% do 1º mês o crédito espera. O crédito **nunca zera** a fatura (sobra no mínimo R$ 1,00 a pagar). Fatura cancelada devolve o crédito.
+- **D6:** **aumento** (mais entregas por mês) vale na hora: o plano muda, as entregas pendentes seguem o novo calendário a partir da 1ª quarta após o corte e sai uma **fatura avulsa de diferença** ((entregas do plano novo − as do antigo, do corte ao fim do mês) × valor da entrega, vence hoje); faturas futuras não pagas são refeitas pelo plano novo. **Redução** fica agendada para o dia 1 do mês seguinte (a fatura desse mês já sai pelo plano novo). Voltar ao plano atual cancela a redução agendada.
+- Pedidos do assinante: pausa (com preferência), cancelamento e **troca de plano**; o dono atende no painel.
+
+**Interpretações a confirmar com o Fred/a Bruna:** (1) o crédito é calculado com o valor da entrega da fatura paga, **sem refazer o desconto do 1º mês**; (2) "pentes depois" = tudo na 1ª entrega do retorno; (3) a D4 vale também para fatura pendente (não só atrasada); (4) a fatura avulsa de diferença **não entra** no cálculo de crédito de uma pausa futura (não tem período); (5) crédito que sobra ao cancelar **não vira dinheiro nem pentes** (o painel mostra o saldo; a devolução é combinada à mão); (6) aumento com fatura do mês ainda não paga cobra a diferença **além** dela.
+
+**Não implementado:** D11 (dúzia pedida pelo assinante) e D15 (indicação). O campo de duração máxima da pausa ainda não está em `/configuracoes`.
+

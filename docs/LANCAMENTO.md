@@ -1,6 +1,6 @@
 # Checklist de lançamento — Ovo di Onça
 
-Última revisão: 06/10/2026 (Bloco 9). **Nada aqui foi executado em produção nem no Neon**: tudo foi testado num Postgres 16 local e descartável. Cada item diz como conferir e como desfazer.
+Última revisão: 06/10/2026 (Bloco 10). **Nada aqui foi executado em produção nem no Neon**: tudo foi testado num Postgres 16 local e descartável. Cada item diz como conferir e como desfazer.
 
 Legenda: ☐ a fazer · 🔒 só você pode fazer (credencial/decisão) · ⚠️ risco real se pular
 
@@ -28,7 +28,7 @@ Legenda: ☐ a fazer · 🔒 só você pode fazer (credencial/decisão) · ⚠�
 
 ## 2. Banco (Neon)
 
-⚠️ **Sempre no branch de teste primeiro, depois no principal.** As migrations 424–429 ainda não foram aplicadas em nenhum Neon.
+⚠️ **Sempre no branch de teste primeiro, depois no principal.** As migrations 424–430 ainda não foram aplicadas em nenhum Neon.
 
 1. ☐ 🔒 No Neon, **crie um branch do principal** (ponto de restauração) antes de migrar. É o seu "desfazer" mais rápido.
 2. ☐ 🔒 `DATABASE_TEST_URL` apontando para o branch de teste → `pnpm db:migrar:teste` → `pnpm teste:banco` → `pnpm seguranca`. Tudo verde antes de seguir.
@@ -136,7 +136,8 @@ Hoje o padrão é **relatório** (só avisa no console). Para impor:
 
 - Sem serviço de e-mail: ninguém tem e-mail confirmado; o dono vincula contas à mão na ficha do cliente.
 - **Antes de migrar o Neon principal (migration 429, D1/D2):** assinaturas que já existem com `proxima_cobranca` no meio do mês recebem **uma fatura de transição** até o fim do mês e só depois entram no ciclo do dia 1; e **faturas que já estiverem vencidas há mais de 25 dias bloqueiam a assinatura na primeira rotina**. Rode antes `select a.id from assinaturas a join faturas f on f.assinatura_id = a.id where a.status='ativa' and f.status in ('pendente','atrasada') and f.vencimento + 25 <= current_date;` para saber quem será bloqueado e avisar essas pessoas.
-- Regras D3–D7, D11 e D15 **ainda não implementadas** (`DECISOES.md`). As interpretações da D1/D2 (fatura 7 dias antes, período bloqueado não cobrado) precisam da confirmação do Fred/da Bruna.
+- **Migration 430 (D3–D7):** assinaturas **pausadas há mais de 60 dias** passam a aparecer no painel como pendência (consulta antes: `select a.id, p.inicio from pausas_assinatura p join assinaturas a on a.id = p.assinatura_id where p.status = 'ativa' and p.inicio + 60 < current_date;`). Cancelar passa a **agendar** para o fim do mês pago: avise quem opera o painel (há a opção "Cancelar agora"). Reduções de plano ficam agendadas para o mês seguinte.
+- Regras D11 e D15 **ainda não implementadas** (`DECISOES.md`). As interpretações da D1/D2 e da D3–D7 (fatura 7 dias antes, período bloqueado não cobrado, crédito sem refazer o desconto do 1º mês, crédito que sobra ao cancelar) precisam da confirmação do Fred/da Bruna.
 - Texto de consentimento do "Avise-me" **precisa de revisão jurídica** (`packages/config/src/privacidade.mjs`).
 - Fotos e depoimentos reais ainda não existem no site.
 - `rateLimit` no Better Auth cobre login/cadastro; as demais rotas do Better Auth usam o limite geral (100/min por IP).

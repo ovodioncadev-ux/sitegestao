@@ -57,6 +57,7 @@ export const STATUS_SOLICITACAO = {
 export const TIPO_SOLICITACAO = {
   pausa: 'Pausar',
   cancelamento: 'Cancelar',
+  troca_plano: 'Trocar de plano',
 } as const;
 
 export const CHAVES_STATUS_CLIENTE = Object.keys(STATUS_CLIENTE) as (keyof typeof STATUS_CLIENTE)[];

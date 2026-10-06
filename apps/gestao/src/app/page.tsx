@@ -57,10 +57,13 @@ export default async function PainelInicial() {
               count(*) filter (where status = 'novo' and area_atendida_em is not null) as prontos
          from interessados`,
     );
-    const e = await bd.umaLinha<{ aguardando: string; problemas: string; bloqueadas: string }>(
+    const e = await bd.umaLinha<{ aguardando: string; problemas: string; bloqueadas: string; pausas_longas: string }>(
       `select (select count(*) from assinaturas where status = 'ativa' and aguardando_pagamento_desde is not null) as aguardando,
               (select count(*) from pagamentos_online where status <> 'confirmado') as problemas,
-              (select count(*) from assinaturas where bloqueada_desde is not null) as bloqueadas`,
+              (select count(*) from assinaturas where bloqueada_desde is not null) as bloqueadas,
+              (select count(*) from pausas_assinatura pa cross join config_negocio cn
+                where pa.status = 'ativa' and cn.id = 1
+                  and pa.inicio + cn.dias_max_pausa < (now() at time zone 'America/Sao_Paulo')::date) as pausas_longas`,
     );
     const pagamentosComProblema = await bd.consultar<{ id: string; fatura_id: string; status: string; valor_pago_centavos: number; criado_em: string; fatura_centavos: number }>(
       `select p.id, p.fatura_id, p.status, p.valor_pago_centavos, p.criado_em::text, f.valor_centavos as fatura_centavos
@@ -72,7 +75,7 @@ export default async function PainelInicial() {
         where criado_em > now() - interval '30 days' group by etapa`,
     );
     return {
-      espera: { aguardando: Number(e?.aguardando ?? 0), problemas: Number(e?.problemas ?? 0), bloqueadas: Number(e?.bloqueadas ?? 0) },
+      espera: { aguardando: Number(e?.aguardando ?? 0), problemas: Number(e?.problemas ?? 0), bloqueadas: Number(e?.bloqueadas ?? 0), pausasLongas: Number(e?.pausas_longas ?? 0) },
       pagamentosComProblema,
       interessados: { aguardando: Number(i?.aguardando ?? 0), prontos: Number(i?.prontos ?? 0) },
       funil: Object.fromEntries(funilLinhas.map((l) => [l.etapa, Number(l.total)])) as Record<string, number>,
@@ -121,6 +124,12 @@ export default async function PainelInicial() {
         {espera.bloqueadas > 0 && (
           <li>
             <Link href="/assinaturas">{espera.bloqueadas} assinatura(s) bloqueada(s) por inadimplência</Link> (entregas paradas até o pagamento)
+          </li>
+        )}
+        {espera.pausasLongas > 0 && (
+          <li>
+            <Link href="/assinaturas?status=pausada">{espera.pausasLongas} pausa(s) além do limite de dias</Link>: reative
+            ou cancele
           </li>
         )}
         {espera.problemas > 0 && (

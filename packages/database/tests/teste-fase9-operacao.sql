@@ -140,7 +140,9 @@ begin
 
   -- F9.7 ── trocar plano: histórico e próxima operação ──────────────────────
   v_total := v_total + 1;
-  perform alterar_plano_assinatura(ass_1, v_plano_q);
+  perform alterar_plano_assinatura(ass_1, v_plano_q);      -- redução (D6): fica agendada para o mês seguinte
+  update assinaturas set plano_proximo_a_partir_de = v_hoje where id = ass_1;   -- simula a chegada da data
+  perform aplicar_trocas_agendadas();
   if (select plano_id from assinaturas where id = ass_1) = v_plano_q
      and exists (select 1 from auditoria where acao = 'plano_da_assinatura_alterado' and entidade_id = ass_1::text)
      and calcular_valor_fatura(ass_1) = 8200 then
@@ -367,7 +369,7 @@ begin
 
   -- F9.21 ── cancelar: nada mais é cobrado ──────────────────────────────────
   v_total := v_total + 1;
-  perform cancelar_assinatura(ass_1, 'sem fidelidade');
+  perform cancelar_assinatura(ass_1, 'sem fidelidade', true);
   begin
     perform gerar_cobranca(ass_1);
     v_falhas := v_falhas + 1;

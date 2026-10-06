@@ -217,6 +217,9 @@ jobs:
       - name: Fluxo de assinatura (chave D8 desligada, como na entrega atual)
         run: node scripts/e2e/assinatura.mjs
 
+      - name: Pausa, troca de plano e cancelamento (D3-D7, portal + painel)
+        run: node scripts/e2e/ciclo.mjs
+
       - name: Fluxo de pagamento (D8 + provedor simulado)
         # O simulador só liga fora de produção: o assinante sobe em modo de desenvolvimento.
         env:

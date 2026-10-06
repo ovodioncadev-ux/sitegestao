@@ -45,11 +45,18 @@ type Assinatura = {
   pagar_ate: string | null;
   /** D2: entregas paradas por fatura em atraso (nulo = normal). */
   bloqueada_desde: string | null;
+  /** D7/D6/D3: cancelamento agendado, troca agendada e crédito em reais. */
+  cancelamento_agendado_para: string | null;
+  plano_proximo_nome: string | null;
+  plano_proximo_a_partir_de: string | null;
+  saldo_credito: number;
+  plano_id: number;
 };
 type Reposicao = { id: string; quantidade_ovos: number; status: string; reposicao: string | null };
 type Entrega = { id: string; data_prevista: string; status: string; pentes: number; duzias: number; horario: string | null };
 type Fatura = { id: string; valor_centavos: number; vencimento: string; data_pagamento: string | null; status: string };
-type Pedido = { tipo: 'pausa' | 'cancelamento' };
+type Pedido = { tipo: 'pausa' | 'cancelamento' | 'troca_plano' };
+type PlanoOpcao = { id: number; nome: string };
 
 export default async function MinhaAssinatura({ searchParams }: { searchParams: Promise<{ nova?: string }> }) {
   const { usuarioId } = await exigirSessao();
@@ -66,9 +73,13 @@ export default async function MinhaAssinatura({ searchParams }: { searchParams: 
               p.nome as plano_nome, p.freshness_max_dias, a.forma_cobranca::text,
               a.proxima_cobranca::text, a.data_retorno_prevista::text,
               a.aguardando_pagamento_desde::text, a.bloqueada_desde::text,
+              a.cancelamento_agendado_para::text, pp.nome as plano_proximo_nome, a.plano_proximo_a_partir_de::text,
+              (select coalesce(sum(cr.valor_centavos), 0)::int from creditos_assinatura cr where cr.assinatura_id = a.id) as saldo_credito,
+              a.plano_id,
               (a.aguardando_pagamento_desde + cfg.dias_para_pagar_1a_fatura)::text as pagar_ate
          from assinaturas a
          join planos p on p.id = a.plano_id
+         left join planos pp on pp.id = a.plano_proximo_id
          cross join config_negocio cfg
         where a.cliente_id = $1 and cfg.id = 1
         order by (a.status in ('ativa', 'pausada')) desc, a.criado_em desc
@@ -110,7 +121,14 @@ export default async function MinhaAssinatura({ searchParams }: { searchParams: 
       [cliente.id],
     );
 
-    return { cliente, assinatura, entregas, faturas, pedidos, reposicoes };
+    const outrosPlanos = assinatura
+      ? await bd.consultar<PlanoOpcao>(
+          `select id, nome from planos where ativo and id <> $1 order by entregas_por_mes desc`,
+          [assinatura.plano_id],
+        )
+      : [];
+
+    return { cliente, assinatura, entregas, faturas, pedidos, reposicoes, outrosPlanos };
   });
 
   if (!dados) {
@@ -135,7 +153,8 @@ export default async function MinhaAssinatura({ searchParams }: { searchParams: 
     );
   }
 
-  const { cliente, assinatura, entregas, faturas, pedidos, reposicoes } = dados;
+  const { cliente, assinatura, entregas, faturas, pedidos, reposicoes, outrosPlanos } = dados;
+  const pediuTroca = pedidos.some((p) => p.tipo === 'troca_plano');
   const vigente = assinatura && (assinatura.status === 'ativa' || assinatura.status === 'pausada');
   const pediuPausa = pedidos.some((p) => p.tipo === 'pausa');
   const pediuCancelamento = pedidos.some((p) => p.tipo === 'cancelamento');
@@ -148,6 +167,34 @@ export default async function MinhaAssinatura({ searchParams }: { searchParams: 
 
   return (
     <Pagina titulo={`Olá, ${cliente.nome.split(' ')[0]}`}>
+      {assinatura?.cancelamento_agendado_para && (
+        <section className="cartao" role="status" aria-labelledby="titulo-cancelamento">
+          <h2 id="titulo-cancelamento">Cancelamento agendado</h2>
+          <p>
+            Sua assinatura vai até <strong>{formatarData(assinatura.cancelamento_agendado_para)}</strong> (fim do mês
+            já pago): as entregas continuam até lá e nada novo será cobrado. Mudou de ideia? Fale com a gente pelo
+            WhatsApp.
+          </p>
+        </section>
+      )}
+      {assinatura?.plano_proximo_nome && (
+        <section className="cartao" role="status" aria-labelledby="titulo-troca">
+          <h2 id="titulo-troca">Troca de plano agendada</h2>
+          <p>
+            A partir de <strong>{formatarData(assinatura.plano_proximo_a_partir_de)}</strong> você passa para o plano{' '}
+            <strong>{assinatura.plano_proximo_nome}</strong>.
+          </p>
+        </section>
+      )}
+      {assinatura && assinatura.saldo_credito > 0 && (
+        <section className="cartao" role="status" aria-labelledby="titulo-credito">
+          <h2 id="titulo-credito">Você tem crédito</h2>
+          <p>
+            <strong>{formatarReais(assinatura.saldo_credito)}</strong> serão abatidos da sua próxima fatura (quando ela
+            não tiver o desconto do 1º mês).
+          </p>
+        </section>
+      )}
       {bloqueada && (
         <section className="cartao" role="alert" aria-labelledby="titulo-bloqueada">
           <h2 id="titulo-bloqueada">Suas entregas estão paradas</h2>
@@ -277,6 +324,35 @@ export default async function MinhaAssinatura({ searchParams }: { searchParams: 
                   Motivo (opcional)
                   <textarea name="motivo" maxLength={500} rows={2} />
                 </label>
+                <label className="campo">
+                  Se já pagou entregas que não vão acontecer
+                  <select name="preferencia" defaultValue="credito">
+                    <option value="credito">Quero crédito na próxima fatura</option>
+                    <option value="pentes">Quero receber os pentes depois</option>
+                  </select>
+                </label>
+              </FormAcao>
+            ))}
+
+          {assinatura.status === 'ativa' && outrosPlanos.length > 0 &&
+            (pediuTroca ? (
+              <p className="msg-info">Seu pedido de troca de plano está aguardando resposta.</p>
+            ) : (
+              <FormAcao acao={solicitarAlteracao} rotulo="Pedir troca de plano" secundario limpar>
+                <input type="hidden" name="tipo" value="troca_plano" />
+                <label className="campo">
+                  Novo plano
+                  <select name="plano_id" required defaultValue="">
+                    <option value="" disabled>Escolha…</option>
+                    {outrosPlanos.map((p) => (
+                      <option key={p.id} value={p.id}>{p.nome}</option>
+                    ))}
+                  </select>
+                </label>
+                <p className="suave">
+                  Para um plano com mais entregas, a troca vale na hora (com uma cobrança da diferença do mês). Para
+                  menos entregas, vale a partir do mês seguinte.
+                </p>
               </FormAcao>
             ))}
 
