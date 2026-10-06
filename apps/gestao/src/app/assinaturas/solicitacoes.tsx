@@ -9,6 +9,7 @@ export type Solicitacao = {
   motivo: string | null;
   preferencia?: string | null;
   plano_destino_nome?: string | null;
+  duzias_pedidas?: number | null;
   criado_em: string;
   cliente_nome: string;
   assinatura_id: string;
@@ -57,6 +58,9 @@ export function SolicitacoesPendentes({
                 <td>
                   {rotulo(TIPO_SOLICITACAO, s.tipo)}
                   {s.tipo === 'troca_plano' && s.plano_destino_nome ? ` → ${s.plano_destino_nome}` : ''}
+                  {s.tipo === 'duzia' && s.duzias_pedidas !== null && s.duzias_pedidas !== undefined
+                    ? `: ${s.duzias_pedidas === 0 ? 'parar de receber' : `${s.duzias_pedidas} por entrega`}`
+                    : ''}
                   {s.tipo === 'pausa' && s.preferencia
                     ? ` (${s.preferencia === 'pentes' ? 'quer receber os pentes depois' : 'prefere crédito'})`
                     : ''}
@@ -74,7 +78,9 @@ export function SolicitacoesPendentes({
                           <input type="checkbox" name="executar" defaultChecked />{' '}
                           {s.tipo === 'pausa'
                             ? 'Pausar a assinatura agora'
-                            : s.tipo === 'troca_plano'
+                            : s.tipo === 'duzia'
+                              ? 'Aplicar as dúzias a partir da próxima entrega depois do corte'
+                              : s.tipo === 'troca_plano'
                               ? 'Trocar o plano agora (aumento vale já; redução, no mês seguinte)'
                               : 'Cancelar (no fim do mês pago)'}
                         </label>

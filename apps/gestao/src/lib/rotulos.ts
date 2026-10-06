@@ -58,6 +58,7 @@ export const TIPO_SOLICITACAO = {
   pausa: 'Pausar',
   cancelamento: 'Cancelar',
   troca_plano: 'Trocar de plano',
+  duzia: 'Dúzias por entrega',
 } as const;
 
 export const CHAVES_STATUS_CLIENTE = Object.keys(STATUS_CLIENTE) as (keyof typeof STATUS_CLIENTE)[];

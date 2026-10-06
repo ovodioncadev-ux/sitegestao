@@ -366,3 +366,26 @@ Migration `1758758430000_bloco10-d3-d7-pausa-troca-cancelamento.sql` (**só no b
 
 **Não implementado:** D11 (dúzia pedida pelo assinante) e D15 (indicação). O campo de duração máxima da pausa ainda não está em `/configuracoes`.
 
+
+---
+
+## Bloco 11 — D11 (dúzia) e D15 (indicação) (06/10/2026)
+
+Migration `1758758431000_bloco11-d11-d15-duzia-e-indicacao.sql` (**só no banco de teste local**, não no Neon). Testes: `pnpm --filter @ovo/database teste:bloco11` (12 verificações) e o passo de dúzia em `scripts/e2e/ciclo.mjs`. Com isto **todas as regras D1–D15 estão implementadas**.
+
+**D11 — dúzia**
+- O assinante **pede** no portal ("Pedir dúzias", 0 a 50 por entrega; 0 = parar) e o dono **atende** no painel. Só assinatura ativa; o pedido igual ao que já recebe é recusado. O preço da dúzia (R$ 12,00, `config_negocio.preco_duzia_centavos`) **não aparece no site público**; só na fatura.
+- Ao atender, `aplicar_duzias` grava `clientes.duzias_padrao` e muda **só as entregas pendentes a partir da 1ª quarta que o corte permite** (D9). As anteriores ficam como estão.
+
+**D15 — indicação**
+- O **indicado** continua com os 10% do 1º mês (como todo novo assinante, não 20%).
+- O **indicador** ganha `bonus_indicador_pct` (10%) **na fatura do mês em que um indicado pagou a 1ª fatura** (`bonus_indicacao`, um registro por indicado). Duas indicações no mesmo mês dão **um** desconto de 10%; os dois bônus ficam gastos juntos. Os percentuais **nunca se somam** (D15c): se o indicador está no próprio 1º mês, vale o desconto de 1º mês e o bônus espera a fatura seguinte. Fatura cancelada devolve o bônus.
+- Painel: a ficha do cliente mostra "Indicado por…" e "Indicou N: bônus a aplicar / aplicados".
+
+**Interpretações a confirmar com o Fred/a Bruna**
+1. Fatura já emitida não é refeita quando entra a dúzia: vale a partir da próxima fatura.
+2. O bônus vale na primeira fatura do indicador cujo **período é do mês do pagamento do indicado ou posterior**; se a fatura do mês já saiu, vale na seguinte (sem devolução).
+3. O bônus só é concedido a indicador com **assinatura ativa** no momento do pagamento do indicado.
+4. Só a **primeira fatura paga** do indicado gera bônus (renovações e novas assinaturas do mesmo cliente não geram outro).
+5. A migration passou `bonus_indicador_pct` de 0 para 10 e `preco_duzia_centavos` de 0 para 1200 **onde estavam zerados**; confira em `/configuracoes`.
+

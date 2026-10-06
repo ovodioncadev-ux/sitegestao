@@ -156,7 +156,16 @@ try {
   assert.equal(sql(`select coalesce(cancelamento_agendado_para::text, 'nulo') from assinaturas where id = '${assinaturaId}'`), 'nulo');
   passo('o dono desfez o cancelamento agendado');
 
-  console.log('\nE2E do ciclo (D3–D7): tudo passou.');
+  // 10. D11: o assinante pede 2 dúzias por entrega; o dono aplica
+  await pedir('Pedir dúzias', /pedido de dúzias está aguardando/, async () => {
+    await portal.locator('input[name="duzias"]').fill('2');
+  });
+  await atender('Dúzias');
+  assert.equal(sql(`select duzias_padrao from clientes where id = (select cliente_id from assinaturas where id = '${assinaturaId}')`), '2');
+  assert.ok(Number(sql(`select count(*) from entregas where assinatura_id = '${assinaturaId}' and status = 'pendente' and duzias = 2`)) >= 1);
+  passo('D11: o assinante pediu 2 dúzias por entrega; o dono aplicou e a entrega pendente já leva as dúzias');
+
+  console.log('\nE2E do ciclo (D3–D7 e D11): tudo passou.');
 } catch (erro) {
   await portal.screenshot({ path: 'e2e-falha-portal.png', fullPage: true }).catch(() => {});
   await painel.screenshot({ path: 'e2e-falha-painel.png', fullPage: true }).catch(() => {});

@@ -35,7 +35,7 @@ export default async function Assinaturas({
 
   const { linhas, pedidos } = await comoUsuario(autorizacao.usuario.usuarioId, async (bd) => ({
     pedidos: await bd.consultar<Solicitacao>(
-      `select s.id, s.tipo::text, s.motivo, s.preferencia, pd.nome as plano_destino_nome,
+      `select s.id, s.tipo::text, s.motivo, s.preferencia, s.duzias_pedidas, pd.nome as plano_destino_nome,
               to_char(s.criado_em at time zone 'America/Sao_Paulo', 'DD/MM/YYYY HH24:MI') as criado_em,
               c.nome as cliente_nome, s.assinatura_id, a.status::text as assinatura_status
          from solicitacoes_assinatura s

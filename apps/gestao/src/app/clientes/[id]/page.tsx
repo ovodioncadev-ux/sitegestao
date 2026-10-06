@@ -38,7 +38,7 @@ export default async function EditarCliente({ params }: { params: Promise<{ id: 
     notFound();
   }
 
-  const { cliente, planos, planosComId, assinaturas } = await comoUsuario(autorizacao.usuario.usuarioId, async (bd) => {
+  const { cliente, planos, planosComId, assinaturas, indicacao } = await comoUsuario(autorizacao.usuario.usuarioId, async (bd) => {
     const cliente = await bd.umaLinha<ClienteDetalhe>(
       `select c.id, c.nome, c.email, c.telefone, c.cep, c.endereco, c.numero, c.complemento,
               c.bairro, c.cidade, c.estado, c.status::text, c.pentes_padrao, c.duzias_padrao,
@@ -62,7 +62,14 @@ export default async function EditarCliente({ params }: { params: Promise<{ id: 
         order by a.criado_em desc`,
       [id],
     );
-    return { cliente, planos, planosComId, assinaturas };
+    const indicacao = await bd.umaLinha<{ indicou: string; pendentes: string; aplicados: string; indicado_por_nome: string | null }>(
+      `select (select count(*) from clientes i where i.indicado_por = $1) as indicou,
+              (select count(*) from bonus_indicacao b where b.indicador_id = $1 and b.status = 'pendente') as pendentes,
+              (select count(*) from bonus_indicacao b where b.indicador_id = $1 and b.status = 'aplicado') as aplicados,
+              (select ic.nome from clientes c2 join clientes ic on ic.id = c2.indicado_por where c2.id = $1) as indicado_por_nome`,
+      [id],
+    );
+    return { cliente, planos, planosComId, assinaturas, indicacao };
   });
 
   if (!cliente) notFound();
@@ -89,6 +96,14 @@ export default async function EditarCliente({ params }: { params: Promise<{ id: 
         Código {cliente.codigo_indicacao} · {cliente.dentro_area_entrega ? 'dentro' : 'fora'} da área de
         entrega
       </p>
+      {indicacao && (Number(indicacao.indicou) > 0 || indicacao.indicado_por_nome) && (
+        <p className="suave">
+          {indicacao.indicado_por_nome ? `Indicado por ${indicacao.indicado_por_nome}. ` : ''}
+          {Number(indicacao.indicou) > 0
+            ? `Indicou ${indicacao.indicou} pessoa(s): bônus de indicação ${indicacao.pendentes} a aplicar, ${indicacao.aplicados} já aplicado(s).`
+            : ''}
+        </p>
+      )}
 
       <p>
         <Link href={`/historico?entidade=clientes&id=${cliente.id}`}>Ver histórico deste cliente</Link>

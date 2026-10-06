@@ -51,11 +51,12 @@ type Assinatura = {
   plano_proximo_a_partir_de: string | null;
   saldo_credito: number;
   plano_id: number;
+  duzias_padrao: number;
 };
 type Reposicao = { id: string; quantidade_ovos: number; status: string; reposicao: string | null };
 type Entrega = { id: string; data_prevista: string; status: string; pentes: number; duzias: number; horario: string | null };
 type Fatura = { id: string; valor_centavos: number; vencimento: string; data_pagamento: string | null; status: string };
-type Pedido = { tipo: 'pausa' | 'cancelamento' | 'troca_plano' };
+type Pedido = { tipo: 'pausa' | 'cancelamento' | 'troca_plano' | 'duzia' };
 type PlanoOpcao = { id: number; nome: string };
 
 export default async function MinhaAssinatura({ searchParams }: { searchParams: Promise<{ nova?: string }> }) {
@@ -75,7 +76,7 @@ export default async function MinhaAssinatura({ searchParams }: { searchParams: 
               a.aguardando_pagamento_desde::text, a.bloqueada_desde::text,
               a.cancelamento_agendado_para::text, pp.nome as plano_proximo_nome, a.plano_proximo_a_partir_de::text,
               (select coalesce(sum(cr.valor_centavos), 0)::int from creditos_assinatura cr where cr.assinatura_id = a.id) as saldo_credito,
-              a.plano_id,
+              a.plano_id, coalesce((select c.duzias_padrao from clientes c where c.id = a.cliente_id), 0)::int as duzias_padrao,
               (a.aguardando_pagamento_desde + cfg.dias_para_pagar_1a_fatura)::text as pagar_ate
          from assinaturas a
          join planos p on p.id = a.plano_id
@@ -155,6 +156,7 @@ export default async function MinhaAssinatura({ searchParams }: { searchParams: 
 
   const { cliente, assinatura, entregas, faturas, pedidos, reposicoes, outrosPlanos } = dados;
   const pediuTroca = pedidos.some((p) => p.tipo === 'troca_plano');
+  const pediuDuzia = pedidos.some((p) => p.tipo === 'duzia');
   const vigente = assinatura && (assinatura.status === 'ativa' || assinatura.status === 'pausada');
   const pediuPausa = pedidos.some((p) => p.tipo === 'pausa');
   const pediuCancelamento = pedidos.some((p) => p.tipo === 'cancelamento');
@@ -352,6 +354,23 @@ export default async function MinhaAssinatura({ searchParams }: { searchParams: 
                 <p className="suave">
                   Para um plano com mais entregas, a troca vale na hora (com uma cobrança da diferença do mês). Para
                   menos entregas, vale a partir do mês seguinte.
+                </p>
+              </FormAcao>
+            ))}
+
+          {assinatura.status === 'ativa' &&
+            (pediuDuzia ? (
+              <p className="msg-info">Seu pedido de dúzias está aguardando resposta.</p>
+            ) : (
+              <FormAcao acao={solicitarAlteracao} rotulo="Pedir dúzias" secundario limpar>
+                <input type="hidden" name="tipo" value="duzia" />
+                <label className="campo">
+                  Dúzias a mais por entrega (0 para parar)
+                  <input name="duzias" type="number" min={0} max={50} step={1} required defaultValue={assinatura.duzias_padrao} />
+                </label>
+                <p className="suave">
+                  É um complemento ao seu pente: o valor da dúzia aparece na sua fatura. Vale a partir da próxima
+                  entrega depois do corte, depois que a Ovo di Onça confirmar.
                 </p>
               </FormAcao>
             ))}

@@ -163,7 +163,7 @@ export default async function DetalheAssinatura({ params }: { params: Promise<{ 
       [id],
     );
     const pedidos = await bd.consultar<Solicitacao & { status: string; resposta: string | null; resolvida_em: string | null }>(
-      `select s.id, s.tipo::text, s.motivo, s.preferencia, pd.nome as plano_destino_nome, to_char(s.criado_em at time zone 'America/Sao_Paulo', 'DD/MM/YYYY HH24:MI') as criado_em,
+      `select s.id, s.tipo::text, s.motivo, s.preferencia, s.duzias_pedidas, pd.nome as plano_destino_nome, to_char(s.criado_em at time zone 'America/Sao_Paulo', 'DD/MM/YYYY HH24:MI') as criado_em,
               c.nome as cliente_nome, s.assinatura_id, a.status::text as assinatura_status,
               s.status::text, s.resposta,
               to_char(s.resolvida_em at time zone 'America/Sao_Paulo', 'DD/MM/YYYY HH24:MI') as resolvida_em

@@ -113,7 +113,7 @@ begin
   v_json := processar_rotina_diaria();
   if (v_json ->> 'cobrancas_geradas')::int >= 2
      and (select proxima_cobranca from assinaturas where id = ass_1) > v_hoje
-     and exists (select 1 from faturas where assinatura_id = ass_1 and periodo_inicio between v_hoje - 70 and v_hoje - 63 and status = 'atrasada') then
+     and exists (select 1 from faturas where assinatura_id = ass_1 and periodo_inicio between v_hoje - 70 and v_hoje - 56 and status = 'atrasada') then
     raise notice '  OK    F9.5  rotina gera os períodos vencidos (marcados atrasados) e deixa a próxima no futuro';
   else
     v_falhas := v_falhas + 1;

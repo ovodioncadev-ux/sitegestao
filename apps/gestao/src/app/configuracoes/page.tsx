@@ -90,7 +90,7 @@ export default async function Configuracoes() {
             <input id="hora_corte" name="hora_corte" type="time" required defaultValue={config.hora_corte} />
           </div>
           <div>
-            <label htmlFor="bonus">Bônus do indicador (%)</label>
+            <label htmlFor="bonus">Bônus do indicador (%) — na fatura do mês em que o indicado paga a 1ª</label>
             <input id="bonus" name="bonus_indicador_pct" inputMode="decimal" required
               defaultValue={Number(config.bonus_indicador_pct)} />
           </div>
