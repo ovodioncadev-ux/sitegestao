@@ -53,3 +53,11 @@ test('acessoBloqueado libera (fail-open) e desfaz o savepoint quando o contador 
     console.error = erro;
   }
 });
+
+test('ipDaRequisicao: o PRIMEIRO IP de x-forwarded-for é o que vale (só confiável se o proxy reescrever o cabeçalho)', () => {
+  // Documenta o comportamento e a premissa (docs/LANCAMENTO.md §3): se o proxy apenas ACRESCENTA o
+  // IP real ao final, o primeiro valor é o que o cliente mandou, e o limite por IP é contornável.
+  assert.equal(ipDaRequisicao(cab({ 'x-forwarded-for': 'falso-do-cliente, 203.0.113.9' })), 'falso-do-cliente');
+  // Proxy que reescreve: só o IP real chega, e é ele que vale.
+  assert.equal(ipDaRequisicao(cab({ 'x-forwarded-for': '203.0.113.9' })), '203.0.113.9');
+});

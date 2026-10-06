@@ -1,5 +1,6 @@
 import { CONSENTIMENTO_VERSAO } from '@ovo/config/privacidade';
 import { comoAnonimo } from '@ovo/database';
+import { lerJsonLimitado } from '@/lib/corpo';
 import { lerInteresse } from '@/lib/interesse';
 import { acessoBloqueado } from '@/lib/limite-publico';
 
@@ -14,14 +15,13 @@ export const dynamic = 'force-dynamic';
  *     não confirma se um contato já estava na lista.
  */
 export async function POST(request: Request) {
-  let corpo: unknown;
-  try {
-    corpo = await request.json();
-  } catch {
-    return Response.json({ erro: 'Pedido inválido.' }, { status: 400 });
+  // Um pedido legítimo cabe em poucas centenas de bytes: teto de 4 KB.
+  const corpo = await lerJsonLimitado(request, 4096);
+  if (!corpo.ok) {
+    return Response.json({ erro: corpo.status === 413 ? 'Pedido grande demais.' : 'Pedido inválido.' }, { status: corpo.status });
   }
 
-  const leitura = lerInteresse(corpo);
+  const leitura = lerInteresse(corpo.valor);
   if (leitura.ok === 'isca') return new Response(null, { status: 204 });
   if (leitura.ok === false) return Response.json({ erro: leitura.erro }, { status: 400 });
 

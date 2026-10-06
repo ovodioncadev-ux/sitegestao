@@ -39,7 +39,7 @@ export type PedidoInteresse = {
   telefone?: string;
   email?: string;
   cep: string;
-  website?: string; // campo-isca: tem de ir vazio
+  referencia_interna?: string; // campo-isca: tem de ir vazio
 };
 
 /** Pede aviso para um CEP fora da área. Lança Error com a mensagem a mostrar. */

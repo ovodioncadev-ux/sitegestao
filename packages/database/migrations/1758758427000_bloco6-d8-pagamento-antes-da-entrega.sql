@@ -413,6 +413,60 @@ end;
 $$;
 
 
+create or replace function gerar_cobranca(p_assinatura uuid)
+returns uuid
+language plpgsql
+set search_path = public
+as $$
+declare
+  v_ass    assinaturas%rowtype;
+  v_inicio date;
+  v_fim    date;
+  v_id     uuid;
+begin
+  select * into v_ass from assinaturas where id = p_assinatura for update;
+  if not found then
+    raise exception 'Assinatura não encontrada.' using errcode = 'OV001';
+  end if;
+  if v_ass.status <> 'ativa' or v_ass.proxima_cobranca is null then
+    raise exception 'Só assinaturas ativas têm próxima cobrança.' using errcode = 'OV001';
+  end if;
+
+  -- D8: quem aguarda o 1º pagamento já tem a fatura certa em aberto. Gerar outra (pelo botão
+  -- "Gerar cobrança" do painel) só empilharia cobrança de uma assinatura que nem recebeu entrega.
+  -- A 1ª chamada (de criar_assinatura) passa: ainda não há fatura.
+  if v_ass.aguardando_pagamento_desde is not null and exists (
+       select 1 from faturas
+        where assinatura_id = p_assinatura and status in ('pendente', 'atrasada')
+     ) then
+    raise exception 'Esta assinatura aguarda o pagamento da 1ª fatura, que já está em aberto: não há outra cobrança a gerar.'
+      using errcode = 'OV001';
+  end if;
+
+  v_inicio := v_ass.proxima_cobranca;
+  v_fim    := (v_inicio + interval '1 month')::date - 1;
+
+  select id into v_id from faturas
+   where assinatura_id = p_assinatura and periodo_inicio = v_inicio and status <> 'cancelada';
+
+  if v_id is null then
+    v_id := inserir_fatura_com_snapshot(
+      p_assinatura, v_inicio,
+      case when v_inicio < hoje_sp() then 'atrasada'::status_fatura else 'pendente'::status_fatura end,
+      v_inicio, v_fim,
+      case v_ass.forma_cobranca
+        when 'cartao' then 'Cartão (recorrência): confirme o pagamento e registre aqui.'
+        else 'PIX: cobrança mensal manual.'
+      end,
+      null
+    );
+  end if;
+
+  update assinaturas set proxima_cobranca = v_fim + 1 where id = p_assinatura;
+  return v_id;
+end;
+$$;
+
 -- ───────────────────────────────────────────────────────────────────────────
 -- 4. Pagamento online
 -- ───────────────────────────────────────────────────────────────────────────
@@ -632,7 +686,15 @@ drop function if exists iniciar_pagamento_online(uuid);
 drop function if exists confirmar_pagamento_online(uuid, text, text, integer, text);
 drop table if exists pagamentos_online;
 drop owned by app_pagamentos;
-drop role if exists app_pagamentos;
+-- Papéis valem para o CLUSTER inteiro: se outro banco do mesmo servidor ainda usa app_pagamentos,
+-- o `drop role` recusa. Isso não pode derrubar o `down` (que então desfaria nada): mantém o papel.
+do $$
+begin
+  drop role if exists app_pagamentos;
+exception when dependent_objects_still_exist then
+  raise notice 'app_pagamentos ainda é usado por outro banco deste servidor: o papel foi mantido.';
+end;
+$$;
 
 create or replace function criar_assinatura(
   p_cliente uuid,
@@ -892,6 +954,49 @@ begin
     'faturas_atrasadas', v_atrasadas,
     'falhas', to_jsonb(v_falhas)
   );
+end;
+$$;
+
+create or replace function gerar_cobranca(p_assinatura uuid)
+returns uuid
+language plpgsql
+set search_path = public
+as $$
+declare
+  v_ass    assinaturas%rowtype;
+  v_inicio date;
+  v_fim    date;
+  v_id     uuid;
+begin
+  select * into v_ass from assinaturas where id = p_assinatura for update;
+  if not found then
+    raise exception 'Assinatura não encontrada.' using errcode = 'OV001';
+  end if;
+  if v_ass.status <> 'ativa' or v_ass.proxima_cobranca is null then
+    raise exception 'Só assinaturas ativas têm próxima cobrança.' using errcode = 'OV001';
+  end if;
+
+  v_inicio := v_ass.proxima_cobranca;
+  v_fim    := (v_inicio + interval '1 month')::date - 1;
+
+  select id into v_id from faturas
+   where assinatura_id = p_assinatura and periodo_inicio = v_inicio and status <> 'cancelada';
+
+  if v_id is null then
+    v_id := inserir_fatura_com_snapshot(
+      p_assinatura, v_inicio,
+      case when v_inicio < hoje_sp() then 'atrasada'::status_fatura else 'pendente'::status_fatura end,
+      v_inicio, v_fim,
+      case v_ass.forma_cobranca
+        when 'cartao' then 'Cartão (recorrência): confirme o pagamento e registre aqui.'
+        else 'PIX: cobrança mensal manual.'
+      end,
+      null
+    );
+  end if;
+
+  update assinaturas set proxima_cobranca = v_fim + 1 where id = p_assinatura;
+  return v_id;
 end;
 $$;
 

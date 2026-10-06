@@ -31,8 +31,11 @@ export function lerInteresse(corpo: unknown): LeituraInteresse {
   if (typeof corpo !== 'object' || corpo === null) return { ok: false, erro: 'Pedido inválido.' };
   const c = corpo as Record<string, unknown>;
 
-  // Honeypot: o campo existe no formulário, escondido; gente não preenche.
-  if (typeof c.website === 'string' && c.website.trim() !== '') return { ok: 'isca' };
+  // Honeypot: o campo existe no formulário, escondido; gente não preenche. O nome é de
+  // propósito sem cara de dado pessoal: "website", "url", "telefone"... são nomes que
+  // gerenciadores de senha e extensões de preenchimento completam SOZINHOS, e uma pessoa
+  // de verdade seria tomada por robô e descartada em silêncio. Por isso `website` NÃO conta.
+  if (typeof c.referencia_interna === 'string' && c.referencia_interna.trim() !== '') return { ok: 'isca' };
 
   if (c.consentimento !== true) {
     return { ok: false, erro: 'É preciso aceitar o uso do contato para avisar sobre a entrega.' };

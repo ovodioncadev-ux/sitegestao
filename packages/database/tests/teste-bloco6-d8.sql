@@ -151,6 +151,17 @@ begin
     v_falhas := v_falhas + 1; raise notice '  FALHA D8.7  uma operação proibida passou';
   end if;
 
+  -- D8.7b ─ "Gerar cobrança" manual não empilha fatura em quem aguarda o 1º pagamento ──
+  v_total := v_total + 1;
+  v_ok := true;
+  begin perform gerar_cobranca(ass5); v_ok := false; exception when sqlstate 'OV001' then null; end;
+  select count(*) into v_int from faturas where assinatura_id = ass5;
+  if v_ok and v_int = 1 then
+    raise notice '  OK    D8.7b "Gerar cobrança" manual é recusada enquanto a 1ª fatura está em aberto: continua 1 fatura só';
+  else
+    v_falhas := v_falhas + 1; raise notice '  FALHA D8.7b  recusou: %, faturas: %', v_ok, v_int;
+  end if;
+
   -- D8.8 ── fatura avulsa paga não libera a entrega ─────────────────────────
   v_total := v_total + 1;
   f_av := criar_fatura(ass5, v_hoje + 1, 1000, 'avulsa de teste');

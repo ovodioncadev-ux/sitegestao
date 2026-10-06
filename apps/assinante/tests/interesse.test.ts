@@ -40,6 +40,12 @@ test('lerInteresse recusa entradas inválidas', () => {
 });
 
 test('lerInteresse trata o campo-isca preenchido como robô (sem erro, sem gravar)', () => {
-  assert.equal(lerInteresse({ ...valido, website: 'http://spam.example' }).ok, 'isca');
-  assert.equal(lerInteresse({ ...valido, website: '   ' }).ok, true);
+  assert.equal(lerInteresse({ ...valido, referencia_interna: 'http://spam.example' }).ok, 'isca');
+  assert.equal(lerInteresse({ ...valido, referencia_interna: '   ' }).ok, true);
+});
+
+test('"website" NÃO é isca: autofill de navegador não pode derrubar um pedido legítimo', () => {
+  // Gerenciadores de senha e extensões costumam preencher campos com esse nome sozinhos.
+  const r = lerInteresse({ ...valido, website: 'https://meusite.example', url: 'x', phone: 'y' });
+  assert.equal(r.ok, true);
 });

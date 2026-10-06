@@ -1,4 +1,5 @@
 import { comoAnonimo, comoPagamentos } from '@ovo/database';
+import { lerJsonLimitado } from '@/lib/corpo';
 import { acessoBloqueado } from '@/lib/limite-publico';
 import { processarAviso, type ConfirmacaoNoBanco } from '@/lib/pagamento/aviso';
 import { obterProvedor } from '@/lib/pagamento/provedor';
@@ -31,20 +32,13 @@ export async function POST(request: Request) {
   }
   if (!provedor) return new Response(null, { status: 404 });
 
-  const tamanho = Number(request.headers.get('content-length') ?? 0);
-  if (tamanho > TAMANHO_MAXIMO) return new Response(null, { status: 413 });
-
   const bloqueado = await comoAnonimo((bd) => acessoBloqueado(bd, request.headers, 'webhook')).catch(() => false);
   if (bloqueado) return new Response(null, { status: 429, headers: { 'Retry-After': '60' } });
 
-  let corpo: unknown;
-  try {
-    const texto = await request.text();
-    if (texto.length > TAMANHO_MAXIMO) return new Response(null, { status: 413 });
-    corpo = JSON.parse(texto);
-  } catch {
-    return new Response(null, { status: 400 });
-  }
+  // Lido em fluxo, com teto, inclusive sem Content-Length (ver lib/corpo.ts).
+  const leitura = await lerJsonLimitado(request, TAMANHO_MAXIMO);
+  if (!leitura.ok) return new Response(null, { status: leitura.status });
+  const corpo = leitura.valor;
 
   const confirmar: ConfirmacaoNoBanco = async (d) => {
     try {

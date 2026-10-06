@@ -29,7 +29,7 @@ export function FormInteresse({ cep, nome, telefone }: { cep: string; nome: stri
       const res = await fetch('/api/interesse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome, telefone: tel, email, cep, website: isca, origem: 'assinar', consentimento: true }),
+        body: JSON.stringify({ nome, telefone: tel, email, cep, referencia_interna: isca, origem: 'assinar', consentimento: true }),
       });
       if (!res.ok) {
         const corpo = (await res.json().catch(() => ({}))) as { erro?: string };

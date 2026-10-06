@@ -1,4 +1,5 @@
 import { comoAnonimo } from '@ovo/database';
+import { lerJsonLimitado } from '@/lib/corpo';
 import { ehEtapaFunil, registrarEvento } from '@/lib/evento';
 import { acessoBloqueado } from '@/lib/limite-publico';
 import { ehFrequencia } from '@/lib/planos';
@@ -12,14 +13,11 @@ export const dynamic = 'force-dynamic';
  * esbarra no limite, e o dado é só de contagem — não decide nada no sistema.
  */
 export async function POST(request: Request) {
-  let corpo: unknown;
-  try {
-    corpo = await request.json();
-  } catch {
-    return new Response(null, { status: 400 });
-  }
+  // Um evento real tem poucas dezenas de bytes: teto de 4 KB.
+  const leitura = await lerJsonLimitado(request, 4096);
+  if (!leitura.ok) return new Response(null, { status: leitura.status });
 
-  const { etapa, plano } = (corpo ?? {}) as { etapa?: unknown; plano?: unknown };
+  const { etapa, plano } = (leitura.valor ?? {}) as { etapa?: unknown; plano?: unknown };
   if (!ehEtapaFunil(etapa)) return new Response(null, { status: 400 });
   if (plano !== undefined && plano !== null && !ehFrequencia(plano)) return new Response(null, { status: 400 });
 

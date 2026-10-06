@@ -14,6 +14,20 @@
  * para poder ser testado sem banco.
  */
 
+import { createHash } from 'node:crypto';
+
+/**
+ * A função do banco recusa chave acima de 300 caracteres. Uma chave longa demais NÃO pode
+ * virar "libera" (alguém mandaria um caminho enorme para fugir do contador): ela é reduzida
+ * a um hash estável, e a mesma chave longa continua caindo no mesmo contador.
+ */
+const TAMANHO_MAXIMO_DA_CHAVE = 250;
+
+export function normalizarChave(chave: string): string {
+  if (chave.length <= TAMANHO_MAXIMO_DA_CHAVE) return chave;
+  return `sha256:${createHash('sha256').update(chave).digest('hex')}`;
+}
+
 export type Consulta = (
   sql: string,
   parametros: unknown[],
@@ -29,7 +43,7 @@ export function criarArmazenamentoDeLimite(
     async consume(key: string, rule: RegraDeLimite): Promise<{ allowed: boolean; retryAfter: number | null }> {
       try {
         const { rows } = await consultar('select permitido, retry_apos from consumir_rate_limit($1, $2, $3)', [
-          key,
+          normalizarChave(key),
           rule.max,
           rule.window,
         ]);

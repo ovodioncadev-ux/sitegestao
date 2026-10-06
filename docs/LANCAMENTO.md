@@ -57,7 +57,7 @@ Valores reais só no painel da hospedagem; **nunca** no Git. O modelo completo, 
 
 ⚠️ O **build** do assinante e do gestão precisa de `DATABASE_URL`, `DATABASE_ADMIN_URL`, `BETTER_AUTH_URL` e `BETTER_AUTH_SECRET` definidas (a rota do Better Auth é inicializada na coleta de páginas). Os valores **não são usados** no build (não abre conexão), mas têm de existir.
 
-⚠️ **Atrás de proxy/CDN:** o limite de tentativas usa o IP de `x-forwarded-for`. Só é confiável se o proxy da hospedagem **reescreve** esse cabeçalho (Vercel, Cloudflare e similares fazem). Sem isso, qualquer um troca o cabeçalho e foge do limite.
+⚠️ **Atrás de proxy/CDN:** o limite de tentativas (login e rotas públicas) usa o **primeiro** IP de `x-forwarded-for`. Isso só é confiável se o proxy da hospedagem **reescreve** o cabeçalho com o IP real do cliente (Vercel, por exemplo). Se o proxy apenas **acrescenta** o IP ao final, o primeiro valor é o que o cliente mandou: qualquer um troca o cabeçalho a cada tentativa e foge do limite. Confira no provedor antes de abrir ao público; se for o caso de acrescentar, o limite precisa passar a ler o último IP (ou um cabeçalho próprio do provedor, como `cf-connecting-ip`), **nas duas pontas**: em `apps/assinante/src/lib/limite-publico.ts` (`ipDaRequisicao`) e em `advanced.ipAddress.ipAddressHeaders` do Better Auth (`packages/database/src/auth/better-auth.ts`). Hoje nenhuma das duas está configurada para isso.
 
 ## 4. Rotina diária
 

@@ -11,7 +11,7 @@ const CAMPO = 'min-h-controle w-full rounded-controle border border-borda px-3';
 /**
  * "Avise-me quando chegar ao meu CEP". Pede só o necessário (telefone OU e-mail),
  * o consentimento é uma caixa que a pessoa marca (nunca pré-marcada) e o texto
- * dele vem de @ovo/config. O campo `website` é uma isca para robôs: fica fora da
+ * dele vem de @ovo/config. O campo `referencia_interna` é uma isca para robôs: fica fora da
  * tela e do teclado, e quem o preenche é descartado no servidor.
  */
 export function FormInteresse({ cep }: { cep: string }) {
@@ -37,7 +37,7 @@ export function FormInteresse({ cep }: { cep: string }) {
     }
     setEnviando(true);
     try {
-      await registrarInteresse({ nome, telefone, email, cep, website: isca });
+      await registrarInteresse({ nome, telefone, email, cep, referencia_interna: isca });
       setEnviado(true);
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Não foi possível registrar agora.');
@@ -85,7 +85,7 @@ export function FormInteresse({ cep }: { cep: string }) {
       <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
         <label>
           Não preencha este campo
-          <input type="text" name="website" tabIndex={-1} autoComplete="off" value={isca} onChange={(e) => setIsca(e.target.value)} />
+          <input type="text" name="referencia_interna" tabIndex={-1} autoComplete="off" value={isca} onChange={(e) => setIsca(e.target.value)} />
         </label>
       </div>
 

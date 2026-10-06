@@ -60,23 +60,25 @@ pnpm --filter @ovo/database teste:estrutura   # Run structure tests
 4. All writes go through functions with closed list of fields (never `update(req.body)`).
 
 ### Fix a security issue
-1. Check `scripts/verificar-segredos.sh` (8 verifications).
+1. Check `scripts/verificar-segredos.sh` (9 verifications, incl. `comoPagamentos` só no webhook).
 2. Test: `pnpm seguranca` and `pnpm typecheck`.
 3. CI runs these automatically.
 
 ## Gotchas
 
-- Rate limit do Better Auth é em memória (por instância).
+- Rate limit de login/cadastro (Better Auth) mora no Postgres (`consumir_rate_limit`, via `customStorage`): vale entre instâncias e sobrevive a reinício. O IP vem de `x-forwarded-for`: só confiável atrás de proxy que o **reescreva** (ver `docs/LANCAMENTO.md` §3).
 - `.env` na raiz; `next.config.ts` de assinante e site o carregam.
 - Bash do Claude Code colapsa `\` em heredocs: para código com barra invertida use a ferramenta de edição.
-- CSP em report-only; para aplicar, `{ modoRelatorio: false }` em `next.config.ts`.
+- CSP: `CSP_MODO=relatorio` (padrão) ou `impor`, lida **no build** (defina antes de `pnpm build`). Prove com `scripts/e2e/csp.mjs` antes de impor em produção.
+- `pnpm teste:banco` exige banco de teste **sem dados soltos** (a Fase 10 conta linhas): rode os E2E num banco separado.
+- Papéis do Postgres valem para o **cluster**: com vários bancos no mesmo servidor, `drop role` das migrations pode ser recusado (o `down` da 427 tolera isso).
 - `Ovo di Onça Design System/` (85 MB) e `_tmp_*` continuam fora do fluxo.
 
 ## Key Files
 
 - `packages/database/src/acesso.ts:82–118` — `emTransacao`, como os papéis são definidos
 - `packages/database/src/auth/papel.ts:30–50` — `usuarioAtual`, `exigirDono`
-- `packages/database/migrations/` — Fases 0–9
+- `packages/database/migrations/` — Fases 0–10, Etapas 1–2 e Blocos 3–8
 - **`apps/assinante/src/app/assinar/`** — passos de cadastro e confirmação (`acoes.ts` chama `criar_meu_cadastro` / `assinar_plano`)
 - `apps/assinante/src/lib/seguranca.ts` — `caminhoInterno()` (anti open redirect)
 - `apps/gestao/src/lib/dono.ts` — `comoDono(fn)` = `exigirDono() + comoAdmin`

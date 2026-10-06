@@ -300,3 +300,23 @@ Migration `1758758428000_bloco8-rate-limit-auth.sql`. **Aplicada só no banco de
 | Removido | `packages/database/src/auth/rate-limit-server-action.ts`: nunca foi usado, não compilava e prometia proteção que não existia. O `pnpm typecheck` da raiz passa pela primeira vez. |
 
 **Pendente (depende de você):** hospedagem e agendador da rotina, ferramenta de monitoramento de erros, ligar `CSP_MODO=impor` e a chave D8, aplicar as migrations 424–428 no Neon e rodar `db:papel-servidor` de novo.
+
+
+---
+
+## Revisão de código da branch (06/10/2026)
+
+Releitura adversarial dos Blocos 1–8 antes do primeiro pull request. **Seis achados, todos corrigidos e provados:**
+
+| # | Gravidade | Problema | Correção e prova |
+|---|---|---|---|
+| 1 | Alta | O teste de fumaça (que roda contra produção) mandava um cadastro **válido** ao painel: se a guarda regredisse, ele **criaria uma conta real**. | Corpo inválido de propósito. Contra um alvo sem a guarda: a verificação reprova (HTTP 400) e o número de usuários não muda (2 → 2). |
+| 2 | Média | Rotas públicas liam o corpo inteiro, sem teto; no webhook o teto só valia com `Content-Length`. | `lerJsonLimitado` (leitura em fluxo, 4 KB; webhook 20 KB). Ao vivo: 413 com e sem `Content-Length`. |
+| 3 | Média | A isca anti-robô se chamava `website` — nome que o preenchimento automático completa sozinho; a pessoa era **descartada em silêncio**. | Renomeada para `referencia_interna`; `website` não conta mais. Ao vivo: autofill em `website` grava; isca preenchida é descartada. |
+| 4 | Baixa | Chave de limite acima de 300 caracteres recusada pelo banco → o adaptador "liberava". | Chave longa vira `sha256:…` estável. |
+| 5 | Baixa | O botão "Gerar cobrança" empilhava fatura em assinatura aguardando o 1º pagamento. | Recusado enquanto a 1ª fatura está em aberto (na migration 427, ainda não aplicada em nenhum Neon). |
+| 6 | Doc | `CLAUDE.md` e `next.config.ts` desatualizados (limite "em memória", CSP por `modoRelatorio`, "8 verificações"). | Corrigidos. |
+
+**Defeito extra achado na verificação:** o `down` da migration 427 **falhava** quando outro banco do mesmo servidor ainda usava o papel `app_pagamentos` (papéis são do cluster). O `down` agora mantém o papel nesse caso. **Concorrência com linhas vencidas:** 5 rodadas de 240 chamadas simultâneas, sem deadlock, sempre exatamente `max` por chave.
+
+**Premissa que continua sua:** o limite por IP só é confiável atrás de proxy que **reescreve** `x-forwarded-for` (`docs/LANCAMENTO.md` §3).

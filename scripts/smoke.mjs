@@ -7,8 +7,10 @@
  *   SITE=https://exemplo.com.br ASSINANTE=https://app.exemplo.com.br \
  *   GESTAO=https://gestao.exemplo.com.br node scripts/smoke.mjs
  *
- * Defina só os que existem (ao menos um). Somente leitura: não cria nada. Sai com
- * código 1 se qualquer verificação falhar. Use depois de CADA deploy.
+ * Defina só os que existem (ao menos um). NÃO ESCREVE NADA: só GETs e POSTs com corpo
+ * inválido de propósito (recusados por validação, sem efeito). Em particular, a sonda de
+ * cadastro do painel usa dados inválidos para que, mesmo que a guarda regrida, nenhuma conta
+ * seja criada em produção. Sai com código 1 se qualquer verificação falhar. Use depois de CADA deploy.
  */
 
 const ALVOS = {
@@ -172,10 +174,14 @@ try {
     const rotinaErrada = await pegar(base, '/api/rotina', { method: 'POST', headers: { authorization: 'Bearer segredo-errado' } });
     conferir(rotinaErrada.res.status === 401, 'gestão: /api/rotina com segredo errado é recusada (401)', `HTTP ${rotinaErrada.res.status}`);
 
+    // Sonda SEGURA: o corpo é INVÁLIDO de propósito (senha curta demais, e-mail sem domínio).
+    // Com a guarda do painel, a rota nem existe (404). Se a guarda um dia regredir, a rota
+    // existiria mas recusaria a validação (400/422) — e NENHUMA conta seria criada. Um corpo
+    // válido aqui faria este teste, rodando em produção, criar um usuário de verdade.
     const cadastro = await pegar(base, '/api/auth/sign-up/email', {
       method: 'POST',
       headers: { 'content-type': 'application/json', origin: base },
-      body: JSON.stringify({ name: 'x', email: 'x@exemplo.test', password: 'x'.repeat(14) }),
+      body: JSON.stringify({ name: 'x', email: 'invalido', password: 'curta' }),
     });
     conferir(cadastro.res.status === 404, 'gestão: cadastro público de conta no painel NÃO existe (404)', `HTTP ${cadastro.res.status}`);
   }
