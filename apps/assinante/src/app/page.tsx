@@ -43,6 +43,8 @@ type Assinatura = {
   /** D8: dia em que passou a aguardar o 1º pagamento (nulo = normal) e prazo para pagar. */
   aguardando_pagamento_desde: string | null;
   pagar_ate: string | null;
+  /** D2: entregas paradas por fatura em atraso (nulo = normal). */
+  bloqueada_desde: string | null;
 };
 type Reposicao = { id: string; quantidade_ovos: number; status: string; reposicao: string | null };
 type Entrega = { id: string; data_prevista: string; status: string; pentes: number; duzias: number; horario: string | null };
@@ -63,7 +65,7 @@ export default async function MinhaAssinatura({ searchParams }: { searchParams: 
       `select a.id, a.status, a.data_inicio::text, a.proxima_entrega::text,
               p.nome as plano_nome, p.freshness_max_dias, a.forma_cobranca::text,
               a.proxima_cobranca::text, a.data_retorno_prevista::text,
-              a.aguardando_pagamento_desde::text,
+              a.aguardando_pagamento_desde::text, a.bloqueada_desde::text,
               (a.aguardando_pagamento_desde + cfg.dias_para_pagar_1a_fatura)::text as pagar_ate
          from assinaturas a
          join planos p on p.id = a.plano_id
@@ -138,11 +140,34 @@ export default async function MinhaAssinatura({ searchParams }: { searchParams: 
   const pediuPausa = pedidos.some((p) => p.tipo === 'pausa');
   const pediuCancelamento = pedidos.some((p) => p.tipo === 'cancelamento');
   const aguardando = Boolean(assinatura?.aguardando_pagamento_desde) && assinatura?.status === 'ativa';
+  const bloqueada = Boolean(assinatura?.bloqueada_desde) && assinatura?.status === 'ativa';
   const pagamentoOnline = pagamentoOnlineAtivo();
   const primeiraEmAberto = faturas.find((f) => f.status === 'pendente' || f.status === 'atrasada');
+  // A lista vem da mais nova para a mais antiga: quem destrava é pagar a mais ANTIGA em atraso.
+  const maisAntigaEmAtraso = [...faturas].reverse().find((f) => f.status === 'atrasada');
 
   return (
     <Pagina titulo={`Olá, ${cliente.nome.split(' ')[0]}`}>
+      {bloqueada && (
+        <section className="cartao" role="alert" aria-labelledby="titulo-bloqueada">
+          <h2 id="titulo-bloqueada">Suas entregas estão paradas</h2>
+          <p>
+            Há fatura em atraso além do prazo de tolerância. Assim que o pagamento for confirmado, as entregas voltam
+            automaticamente na próxima quarta disponível.
+          </p>
+          {pagamentoOnline && maisAntigaEmAtraso ? (
+            <FormAcao acao={pagarFatura} rotulo="Pagar agora">
+              <input type="hidden" name="fatura" value={maisAntigaEmAtraso.id} />
+            </FormAcao>
+          ) : (
+            <p>
+              <a className="botao botao-whatsapp" href={WHATSAPP_URL} target="_blank" rel="noreferrer">
+                Enviar comprovante pelo WhatsApp
+              </a>
+            </p>
+          )}
+        </section>
+      )}
       {aguardando && assinatura && (
         <section className="cartao" role="status" aria-labelledby="titulo-aguardando">
           <h2 id="titulo-aguardando">{nova === '1' ? 'Assinatura criada! Falta o pagamento.' : 'Falta o pagamento da 1ª fatura'}</h2>

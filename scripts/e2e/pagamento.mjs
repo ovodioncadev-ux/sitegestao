@@ -81,8 +81,14 @@ try {
   const clienteId = sql(`select c.id from clientes c join "user" u on u.id = c.usuario_id where u.email = '${email}'`);
   const faturaId = sql(`select id from faturas where cliente_id = '${clienteId}'`);
   assert.equal(sql(`select count(*) from entregas where cliente_id = '${clienteId}'`), '0');
-  assert.equal(sql(`select status || '/' || valor_centavos from faturas where id = '${faturaId}'`), 'pendente/14760');
-  passo('banco: 0 entregas e 1ª fatura pendente de R$ 147,60 (10% de desconto)');
+  // D1/D10: a 1ª fatura cobre as entregas da 1ª entrega até o fim do mês (4 a 5 no semanal) com 10% off.
+  const [statusFatura, valorFatura, entregasFatura, precoPente] = sql(
+    `select f.status, f.valor_centavos, f.calculo_entregas, (select preco_pente_centavos from config_negocio) from faturas f where f.id = '${faturaId}'`,
+  ).split('|');
+  const VALOR = Number(valorFatura);
+  assert.equal(statusFatura, 'pendente');
+  assert.equal(VALOR, Math.round(Number(precoPente) * Number(entregasFatura) * 0.9));
+  passo(`banco: 0 entregas e 1ª fatura pendente de ${entregasFatura} entrega(s) com 10% de desconto (${VALOR} centavos)`);
 
   // 3. Pagar agora → simulador → webhook
   await Promise.all([pagina.waitForURL(/\/pagamento\/simulado\//), pagina.getByRole('button', { name: 'Pagar agora' }).first().click()]);
@@ -103,7 +109,7 @@ try {
   // 4. Aviso repetido (o provedor reenvia) não duplica nada
   const transacao = sql(`select transacao_id from pagamentos_online where fatura_id = '${faturaId}'`);
   const aviso = (extra = {}) => ({
-    fatura: faturaId, transacao, valor: 14760, metodo: 'pix', assinatura: assinar(faturaId, transacao, 14760, 'pix'), ...extra,
+    fatura: faturaId, transacao, valor: VALOR, metodo: 'pix', assinatura: assinar(faturaId, transacao, VALOR, 'pix'), ...extra,
   });
   const enviar = (corpo) =>
     pagina.request.post(`${ASSINANTE}/api/pagamento/webhook`, { data: corpo, headers: { 'Content-Type': 'application/json' } });

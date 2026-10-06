@@ -58,7 +58,8 @@ async function visitar(pagina, url, depois) {
   };
   pagina.on('console', aoConsole);
   try {
-    await pagina.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
+    const resposta = await pagina.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
+    if (resposta && resposta.status() >= 500) problemas.push(`${rotulo}: a página respondeu HTTP ${resposta.status()}`);
     if (depois) await depois(pagina);
     await pagina.waitForTimeout(400);
     const eventos = await pagina.evaluate(() => window.__csp ?? []);

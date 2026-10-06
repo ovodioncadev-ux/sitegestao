@@ -320,3 +320,30 @@ Releitura adversarial dos Blocos 1–8 antes do primeiro pull request. **Seis ac
 **Defeito extra achado na verificação:** o `down` da migration 427 **falhava** quando outro banco do mesmo servidor ainda usava o papel `app_pagamentos` (papéis são do cluster). O `down` agora mantém o papel nesse caso. **Concorrência com linhas vencidas:** 5 rodadas de 240 chamadas simultâneas, sem deadlock, sempre exatamente `max` por chave.
 
 **Premissa que continua sua:** o limite por IP só é confiável atrás de proxy que **reescreve** `x-forwarded-for` (`docs/LANCAMENTO.md` §3).
+
+
+---
+
+## Bloco 9 — D1 e D2: ciclo mensal e inadimplência (06/10/2026)
+
+Migration `1758758429000_bloco9-d1-d2-ciclo-e-inadimplencia.sql` (aplicada **só no banco de teste local**, não no Neon). Testes: `pnpm --filter @ovo/database teste:bloco9` (13 verificações) e os de Fase 4/9, Etapa 1 e Bloco 6, ajustados porque os valores agora dependem do calendário.
+
+**D1 — fatura do mês do calendário**
+- Mês cheio: período do dia 1 ao último dia, **vence dia 3**, vira **atrasada no dia 8** (`config_negocio.dias_tolerancia_atraso` = 5).
+- **1ª fatura:** vence no dia da assinatura e cobre da **1ª entrega** até o fim do mês dela. Com a D8 ligada, a 1ª entrega usada é a **projetada no momento da assinatura** (o corte real só é aplicado quando o pagamento chega).
+- **Valor = entregas do calendário no período × valor da entrega** (a parte da D10 que faltava): semanal 4 ou 5, quinzenal 2, mensal 1. `planos.entregas_por_mes` não comanda mais a fatura (só a vitrine). Regra gravada no snapshot: `calendario-v1`; faturas manuais continuam `mensalidade-fixa-v1`.
+- Cobrança que começa no meio do mês (assinatura antiga, volta de pausa) gera **uma fatura de transição** até o fim do mês e depois entra no ciclo do dia 1.
+
+**D2 — inadimplência**
+- Fatura em aberto com `vencimento + 5 + 20 dias` já passado (dia 3 → dia 28) **bloqueia** a assinatura (`assinaturas.bloqueada_desde`): as entregas pendentes são canceladas, nenhuma entrega nova pode ser criada (gatilho em `entregas`) e a rotina não gera fatura nova.
+- **Pagar** (manual ou pelo webhook) a fatura que causa o bloqueio desbloqueia, agenda a próxima entrega (calendário + corte) e recomeça a cobrança no **1º dia do mês seguinte** (o período bloqueado não é cobrado). Se houver outra fatura além do limite, continua bloqueada.
+- Visível no painel (lista, detalhe e contagem na tela inicial) e no portal do assinante (aviso com "Pagar agora" na fatura mais antiga em atraso).
+
+**Interpretações a confirmar com o Fred/a Bruna**
+1. A fatura do mês seguinte sai **7 dias antes** (`dias_antecedencia_fatura`), para dar tempo de pagar até o dia 3.
+2. No desbloqueio, as entregas retomadas no resto do mês corrente **não são cobradas**.
+3. Se, com a D8, o pagamento atrasa a 1ª entrega, a 1ª fatura **não é recalculada**.
+4. As três constantes (5, 20, 7 dias) estão em `config_negocio`, mas **ainda sem campo em `/configuracoes`**.
+
+**Continua sem implementar:** D3–D7 (pausa com crédito/redução, troca de plano com diferença, cancelamento no fim do mês), D11 e D15. Pausa e bloqueio não se combinam ainda: só assinatura **ativa** é bloqueada.
+

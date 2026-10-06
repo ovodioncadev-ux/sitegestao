@@ -57,9 +57,10 @@ export default async function PainelInicial() {
               count(*) filter (where status = 'novo' and area_atendida_em is not null) as prontos
          from interessados`,
     );
-    const e = await bd.umaLinha<{ aguardando: string; problemas: string }>(
+    const e = await bd.umaLinha<{ aguardando: string; problemas: string; bloqueadas: string }>(
       `select (select count(*) from assinaturas where status = 'ativa' and aguardando_pagamento_desde is not null) as aguardando,
-              (select count(*) from pagamentos_online where status <> 'confirmado') as problemas`,
+              (select count(*) from pagamentos_online where status <> 'confirmado') as problemas,
+              (select count(*) from assinaturas where bloqueada_desde is not null) as bloqueadas`,
     );
     const pagamentosComProblema = await bd.consultar<{ id: string; fatura_id: string; status: string; valor_pago_centavos: number; criado_em: string; fatura_centavos: number }>(
       `select p.id, p.fatura_id, p.status, p.valor_pago_centavos, p.criado_em::text, f.valor_centavos as fatura_centavos
@@ -71,7 +72,7 @@ export default async function PainelInicial() {
         where criado_em > now() - interval '30 days' group by etapa`,
     );
     return {
-      espera: { aguardando: Number(e?.aguardando ?? 0), problemas: Number(e?.problemas ?? 0) },
+      espera: { aguardando: Number(e?.aguardando ?? 0), problemas: Number(e?.problemas ?? 0), bloqueadas: Number(e?.bloqueadas ?? 0) },
       pagamentosComProblema,
       interessados: { aguardando: Number(i?.aguardando ?? 0), prontos: Number(i?.prontos ?? 0) },
       funil: Object.fromEntries(funilLinhas.map((l) => [l.etapa, Number(l.total)])) as Record<string, number>,
@@ -117,6 +118,11 @@ export default async function PainelInicial() {
           {interessados.prontos > 0 && <> ({interessados.prontos} já com área atendida)</>}
         </li>
         {espera.aguardando > 0 && <li>{espera.aguardando} assinatura(s) aguardando o 1º pagamento</li>}
+        {espera.bloqueadas > 0 && (
+          <li>
+            <Link href="/assinaturas">{espera.bloqueadas} assinatura(s) bloqueada(s) por inadimplência</Link> (entregas paradas até o pagamento)
+          </li>
+        )}
         {espera.problemas > 0 && (
           <li>
             <strong>{espera.problemas} pagamento(s) online com problema</strong> (valor menor que o da fatura, ou pago a

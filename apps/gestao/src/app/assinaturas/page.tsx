@@ -16,6 +16,7 @@ type Linha = {
   data_inicio: string;
   proxima_entrega: string | null;
   aguardando_pagamento_desde: string | null;
+  bloqueada_desde: string | null;
 };
 
 const STATUS = Object.keys(STATUS_ASSINATURA);
@@ -46,7 +47,7 @@ export default async function Assinaturas({
     linhas: await bd.consultar<Linha>(
       `select a.id, a.cliente_id, c.nome as cliente_nome, p.nome as plano_nome,
               a.status::text, a.data_inicio::text, a.proxima_entrega::text,
-              a.aguardando_pagamento_desde::text
+              a.aguardando_pagamento_desde::text, a.bloqueada_desde::text
          from assinaturas a
          join clientes c on c.id = a.cliente_id
          join planos p on p.id = a.plano_id
@@ -111,10 +112,14 @@ export default async function Assinaturas({
                   </td>
                   <td>{a.plano_nome}</td>
                   <td>
-                    {a.aguardando_pagamento_desde ? 'Aguardando 1º pagamento' : rotulo(STATUS_ASSINATURA, a.status)}
+                    {a.bloqueada_desde
+                      ? 'Bloqueada (inadimplência)'
+                      : a.aguardando_pagamento_desde
+                        ? 'Aguardando 1º pagamento'
+                        : rotulo(STATUS_ASSINATURA, a.status)}
                   </td>
                   <td>{formatarData(a.data_inicio)}</td>
-                  <td>{a.aguardando_pagamento_desde ? 'após o pagamento' : formatarData(a.proxima_entrega)}</td>
+                  <td>{a.bloqueada_desde ? 'paradas até o pagamento' : a.aguardando_pagamento_desde ? 'após o pagamento' : formatarData(a.proxima_entrega)}</td>
                   <td>
                     <Link href={`/assinaturas/${a.id}`}>Abrir</Link>
                   </td>

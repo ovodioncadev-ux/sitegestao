@@ -49,6 +49,7 @@ type Assinatura = {
   pausada_em: string | null;
   data_retorno_prevista: string | null;
   aguardando_pagamento_desde: string | null;
+  bloqueada_desde: string | null;
 };
 
 type ReposicaoLinha = {
@@ -112,7 +113,7 @@ export default async function DetalheAssinatura({ params }: { params: Promise<{ 
               a.status::text, a.data_inicio::text, a.data_fim::text, a.proxima_entrega::text,
               a.data_cancelamento::text, a.motivo_cancelamento, a.forma_cobranca::text,
               a.proxima_cobranca::text, a.pausada_em::text, a.data_retorno_prevista::text,
-              a.aguardando_pagamento_desde::text
+              a.aguardando_pagamento_desde::text, a.bloqueada_desde::text
          from assinaturas a
          join clientes c on c.id = a.cliente_id
          join planos p on p.id = a.plano_id
@@ -168,7 +169,8 @@ export default async function DetalheAssinatura({ params }: { params: Promise<{ 
   const hoje = hojeEmSaoPaulo();
   const aguardando = Boolean(assinatura.aguardando_pagamento_desde) && assinatura.status === 'ativa';
   // "Sem próxima entrega" é alerta; aguardar o 1º pagamento é esperado (D8) e tem aviso próprio.
-  const semProxima = assinatura.status === 'ativa' && !assinatura.proxima_entrega && !aguardando;
+  const bloqueada = Boolean(assinatura.bloqueada_desde);
+  const semProxima = assinatura.status === 'ativa' && !assinatura.proxima_entrega && !aguardando && !bloqueada;
 
   // Valor sugerido para a próxima fatura (regra única, calculada pelo banco).
   const valorSugerido = assinatura.status === 'ativa' ? await valorSugeridoPromessa : null;
@@ -185,7 +187,7 @@ export default async function DetalheAssinatura({ params }: { params: Promise<{ 
         <tbody>
           <tr>
             <th>Situação</th>
-            <td>{rotulo(STATUS_ASSINATURA, assinatura.status)}</td>
+            <td>{bloqueada ? 'Ativa, bloqueada por inadimplência' : rotulo(STATUS_ASSINATURA, assinatura.status)}</td>
           </tr>
           <tr>
             <th>Plano</th>
@@ -198,7 +200,9 @@ export default async function DetalheAssinatura({ params }: { params: Promise<{ 
           <tr>
             <th>Próxima entrega</th>
             <td>
-              {aguardando
+              {bloqueada
+                ? `Paradas por inadimplência desde ${formatarData(assinatura.bloqueada_desde)}: voltam quando as faturas em atraso forem pagas`
+                : aguardando
                 ? `Aguardando o 1º pagamento (desde ${formatarData(assinatura.aguardando_pagamento_desde)}): registre o pagamento da 1ª fatura para agendar a entrega`
                 : formatarData(assinatura.proxima_entrega)}
             </td>

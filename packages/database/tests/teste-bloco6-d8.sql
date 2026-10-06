@@ -15,6 +15,7 @@ begin;
 
 do $$
 declare
+  v_val integer;
   v_total  int := 0;
   v_falhas int := 0;
   v_int    int;
@@ -77,9 +78,9 @@ begin
   select id, valor_centavos, vencimento, status into f1, v_int, v_data, v_txt from faturas where assinatura_id = ass2;
   if v_row.aguardando_pagamento_desde = v_hoje and v_row.proxima_entrega is null and v_row.status = 'ativa'
      and (select count(*) from entregas where assinatura_id = ass2) = 0
-     and f1 is not null and v_int = 14760 and v_data = v_hoje and v_txt = 'pendente'
+     and f1 is not null and v_int = round((select preco_pente_centavos from config_negocio) * 0.9 * (select calculo_entregas from faturas where id = f1)) and v_data = v_hoje and v_txt = 'pendente'
      and v_row.proxima_cobranca > v_hoje then
-    raise notice '  OK    D8.2  chave LIGADA: sem entrega, aguardando pagamento; 1ª fatura R$ 147,60 (10%% off), vence hoje; próxima cobrança no mês seguinte';
+    raise notice '  OK    D8.2  chave LIGADA: sem entrega, aguardando pagamento; 1ª fatura com 10%% off pelas entregas do período, vence hoje; próxima cobrança no mês seguinte';
   else
     v_falhas := v_falhas + 1;
     raise notice '  FALHA D8.2  aguardando=%, proxima_entrega=%, fatura=% % % %', v_row.aguardando_pagamento_desde, v_row.proxima_entrega, v_int, v_data, v_txt, f1;
@@ -223,13 +224,14 @@ begin
     v_falhas := v_falhas + 1; raise notice '  FALHA D8.11  faturas visíveis %, entregas %', v_int, v_row.count;
   end if;
 
+  select valor_centavos into v_val from faturas where id = f_a;
   -- D8.12 ─ iniciar_pagamento_online: só a própria fatura ────────────────────
   v_total := v_total + 1;
   v_ok := true;
   perform set_config('app.usuario_id', id_a, true);
   set local role app_usuario;
   select valor_centavos, referencia into v_row from iniciar_pagamento_online(f_a);
-  if v_row.valor_centavos <> 14760 or v_row.referencia <> f_a::text then v_ok := false; end if;
+  if v_row.valor_centavos <> v_val or v_row.referencia <> f_a::text then v_ok := false; end if;
   perform anexar_link_pagamento(f_a, 'https://pagamento.exemplo.test/c/abc123');
   begin perform anexar_link_pagamento(f_a, 'http://inseguro.exemplo.test/x'); v_ok := false; exception when check_violation then null; end;
   reset role;
@@ -249,9 +251,9 @@ begin
   -- D8.13 ─ nenhum papel de aplicação executa a confirmação ──────────────────
   v_total := v_total + 1;
   v_ok := true;
-  begin set local role app_anon;    perform confirmar_pagamento_online(f_a, 'sim', 'tx-x', 14760, 'pix'); v_ok := false; exception when insufficient_privilege then null; end;
+  begin set local role app_anon;    perform confirmar_pagamento_online(f_a, 'sim', 'tx-x', v_val, 'pix'); v_ok := false; exception when insufficient_privilege then null; end;
   reset role;
-  begin set local role app_usuario; perform confirmar_pagamento_online(f_a, 'sim', 'tx-x', 14760, 'pix'); v_ok := false; exception when insufficient_privilege then null; end;
+  begin set local role app_usuario; perform confirmar_pagamento_online(f_a, 'sim', 'tx-x', v_val, 'pix'); v_ok := false; exception when insufficient_privilege then null; end;
   reset role;
   if v_ok and (select status from faturas where id = f_a) = 'pendente' then
     raise notice '  OK    D8.13 app_anon e app_usuario NÃO conseguem confirmar pagamento (privilégio negado); a fatura segue pendente';
@@ -279,7 +281,7 @@ begin
   -- D8.15 ─ confirmação válida: paga, libera a entrega ───────────────────────
   v_total := v_total + 1;
   set local role app_pagamentos;
-  v_txt := confirmar_pagamento_online(f_a, 'simulado', 'tx-001', 14760, 'pix');
+  v_txt := confirmar_pagamento_online(f_a, 'simulado', 'tx-001', v_val, 'pix');
   reset role;
   select status, metodo into v_row from faturas where id = f_a;
   if v_txt = 'confirmado' and v_row.status = 'paga' and v_row.metodo = 'pix'
@@ -294,7 +296,7 @@ begin
   -- D8.16 ─ aviso repetido não duplica nada ───────────────────────────────────
   v_total := v_total + 1;
   set local role app_pagamentos;
-  v_txt := confirmar_pagamento_online(f_a, 'simulado', 'tx-001', 14760, 'pix');
+  v_txt := confirmar_pagamento_online(f_a, 'simulado', 'tx-001', v_val, 'pix');
   reset role;
   if v_txt = 'ja_processado' and (select count(*) from pagamentos_online where fatura_id = f_a) = 1
      and (select count(*) from entregas where assinatura_id = ass_a) = 1 then
@@ -306,7 +308,7 @@ begin
   -- D8.17 ─ transação nova para fatura já paga: sem efeito, fica registrada ───
   v_total := v_total + 1;
   set local role app_pagamentos;
-  v_txt := confirmar_pagamento_online(f_a, 'simulado', 'tx-002', 14760, 'pix');
+  v_txt := confirmar_pagamento_online(f_a, 'simulado', 'tx-002', v_val, 'pix');
   reset role;
   if v_txt = 'sem_efeito' and (select status from pagamentos_online where transacao_id = 'tx-002') = 'sem_efeito' then
     raise notice '  OK    D8.17 pagamento a mais para fatura já paga: "sem_efeito", registrado para o dono avaliar estorno';
@@ -319,13 +321,13 @@ begin
   insert into clientes (nome, email, cep, endereco, numero, bairro, origem)
     values ('B6 Seis', 'b6-6@exemplo.test', '30140005', 'Rua', '6', 'Savassi', 'organico') returning id into cli_b;
   ass_a := criar_assinatura(cli_b, v_s);
-  select id into f_b from faturas where assinatura_id = ass_a;
+  select id, valor_centavos into f_b, v_val from faturas where assinatura_id = ass_a;
   set local role app_pagamentos;
-  v_txt := confirmar_pagamento_online(f_b, 'simulado', 'tx-003', 14759, 'pix');
+  v_txt := confirmar_pagamento_online(f_b, 'simulado', 'tx-003', v_val - 1, 'pix');
   reset role;
   if v_txt = 'divergente' and (select status from faturas where id = f_b) = 'pendente'
      and (select count(*) from entregas where assinatura_id = ass_a) = 0 then
-    raise notice '  OK    D8.18 R$ 147,59 para uma fatura de R$ 147,60: "divergente", fatura segue pendente, nenhuma entrega liberada';
+    raise notice '  OK    D8.18 1 centavo a menos que a fatura: "divergente", fatura segue pendente, nenhuma entrega liberada';
   else
     v_falhas := v_falhas + 1; raise notice '  FALHA D8.18  %', v_txt;
   end if;
@@ -333,10 +335,10 @@ begin
   -- D8.19 ─ valor maior é aceito (e fica registrado) ─────────────────────────
   v_total := v_total + 1;
   set local role app_pagamentos;
-  v_txt := confirmar_pagamento_online(f_b, 'simulado', 'tx-004', 15000, 'cartao');
+  v_txt := confirmar_pagamento_online(f_b, 'simulado', 'tx-004', v_val + 300, 'cartao');
   reset role;
   if v_txt = 'confirmado' and (select status from faturas where id = f_b) = 'paga'
-     and (select valor_pago_centavos from pagamentos_online where transacao_id = 'tx-004') = 15000 then
+     and (select valor_pago_centavos from pagamentos_online where transacao_id = 'tx-004') = v_val + 300 then
     raise notice '  OK    D8.19 valor igual ou maior que o da fatura confirma; o valor realmente pago fica guardado';
   else
     v_falhas := v_falhas + 1; raise notice '  FALHA D8.19  %', v_txt;

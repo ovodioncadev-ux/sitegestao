@@ -38,6 +38,7 @@
     "teste:bloco4": "node scripts/rodar-sql.mjs tests/teste-bloco4-funil.sql",
     "teste:bloco5": "node scripts/rodar-sql.mjs tests/teste-bloco5-interessados.sql",
     "teste:bloco6": "node scripts/rodar-sql.mjs tests/teste-bloco6-d8.sql",
+    "teste:bloco9": "node scripts/rodar-sql.mjs tests/teste-bloco9-d1-d2.sql",
     "teste:bloco8": "node scripts/rodar-sql.mjs tests/teste-bloco8-rate-limit.sql",
     "teste:concorrencia": "node scripts/teste-concorrencia-rate-limit.mjs"
   },

@@ -170,7 +170,7 @@ begin
   -- F4.11 ── marcar_faturas_atrasadas ─────────────────────────────────────
   v_total := v_total + 1;
   insert into faturas (cliente_id, assinatura_id, valor_centavos, vencimento)
-  values (cli_q, ass_q, 1000, hoje_sp() - 3) returning id into v_uuid;  -- pendente vencida, inserida direto
+  values (cli_q, ass_q, 1000, hoje_sp() - 10) returning id into v_uuid;  -- pendente vencida, inserida direto
   select marcar_faturas_atrasadas() into v_int;
   select status::text into v_txt from faturas where id = v_uuid;
   select status::text into v_txt2 from faturas where id = fat_1;         -- vence no futuro
