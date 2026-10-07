@@ -88,14 +88,13 @@ apps/{site,assinante,gestao}/src/app/layout.tsx   # imports + fontes (Task 2)
 - Consumes: arquivos `Ovo di Onça Design System/tokens/{colors,typography,spacing,radii,elevation,motion}.css` (somente leitura).
 - Produces: `@ovo/ui/tokens.css` com os tokens do DS (`--gold-*`, `--brown-*`, `--olive-*`, `--cream-*`, `--surface-*`, `--text-*`, `--border-*`, `--action-*`, `--font-*`, `--fs-*`, `--space-*`, `--radius-*`, `--shadow-*`, `--ring-*`, `--dur-*`, `--control-height-*`, `--sidebar-width`…), mais os tokens novos `--gold-800`, `--text-on-sunken`, `--border-control`, `--surface-inverse-hover`, `--surface-on-accent-chip`, e os apelidos legados (`--cor-*`, `--fonte-*`, `--texto-*`, `--esp-*`, `--raio-*`, `--largura-conteudo`, `--altura-controle`, `--alvo-toque`, `--padding-*`, `--sombra-flutuante`, `--altura-linha-*`). `tests/_tokens.ts` exporta `RAIZ`, `lerTokens()`, `resolverCor()`, `contraste()`.
 
-- [ ] **Step 0: Criar o branch de trabalho (não trabalhar na `main`)**
+- [ ] **Step 0: Confirmar o branch de trabalho (não trabalhar na `main`)**
 
 Run:
 ```bash
-git switch -c feat/visual-fundacao-componentes
 git branch --show-current
 ```
-Expected: `feat/visual-fundacao-componentes`. Todos os commits deste plano vão nesse branch. (O spec e este plano já estão commitados; não repetir.)
+Expected: `feat/visual-fundacao-componentes` (criado junto com o commit deste plano). Se aparecer `main`, rode `git switch feat/visual-fundacao-componentes`. Todos os commits deste plano vão nesse branch. O spec (commit `15269ed`) ficou na `main` local, sem push.
 
 - [ ] **Step 1: Reescrever `packages/ui/package.json`**
 
