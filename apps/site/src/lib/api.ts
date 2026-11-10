@@ -1,11 +1,15 @@
 /**
- * Cliente HTTP da vitrine. Os três endereços são do PRÓPRIO site: o
- * next.config.ts os repassa ao app do assinante no servidor (rewrites).
- * Nada de URL de outro domínio no navegador, nada de cookie, nada de CORS.
+ * Cliente HTTP da vitrine. Os três endereços são do MESMO domínio do site: em
+ * produção o vercel.json manda /conta/* para o app do assinante; no dev local o
+ * next.config.ts faz o mesmo com um rewrite. Nada de outro domínio no navegador,
+ * nada de CORS.
  */
 
+// O assinante responde em /conta no mesmo domínio (ver vercel.json).
+const CONTA = '/conta';
+
 async function pegar<T>(caminho: string): Promise<T> {
-  const res = await fetch(caminho, { cache: 'no-store' });
+  const res = await fetch(`${CONTA}${caminho}`, { cache: 'no-store' });
   if (!res.ok) throw new Error(`${res.status}: ${res.statusText}`);
   const data = (await res.json()) as T & { erro?: string };
   if (data.erro) throw new Error(data.erro);
@@ -30,8 +34,7 @@ export async function cepAtendido(cep: string): Promise<boolean> {
 
 /** Endereço do passo de assinatura, no app do assinante. O plano vai pelo nome público, nunca por id. */
 export function urlAssinar(plano: string): string {
-  const base = process.env.NEXT_PUBLIC_URL_ASSINANTE ?? 'http://localhost:3001';
-  return `${base}/assinar?plano=${encodeURIComponent(plano)}`;
+  return `${CONTA}/assinar?plano=${encodeURIComponent(plano)}`;
 }
 
 export type PlanoDaApi = {

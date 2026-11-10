@@ -12,7 +12,8 @@ import { NextResponse, type NextRequest } from 'next/server';
  * segurança. Quem valida de verdade é `usuarioAtual()`, no servidor.
  */
 
-const COOKIE_DE_SESSAO = 'better-auth.session_token';
+// Mesmo nome que o auth gera: <prefixo do app>.session_token (ver better-auth.ts).
+const COOKIE_DE_SESSAO = `${process.env.APP_COOKIE_PREFIX ?? 'better-auth'}.session_token`;
 
 export function temCookieDeSessao(request: NextRequest): boolean {
   return Boolean(
@@ -22,7 +23,10 @@ export function temCookieDeSessao(request: NextRequest): boolean {
 }
 
 export function redirecionarParaLogin(request: NextRequest, caminhoLogin = '/entrar') {
-  const destino = new URL(caminhoLogin, request.url);
+  // nextUrl.clone() preserva o basePath do app (/conta/entrar, /gestao/entrar).
+  const destino = request.nextUrl.clone();
+  destino.pathname = caminhoLogin;
+  destino.search = '';
   destino.searchParams.set('voltar', request.nextUrl.pathname);
   return NextResponse.redirect(destino);
 }

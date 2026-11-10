@@ -12,6 +12,15 @@ const nextConfig: NextConfig = {
   // Os pacotes do monorepo são TypeScript cru, compilados pelo próprio Next.
   transpilePackages: ['@ovo/database', '@ovo/ui'],
   poweredByHeader: false,
+  // Os três apps dividem um domínio só (ver vercel.json): este vive em /gestao.
+  // Estas variáveis são lidas pelo auth (cookie com prefixo e caminho próprios,
+  // para a sessão do cliente e a do painel nunca se misturarem) e pelo navegador.
+  basePath: '/gestao',
+  env: {
+    APP_BASE_PATH: '/gestao',
+    APP_COOKIE_PREFIX: 'ovo-gestao',
+    NEXT_PUBLIC_BASE_PATH: '/gestao',
+  },
   async headers() {
     return [
       {

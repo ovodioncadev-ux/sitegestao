@@ -50,7 +50,11 @@ export const auth = betterAuth({
     'auth',
   ),
 
+  // BETTER_AUTH_URL é só a origem (https://dominio, sem caminho). O caminho
+  // de cada app (/conta, /gestao) entra por APP_BASE_PATH, definido no
+  // next.config.ts de cada um.
   baseURL: exigirEnv('BETTER_AUTH_URL'),
+  basePath: `${process.env.APP_BASE_PATH ?? ''}/api/auth`,
   secret: exigirEnv('BETTER_AUTH_SECRET'),
 
   emailAndPassword: {
@@ -122,7 +126,11 @@ export const auth = betterAuth({
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
+      // Cookie só viaja para o próprio app: /conta nunca recebe o da /gestao.
+      path: process.env.APP_BASE_PATH || '/',
     },
+    // Nome próprio por app, porque os dois dividem a mesma origem.
+    cookiePrefix: process.env.APP_COOKIE_PREFIX ?? 'better-auth',
   },
 
   // Este auth() é compartilhado pelos dois apps (cada um monta sua própria

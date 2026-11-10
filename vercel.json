@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "site": { "root": "apps/site", "framework": "nextjs" },
+    "assinante": { "root": "apps/assinante", "framework": "nextjs" },
+    "gestao": { "root": "apps/gestao", "framework": "nextjs" }
+  },
+  "rewrites": [
+    { "source": "/conta/:path*", "destination": { "service": "assinante" } },
+    { "source": "/gestao/:path*", "destination": { "service": "gestao" } },
+    { "source": "/(.*)", "destination": { "service": "site" } }
+  ]
+}

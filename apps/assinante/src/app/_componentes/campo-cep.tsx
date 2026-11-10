@@ -25,7 +25,7 @@ export function CampoCep({ valorInicial = '' }: { valorInicial?: string }) {
 
     const controle = new AbortController();
     setSituacao('consultando');
-    fetch(`/api/area?cep=${digitos}`, { signal: controle.signal })
+    fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/api/area?cep=${digitos}`, { signal: controle.signal })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
       .then((d: { atendido: boolean }) => setSituacao(d.atendido ? 'atendido' : 'fora'))
       .catch((e: unknown) => {
