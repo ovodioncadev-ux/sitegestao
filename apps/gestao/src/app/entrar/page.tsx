@@ -16,17 +16,29 @@ export default function Entrar() {
     setErro(null);
     setEnviando(true);
 
-    const { error } = await authClient.signIn.email({ email, password: senha });
+    try {
+      const { error } = await authClient.signIn.email({ email, password: senha });
 
-    setEnviando(false);
+      if (error) {
+        // Só diz "senha incorreta" quando o servidor realmente recusou as
+        // credenciais; qualquer outra falha é do sistema, não da pessoa.
+        if (error.status === 401 || error.status === 400) {
+          setErro('E-mail ou senha incorretos.');
+        } else if (error.status === 429) {
+          setErro('Muitas tentativas. Aguarde um minuto e tente de novo.');
+        } else {
+          setErro('Não foi possível entrar agora. Tente de novo em instantes.');
+        }
+        return;
+      }
 
-    if (error) {
-      setErro('E-mail ou senha incorretos.');
-      return;
+      router.push('/');
+      router.refresh();
+    } catch {
+      setErro('Não foi possível entrar agora. Confira a conexão e tente de novo.');
+    } finally {
+      setEnviando(false);
     }
-
-    router.push('/');
-    router.refresh();
   }
 
   return (
@@ -86,7 +98,9 @@ export default function Entrar() {
         />
 
         {erro && (
-          <p style={{ color: 'var(--cor-erro)', marginBottom: 'var(--esp-4)' }}>{erro}</p>
+          <p role="alert" style={{ color: 'var(--cor-erro)', marginBottom: 'var(--esp-4)' }}>
+            {erro}
+          </p>
         )}
 
         <button

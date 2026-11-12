@@ -7,6 +7,7 @@
     ".": "./src/index.ts",
     "./acesso": "./src/acesso.ts",
     "./auth": "./src/auth/better-auth.ts",
+    "./auth-rota": "./src/auth/rota.ts",
     "./auth-cliente": "./src/auth/cliente.ts",
     "./papel": "./src/auth/papel.ts",
     "./types": "./src/types.ts",
