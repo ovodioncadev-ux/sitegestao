@@ -27,6 +27,9 @@
   --cor-erro: #ba1a1a;
   --cor-whatsapp: #1a9e4b;
 
+  /* Texto sobre fundo de ação escuro (ex.: botão do WhatsApp). */
+  --cor-texto-inverso: #fff;
+
   /* ── Tipografia ─────────────────────────────────────────────────── */
   --fonte-titulo: 'Aclonica', system-ui, sans-serif;  /* só h1 e h2 */
   --fonte-corpo: 'Poppins', system-ui, sans-serif;    /* todo o resto */

@@ -12,6 +12,7 @@ const LINKS = [
 
 export function Navbar() {
   const [ativo, setAtivo] = useState<string>('');
+  const [aberto, setAberto] = useState(false);
 
   // Scroll-spy: os ids observados vêm de LINKS, a mesma lista que monta o menu.
   useEffect(() => {
@@ -29,63 +30,53 @@ export function Navbar() {
     return () => observador.disconnect();
   }, []);
 
+  // Esc fecha o menu no celular.
+  useEffect(() => {
+    if (!aberto) return;
+    const aoTeclar = (e: KeyboardEvent) => e.key === 'Escape' && setAberto(false);
+    window.addEventListener('keydown', aoTeclar);
+    return () => window.removeEventListener('keydown', aoTeclar);
+  }, [aberto]);
+
   return (
-    <header
-      style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 40,
-        background: 'var(--cor-fundo)',
-        borderBottom: '1px solid var(--cor-borda)',
-      }}
-    >
-      <nav
-        style={{
-          maxWidth: 'var(--largura-conteudo)',
-          margin: '0 auto',
-          padding: `var(--esp-3) var(--esp-6)`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 'var(--esp-4)',
-        }}
-      >
-        <a
-          href="#inicio"
-          style={{ fontFamily: 'var(--fonte-titulo)', color: 'var(--cor-texto)', fontSize: 'var(--texto-medio)' }}
-        >
+    <header className="topo">
+      <nav className="topo-nav" aria-label="Principal">
+        <a href="#inicio" className="topo-marca" onClick={() => setAberto(false)}>
           Ovo di Onça
         </a>
-        <ul style={{ display: 'flex', gap: 'var(--esp-4)', listStyle: 'none', margin: 0, padding: 0 }}>
-          {LINKS.map((link) => (
-            <li key={link.href}>
-              <a
-                href={link.href}
-                aria-current={ativo === link.href.slice(1) ? 'true' : undefined}
-                style={{
-                  color: ativo === link.href.slice(1) ? 'var(--cor-ouro-escuro)' : 'var(--cor-texto-suave)',
-                  fontWeight: ativo === link.href.slice(1) ? 600 : 400,
-                }}
-              >
-                {link.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-        <a
-          href={WHATSAPP_URL}
-          target="_blank"
-          rel="noreferrer"
-          style={{
-            background: 'var(--cor-ouro)',
-            color: '#fff',
-            borderRadius: 'var(--raio-controle)',
-            padding: `var(--esp-2) var(--esp-4)`,
-            minHeight: 'var(--alvo-toque)',
-            display: 'inline-flex',
-            alignItems: 'center',
-          }}
+        <button
+          type="button"
+          className="topo-botao-menu"
+          aria-expanded={aberto}
+          aria-controls="menu-principal"
+          onClick={() => setAberto((v) => !v)}
         >
+          {aberto ? 'Fechar' : 'Menu'}
+        </button>
+        <ul id="menu-principal" className={aberto ? 'topo-links topo-links-abertos' : 'topo-links'}>
+          {LINKS.map((link) => {
+            const ehAtivo = ativo === link.href.slice(1);
+            return (
+              <li key={link.href}>
+                <a
+                  href={link.href}
+                  className="topo-link"
+                  aria-current={ehAtivo ? 'true' : undefined}
+                  data-ativo={ehAtivo ? 'true' : undefined}
+                  onClick={() => setAberto(false)}
+                >
+                  {link.label}
+                </a>
+              </li>
+            );
+          })}
+          <li className="topo-cta-no-menu">
+            <a href={WHATSAPP_URL} target="_blank" rel="noreferrer" className="botao-ouro">
+              Falar no WhatsApp
+            </a>
+          </li>
+        </ul>
+        <a href={WHATSAPP_URL} target="_blank" rel="noreferrer" className="botao-ouro topo-cta">
           Falar no WhatsApp
         </a>
       </nav>

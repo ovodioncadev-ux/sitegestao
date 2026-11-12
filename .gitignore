@@ -25,6 +25,11 @@ supabase/.temp/
 # Design system reference (85 MB, não usado pelos apps)
 Ovo\ di\ Onça\ Design\ System/
 
+# Arquivos temporários e saídas locais (Bloco 0)
+_tmp_*
+build.log
+graphify-out/cache/
+
 # ─────────────────────────────────────────────────────────────
 # SEGREDOS — regra 0.1 do prompt de construção.
 # NÃO REMOVA ESTAS DUAS LINHAS, E NÃO AS TROQUE POR
@@ -32,3 +37,6 @@ Ovo\ di\ Onça\ Design\ System/
 # ─────────────────────────────────────────────────────────────
 .env*
 !.env.example
+
+# Triagem de arquivos (temporário)
+_a-apagar/

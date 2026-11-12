@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { buscarPlanos } from '@/lib/api';
 import type { Plan } from '@/types';
 
@@ -9,7 +9,9 @@ export function usePlanos() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
 
-  useEffect(() => {
+  const carregar = useCallback(() => {
+    setCarregando(true);
+    setErro(null);
     buscarPlanos()
       .then((dados) => {
         setPlanos(
@@ -35,5 +37,9 @@ export function usePlanos() {
       .finally(() => setCarregando(false));
   }, []);
 
-  return { planos, carregando, erro };
+  useEffect(() => {
+    carregar();
+  }, [carregar]);
+
+  return { planos, carregando, erro, recarregar: carregar };
 }

@@ -1,0 +1,238 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Componentes do painel (etapa C2). Só tokens de ds.css, nenhum hex solto.
+   Sem hover que mexe no tamanho/posição, sem sombra em card, sem blur,
+   sem zebra. Movimento: só cor, ≤200ms.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.so-leitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Mostrar uma versão ou outra conforme a tela (tabela × lista de cartões). */
+.so-celular { display: block; }
+.so-desktop { display: none; }
+@media (min-width: 768px) {
+  .so-celular { display: none; }
+  .so-desktop { display: block; }
+}
+
+/* ─── Botão ──────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target-min);
+  padding: 0 var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  font: var(--fw-semibold) var(--fs-sm) / 1 var(--font-sans);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: var(--transition-control);
+}
+.btn-g { min-height: var(--control-height-lg); font-size: var(--fs-md); padding: 0 var(--space-6); }
+.btn-cheio { width: 100%; }
+
+.btn-primario { background: var(--action-primary); border-color: var(--gold-500); color: var(--text-on-accent); }
+.btn-primario:hover { background: var(--action-primary-hover); }
+.btn-primario:active { background: var(--action-primary-press); }
+
+.btn-secundario { background: var(--surface-raised); border-color: var(--border-default); color: var(--text-body); }
+.btn-secundario:hover { background: var(--action-secondary-hover); }
+
+.btn-perigo { background: transparent; border-color: var(--action-danger); color: var(--action-danger); }
+.btn-perigo:hover { background: var(--surface-danger-soft); }
+
+.btn-perigoSolido { background: var(--action-danger); border-color: var(--action-danger); color: var(--cream-50); }
+.btn-perigoSolido:hover { background: var(--action-danger-hover); }
+
+.btn-fantasma { background: transparent; color: var(--text-body); }
+.btn-fantasma:hover { background: var(--action-ghost-hover); }
+
+.btn:disabled,
+.btn[aria-disabled='true'] {
+  background: var(--action-disabled-bg);
+  border-color: var(--border-subtle);
+  color: var(--action-disabled-text);
+  cursor: not-allowed;
+}
+
+/* Formulário em coluna: o botão desce do último campo. */
+form > .btn { margin-top: var(--space-3); }
+.form-linha > .btn,
+.filtros > .btn { margin-top: 0; }
+
+/* ─── Selo de situação ───────────────────────────────────────────────── */
+.selo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font: var(--fw-medium) var(--fs-sm) / 1.3 var(--font-sans);
+  white-space: nowrap;
+}
+.selo-ponto { width: 8px; height: 8px; flex: none; border-radius: var(--radius-pill); background: var(--brown-300); }
+.selo-sucesso { color: var(--text-success); }
+.selo-sucesso .selo-ponto { background: var(--green-500); }
+.selo-alerta { color: var(--gold-700); }
+.selo-alerta .selo-ponto { background: var(--gold-500); }
+.selo-perigo { color: var(--text-danger); }
+.selo-perigo .selo-ponto { background: var(--red-500); }
+.selo-oliva { color: var(--text-olive); }
+.selo-oliva .selo-ponto { background: var(--olive-500); }
+.selo-neutro { color: var(--text-muted); }
+
+/* ─── Cartão de resumo ───────────────────────────────────────────────── */
+.resumo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--card-padding);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface-card);
+  color: var(--text-body);
+  text-decoration: none;
+}
+.resumo-alerta { border-color: var(--border-accent); }
+.resumo-rotulo { font: var(--type-label); color: var(--text-muted); }
+.resumo-valor { font: var(--type-metric); color: var(--text-strong); font-family: var(--font-display); }
+.resumo-detalhe { font: var(--type-body); color: var(--text-muted); }
+.resumo-seta { position: absolute; top: var(--card-padding); right: var(--card-padding); color: var(--text-muted); }
+
+/* Grade de cartões de resumo (Painel). */
+.resumos { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-4); }
+
+/* ─── Tabela ─────────────────────────────────────────────────────────── */
+.tabela {
+  overflow-x: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface-raised);
+}
+.pagina .tabela table { font: var(--type-body); }
+.pagina .tabela th {
+  padding: var(--cell-padding);
+  background: var(--surface-card);
+  border-bottom: 1px solid var(--border-default);
+  color: var(--text-table-head);
+  font: var(--fw-semibold) var(--fs-sm) / 1.3 var(--font-sans);
+  text-align: left;
+}
+.pagina .tabela td {
+  padding: var(--cell-padding);
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: top;
+}
+.pagina .tabela tr:last-child td { border-bottom: 0; }
+.pagina .tabela .celula-num { text-align: right; }
+
+/* ─── Lista de cartões (celular) ─────────────────────────────────────── */
+.lista-cartoes { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+.item-cartao {
+  padding: var(--card-padding);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface-raised);
+}
+.item-cartao-topo { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.item-cartao-dados { display: flex; flex-direction: column; gap: var(--space-2); margin: var(--space-3) 0 0; }
+.item-cartao-dados > div { display: flex; justify-content: space-between; gap: var(--space-4); }
+.item-cartao-dados dt { color: var(--text-muted); }
+.item-cartao-dados dd { margin: 0; text-align: right; }
+.item-cartao-acoes { margin-top: var(--space-4); }
+
+/* ─── Campo ──────────────────────────────────────────────────────────── */
+.campo { display: flex; flex-direction: column; gap: var(--space-1); }
+.campo + .campo { margin-top: var(--space-4); }
+.pagina .campo label { margin: 0; font: var(--type-label); color: var(--text-strong); }
+.campo-obrigatorio { color: var(--text-muted); font-weight: var(--fw-regular); }
+.pagina .campo-ajuda { margin: 0; color: var(--text-muted); font: var(--type-body); }
+.pagina .campo-erro { margin: 0; color: var(--text-danger); font: var(--fw-medium) var(--fs-sm) / 1.3 var(--font-sans); }
+.pagina .controle {
+  width: 100%;
+  max-width: 420px;
+  min-height: var(--control-height-lg);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
+  background: var(--surface-raised);
+  color: var(--text-body);
+  font: var(--type-body-lg);
+}
+.pagina textarea.controle { padding: var(--space-3); min-height: 96px; }
+
+/* ─── Vazio ──────────────────────────────────────────────────────────── */
+.vazio {
+  padding: var(--space-8) var(--card-padding);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface-raised);
+}
+.pagina .vazio h3 { font: var(--type-h3); margin: 0; }
+.vazio p { margin: var(--space-2) 0 0; color: var(--text-muted); }
+.vazio-acao { margin-top: var(--space-4); }
+
+/* ─── Aviso ──────────────────────────────────────────────────────────── */
+.aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin: var(--space-3) 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
+  background: var(--surface-highlight);
+  color: var(--text-body);
+  font: var(--type-body);
+}
+.aviso > svg { flex: none; margin-top: 1px; }
+.aviso > div { min-width: 0; }
+.aviso-ok { background: var(--surface-success-soft); border-color: var(--border-success); color: var(--green-700); }
+.aviso-erro { background: var(--surface-danger-soft); border-color: var(--border-danger); color: var(--red-700); }
+.aviso-ok > div,
+.aviso-erro > div { font-weight: var(--fw-medium); }
+.form-linha > .aviso { flex-basis: 100%; margin: 0; }
+
+/* ─── Diálogo ────────────────────────────────────────────────────────── */
+.dialogo {
+  width: calc(100% - 2 * var(--gutter-page-mobile));
+  max-width: 480px;
+  margin: auto; /* o reset do Tailwind zera a margem nativa do <dialog> */
+  padding: 0;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-card);
+  background: var(--surface-raised);
+  color: var(--text-body);
+  box-shadow: var(--shadow-float);
+}
+.dialogo::backdrop { background: var(--overlay-scrim); }
+.dialogo-corpo { padding: var(--card-padding); }
+.pagina .dialogo-corpo h2 { margin: 0; font: var(--type-h2); }
+.dialogo-texto { margin-top: var(--space-3); font: var(--type-body-lg); }
+.dialogo-acoes { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-3); margin-top: var(--space-6); }
+.dialogo-acoes > .btn { margin-top: 0; }
+
+/* Celular: painel que sobe do rodapé. */
+@media (max-width: 767px) {
+  .dialogo {
+    width: 100%;
+    max-width: none;
+    margin: auto 0 0;
+    border-width: 1px 0 0;
+    border-radius: 20px 20px 0 0;
+    box-shadow: var(--shadow-sheet);
+  }
+  .dialogo-acoes { flex-direction: column-reverse; }
+  .dialogo-acoes > .btn { width: 100%; }
+}

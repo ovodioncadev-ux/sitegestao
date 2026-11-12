@@ -10,7 +10,12 @@
 
 For detailed architecture, routing, data flow and conventions, see [docs/CODEBASE_MAP.md](docs/CODEBASE_MAP.md).
 
-## Current State (29/09/2026)
+## Current State (atualizado 23/10/2026)
+
+- **Mudanças desde 29/09** (detalhe em [docs/CODEBASE_MAP.md](docs/CODEBASE_MAP.md), seção "Atualização de 22/10/2026"): 24 migrations (421 calendário/corte; 422 RLS em tabelas com dados pessoais; 423 rate limit no banco, ainda sem uso); `.github/workflows/ci.yml` recriado, mas não commitado; visual novo do gestão (`packages/ui/src/ds.css`, componentes em `apps/gestao/src/app/_componentes/`, etapas C1 e C2 do `docs/PLANO-VISUAL-GESTAO-20261019.md`, sem commit); Hero do site com o slogan do `design.md`.
+- **Regras de cobrança D1–D15:** só D9 e D10 (datas) estão no código. O resto está em `docs/PLANO-GESTAO-20261013.md`. Decisões de 22/10 em `DECISOES.md`. Pagamento segue manual (PIX + comprovante); sem provedor de e-mail.
+- **Atenção:** rate limit em banco, CSP em bloqueio e rate limit em Server Actions estão documentados, mas **não efetivos** (CSP em report-only; Better Auth com rate limit em memória). O Down da migration 422 desliga a RLS original.
+
 
 - **Database:** 22 migrations (Fases 0–9 + Etapas 1–2; a 421 aplicada também no principal em 30/09/2026). Testes SQL: `pnpm teste:banco` (fase1..10) + `pnpm seguranca`. Os testes SQL exigem `DATABASE_TEST_URL` (branch de teste do Neon; sem fallback para o principal). `pnpm db:migrar:teste` migra só o teste. Ver README, "Banco de testes".
 - **Auditoria de estabilidade (30/09/2026):** rotina diária serializada por advisory lock e resistente a falha isolada; defeito duplicado recusado; `dentro_area_entrega` recalculado por gatilho ao mexer nas faixas; pools do `pg` com ouvinte de erro (o Neon derruba conexões ociosas); `/api/plans` e `/api/neighborhoods` com cache de 30 s. Dados `[TESTE]` ainda no banco: `pnpm db:limpar-teste` remove (não toca na auditoria).
@@ -67,7 +72,8 @@ pnpm --filter @ovo/database teste:estrutura   # Run structure tests
 - `.env` na raiz; `next.config.ts` de assinante e site o carregam.
 - Bash do Claude Code colapsa `\` em heredocs: para código com barra invertida use a ferramenta de edição.
 - CSP em report-only; para aplicar, `{ modoRelatorio: false }` em `next.config.ts`.
-- `Ovo di Onça Design System/` (85 MB) e `_tmp_*` continuam fora do fluxo.
+- `Ovo di Onça Design System/` (85 MB) continua fora do fluxo; os `_tmp_*` foram removidos.
+- Descartes da triagem de 23/10 estão em `_a-apagar/` (ignorada no git) — ver `_a-apagar/LEIA-ME.md`.
 
 ## Key Files
 

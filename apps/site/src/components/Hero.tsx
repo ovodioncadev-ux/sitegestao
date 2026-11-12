@@ -50,7 +50,7 @@ export function Hero() {
           href={urlWhatsapp('Oi! Quero saber mais sobre os planos de ovos.')}
           target="_blank"
           rel="noreferrer"
-          style={{ ...BOTAO_BASE, background: 'var(--cor-whatsapp)', color: '#fff' }}
+          style={{ ...BOTAO_BASE, background: 'var(--cor-whatsapp)', color: 'var(--cor-texto-inverso)' }}
         >
           Falar no WhatsApp
         </a>

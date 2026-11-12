@@ -4,9 +4,15 @@ import { useState, type FormEvent } from 'react';
 import { useBairros } from '@/hooks/useBairros';
 import { cepAtendido } from '@/lib/api';
 
+/** Só dígitos, no máximo 8, com hífen depois do quinto: "30130000" -> "30130-000". */
+function mascararCep(valor: string): string {
+  const digitos = valor.replace(/\D/g, '').slice(0, 8);
+  return digitos.length > 5 ? `${digitos.slice(0, 5)}-${digitos.slice(5)}` : digitos;
+}
+
 export function NeighborhoodSection() {
   const [busca, setBusca] = useState('');
-  const { bairros, carregando, erro } = useBairros();
+  const { bairros, carregando, erro, recarregar } = useBairros();
   const [cep, setCep] = useState('');
   const [resultadoCep, setResultadoCep] = useState<string | null>(null);
 
@@ -39,62 +45,80 @@ export function NeighborhoodSection() {
         Frete grátis nos bairros atendidos. Fora dessa área ainda não conseguimos entregar.
       </p>
 
-      <form onSubmit={conferirCep} style={{ textAlign: 'center', marginTop: 'var(--esp-6)' }}>
-        <label>
-          Seu CEP{' '}
+      <form
+        onSubmit={conferirCep}
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'flex-end',
+          justifyContent: 'center',
+          gap: 'var(--esp-3)',
+          marginTop: 'var(--esp-6)',
+        }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--esp-1)', textAlign: 'left' }}>
+          <label htmlFor="campo-cep" style={{ fontSize: 'var(--texto-pequeno)' }}>
+            Seu CEP
+          </label>
           <input
+            id="campo-cep"
+            className="campo-texto"
             type="text"
             inputMode="numeric"
+            autoComplete="postal-code"
+            maxLength={9}
             value={cep}
-            onChange={(e) => setCep(e.target.value.replace(/[^\d-]/g, '').slice(0, 9))}
+            onChange={(e) => setCep(mascararCep(e.target.value))}
             placeholder="30000-000"
-            style={{
-              minHeight: 'var(--altura-controle)',
-              borderRadius: 'var(--raio-controle)',
-              border: '1px solid var(--cor-borda)',
-              padding: `0 var(--esp-3)`,
-            }}
+            aria-describedby="resultado-cep"
           />
-        </label>{' '}
-        <button
-          type="submit"
-          style={{
-            minHeight: 'var(--altura-controle)',
-            borderRadius: 'var(--raio-controle)',
-            border: '1px solid var(--cor-ouro)',
-            background: 'transparent',
-            color: 'var(--cor-ouro-escuro)',
-            padding: `0 var(--esp-4)`,
-          }}
-        >
+        </div>
+        <button type="submit" className="botao-contorno">
           Conferir
         </button>
-        {resultadoCep && (
-          <p role="status" style={{ marginTop: 'var(--esp-2)', color: 'var(--cor-texto-suave)' }}>
-            {resultadoCep}
-          </p>
-        )}
+        <p
+          id="resultado-cep"
+          role="status"
+          style={{
+            flexBasis: '100%',
+            textAlign: 'center',
+            margin: 0,
+            minHeight: '1.6em',
+            color: 'var(--cor-texto-suave)',
+          }}
+        >
+          {resultadoCep}
+        </p>
       </form>
 
-      <input
-        type="text"
-        value={busca}
-        onChange={(e) => setBusca(e.target.value)}
-        placeholder="Digite seu bairro"
-        style={{
-          display: 'block',
-          margin: 'var(--esp-6) auto',
-          width: '100%',
-          maxWidth: '360px',
-          minHeight: 'var(--altura-controle)',
-          borderRadius: 'var(--raio-controle)',
-          border: '1px solid var(--cor-borda)',
-          padding: `0 var(--esp-3)`,
-        }}
-      />
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--esp-1)', marginTop: 'var(--esp-6)' }}>
+        <label htmlFor="campo-bairro" style={{ fontSize: 'var(--texto-pequeno)' }}>
+          Buscar bairro
+        </label>
+        <input
+          id="campo-bairro"
+          className="campo-texto"
+          type="search"
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+          placeholder="Digite seu bairro"
+          style={{ width: '100%', maxWidth: '360px' }}
+        />
+      </div>
 
-      {carregando && <p style={{ textAlign: 'center' }}>Carregando bairros...</p>}
-      {erro && <p style={{ textAlign: 'center', color: 'var(--cor-erro)' }}>Erro: {erro}</p>}
+      {carregando && (
+        <p role="status" style={{ textAlign: 'center', marginTop: 'var(--esp-6)' }}>
+          Carregando bairros...
+        </p>
+      )}
+      {erro && (
+        <div role="alert" style={{ textAlign: 'center', marginTop: 'var(--esp-6)' }}>
+          <p style={{ color: 'var(--cor-erro)' }}>{erro}</p>
+          <button type="button" className="botao-contorno" onClick={recarregar} style={{ marginTop: 'var(--esp-3)' }}>
+            Tentar de novo
+          </button>
+        </div>
+      )}
 
       {!carregando && !erro && (
         <ul

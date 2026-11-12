@@ -17,7 +17,12 @@ export function Footer() {
         }}
       >
         <span>Ovo di Onça</span>
-        <a href={WHATSAPP_URL} target="_blank" rel="noreferrer">
+        <a
+          href={WHATSAPP_URL}
+          target="_blank"
+          rel="noreferrer"
+          style={{ display: 'inline-flex', alignItems: 'center', minHeight: 'var(--alvo-toque)' }}
+        >
           WhatsApp: {WHATSAPP_EXIBICAO}
         </a>
       </div>

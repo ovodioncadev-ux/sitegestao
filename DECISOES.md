@@ -72,7 +72,7 @@ Só não dá para ter as duas coisas: ou o intervalo é exato, ou o dia é fixo.
 
 | # | Pergunta | Por que trava |
 |---|---|---|
-| 1 | Quais são as duas fontes? | Três contratos tipográficos conflitantes. Hoje: Aclonica em `h1`/`h2`, Poppins no resto |
+| 1 | ~~Quais são as duas fontes?~~ **Resolvido em 19/10/2026 (Bruna), só para o painel de gestão:** o gestão segue o Design System oficial (`Ovo di Onça Design System/`): Outfit, Archivo e IBM Plex Mono; dourado-gema, marrom-terra e oliva. Site e assinante continuam com Aclonica/Poppins até nova decisão. Ver `docs/PLANO-VISUAL-GESTAO-20261019.md`. | — |
 
 
 ---
@@ -207,3 +207,20 @@ existente é reescrita.
 - **Não implementado (etapas seguintes):** D8 (1ª entrega só após o pagamento),
   D1/D2, D3–D7, D11, D15; recalcular datas das assinaturas atuais; fatura pelo
   novo calendário.
+
+
+---
+
+## Decisões de 22/10/2026 (Bruna)
+
+Respostas às pendências B, C, D, E e H do `docs/PLANO-GESTAO-20261013.md`.
+
+| # | Tema | Decisão | O que isso decide no código |
+|---|---|---|---|
+| B | Estorno de fatura paga | **Não existe.** | Fatura paga continua não podendo ser cancelada. Nada de estorno em dinheiro nem em crédito por estorno. |
+| C | Cancelamento com crédito sobrando (D3) | **Confirmado:** o crédito não vira dinheiro; o cliente recebe os pentes antes de encerrar. | Ao cancelar com crédito, as entregas correspondentes ao crédito são mantidas até acabarem. |
+| D | Endereço nas entregas já agendadas | **Vão para o novo endereço.** | Entrega pendente lê o endereço atual do cliente (como a agenda já faz hoje). Não há endereço congelado na entrega. |
+| E | Status `encerrada` | A assinatura vira `encerrada` **depois que acabam todos os créditos** (cancelada e sem pentes a receber). | Cancelada com crédito fica `cancelada` até a última entrega do crédito; depois passa a `encerrada`. Sem crédito, encerra no fim do mês pago (D7). |
+| H | Provedor de e-mail | **Nenhum por enquanto.** | Sem e-mail no lançamento: o vínculo conta↔cliente segue manual, na ficha do cliente (feito pelo dono). A parte de e-mail do Bloco 6 sai do escopo. |
+
+Pendente: F (faixas de CEP reais) e G (credenciais Sicoob).

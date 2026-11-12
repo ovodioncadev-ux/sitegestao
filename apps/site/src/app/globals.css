@@ -1,5 +1,11 @@
 @import 'tailwindcss';
 
+/* Liga as fontes carregadas em layout.tsx aos tokens (que só nomeiam a família). */
+:root {
+  --fonte-titulo: var(--fonte-aclonica), 'Aclonica', system-ui, sans-serif;
+  --fonte-corpo: var(--fonte-poppins), 'Poppins', system-ui, sans-serif;
+}
+
 html {
   color-scheme: light;
   scroll-behavior: smooth;
@@ -27,6 +33,177 @@ h2 {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+/* ── Topo ────────────────────────────────────────────────────────────── */
+.topo {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--cor-fundo);
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.topo-nav {
+  max-width: var(--largura-conteudo);
+  margin: 0 auto;
+  padding: var(--esp-3) var(--esp-6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-4);
+  position: relative;
+}
+
+.topo-marca {
+  font-family: var(--fonte-titulo);
+  font-size: var(--texto-medio);
+  color: var(--cor-texto);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--alvo-toque);
+}
+
+.topo-links {
+  display: flex;
+  gap: var(--esp-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.topo-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--alvo-toque);
+  padding: 0 var(--esp-2);
+  color: var(--cor-texto-suave);
+}
+
+.topo-link[data-ativo='true'] {
+  color: var(--cor-ouro-escuro);
+  font-weight: 600;
+}
+
+.botao-ouro {
+  background: var(--cor-ouro);
+  color: var(--cor-texto);
+  border-radius: var(--raio-controle);
+  padding: var(--esp-2) var(--esp-4);
+  min-height: var(--alvo-toque);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.topo-botao-menu,
+.topo-cta-no-menu {
+  display: none;
+}
+
+.topo-botao-menu {
+  min-height: var(--alvo-toque);
+  padding: 0 var(--esp-4);
+  border: 1px solid var(--cor-ouro);
+  border-radius: var(--raio-controle);
+  background: transparent;
+  color: var(--cor-ouro-escuro);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Celular e tablet estreito: menu recolhido, abre sob o topo. */
+@media (max-width: 860px) {
+  .topo-botao-menu {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .topo-cta {
+    display: none;
+  }
+
+  .topo-links {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    gap: 0;
+    padding: var(--esp-2) var(--esp-6) var(--esp-4);
+    background: var(--cor-fundo);
+    border-bottom: 1px solid var(--cor-borda);
+  }
+
+  .topo-links-abertos {
+    display: flex;
+  }
+
+  .topo-link {
+    width: 100%;
+  }
+
+  .topo-cta-no-menu {
+    display: block;
+    margin-top: var(--esp-2);
+  }
+
+  .topo-cta-no-menu .botao-ouro {
+    width: 100%;
+  }
+}
+
+/* ── Planos: grade, esqueleto e botão de contorno ────────────────────── */
+.grade-planos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--esp-6);
+}
+
+.esqueleto {
+  background: linear-gradient(90deg, var(--cor-fundo-alt) 25%, var(--cor-borda) 50%, var(--cor-fundo-alt) 75%);
+  background-size: 200% 100%;
+  animation: brilho-esqueleto 1.4s ease-in-out infinite;
+  border-radius: var(--raio-card);
+}
+
+.esqueleto-card {
+  min-height: 320px;
+}
+
+@keyframes brilho-esqueleto {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.botao-contorno {
+  min-height: var(--altura-controle);
+  padding: 0 var(--esp-4);
+  border: 1px solid var(--cor-ouro);
+  border-radius: var(--raio-controle);
+  background: transparent;
+  color: var(--cor-ouro-escuro);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.campo-texto {
+  min-height: var(--altura-controle);
+  border-radius: var(--raio-controle);
+  border: 1px solid var(--cor-borda);
+  padding: 0 var(--esp-3);
+  font: inherit;
+  background: var(--cor-fundo);
 }
 
 .tabela-rolavel {

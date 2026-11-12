@@ -1,0 +1,8 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "site", "runtimeExecutable": "pnpm", "runtimeArgs": ["--filter", "@ovo/site", "dev"], "port": 3002 },
+    { "name": "assinante", "runtimeExecutable": "pnpm", "runtimeArgs": ["--filter", "@ovo/assinante", "dev"], "port": 3001 },
+    { "name": "gestao", "runtimeExecutable": "pnpm", "runtimeArgs": ["--filter", "@ovo/gestao", "dev"], "port": 3000 }
+  ]
+}
