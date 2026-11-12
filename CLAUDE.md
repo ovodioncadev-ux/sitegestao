@@ -2,11 +2,11 @@
 
 ## Codebase Overview
 
-**Ovo di Onça** é um sistema de subscription de ovos caipiras: ordem → entrega quinzenal/semanal/mensal → pagamento manual (PIX). Backend em Postgres com RLS, dois Next.js apps (assinante e gestão), landing page SPA (site). Segurança em camadas: middleware, Better Auth, RLS, funções SQL com lista fechada.
+**Ovo di Onça** é um sistema de subscription de ovos caipiras: ordem → entrega quinzenal/semanal/mensal → pagamento manual (PIX). Backend em Postgres com RLS, três apps Next.js (assinante, gestão e site, a landing page). Segurança em camadas: middleware, Better Auth, RLS, funções SQL com lista fechada.
 
 **Stack:** pnpm monorepo, Node ≥ 20.11, Postgres 16 (Neon), Next.js 15, React 19, TypeScript 5, Better Auth.
 
-**Structure:** `apps/assinante` (API + portal do assinante, porta 3001), `apps/site` (landing page SPA, porta 3002), `apps/gestao` (admin panel, porta 3000), `packages/database` (acesso ao Postgres), `packages/ui` (tokens CSS), `packages/config` (headers de segurança).
+**Structure:** `apps/assinante` (API + portal do assinante, porta 3001), `apps/site` (landing page Next.js, porta 3002), `apps/gestao` (admin panel, porta 3000), `packages/database` (acesso ao Postgres), `packages/ui` (tokens CSS), `packages/config` (headers de segurança).
 
 For detailed architecture, routing, data flow and conventions, see [docs/CODEBASE_MAP.md](docs/CODEBASE_MAP.md).
 
