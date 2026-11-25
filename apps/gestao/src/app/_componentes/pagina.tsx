@@ -46,8 +46,4 @@ export function SemPermissao({ mensagem }: { mensagem: string }) {
   );
 }
 
-export function Aviso({ tipo, children }: { tipo: 'ok' | 'erro' | 'info'; children: ReactNode }) {
-  return (
-    <p className={tipo === 'ok' ? 'msg-ok' : tipo === 'erro' ? 'msg-erro' : 'msg-info'}>{children}</p>
-  );
-}
+export { Aviso } from './aviso';

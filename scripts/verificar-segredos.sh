@@ -44,7 +44,7 @@ fi
 
 echo ""
 echo "── 3. comoAdmin() em Client Component ──"
-arquivos=$(grep -rl 'comoAdmin' --include='*.ts' --include='*.tsx' apps 2>/dev/null || true)
+arquivos=$(grep -rl 'comoAdmin' --include='*.ts' --include='*.tsx' --exclude-dir='node_modules' --exclude-dir='.next' apps 2>/dev/null || true)
 ruins=""
 for arq in $arquivos; do
   if head -5 "$arq" | grep -q "['\"]use client['\"]"; then ruins="$ruins $arq"; fi
@@ -59,7 +59,7 @@ echo ""
 echo "── 4. comoAdmin() sem conferir o papel antes ──"
 # Lei 7: quem usa a conexão administrativa confere o papel na mesma função.
 ruins=""
-for arq in $(grep -rl 'comoAdmin' --include='*.ts' --include='*.tsx' apps 2>/dev/null || true); do
+for arq in $(grep -rl 'comoAdmin' --include='*.ts' --include='*.tsx' --exclude-dir='node_modules' --exclude-dir='.next' apps 2>/dev/null || true); do
   if ! grep -q 'exigirDono\|exigirPapel' "$arq"; then ruins="$ruins $arq"; fi
 done
 if [ -n "$ruins" ]; then

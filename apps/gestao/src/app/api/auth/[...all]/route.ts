@@ -1,7 +1,6 @@
-import { toNextJsHandler } from 'better-auth/next-js';
-import { auth } from '@ovo/database/auth';
+import { rotaDoAuth } from '@ovo/database/auth-rota';
 
-const handlers = toNextJsHandler(auth);
+const handlers = rotaDoAuth();
 
 export const GET = handlers.GET;
 

@@ -1,0 +1,189 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Permissão mínima para todos os jobs. Nenhum job precisa escrever no repositório.
+permissions:
+  contents: read
+
+# Um novo push no mesmo ramo cancela a execução anterior.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  instalar:
+    name: Instalar (lockfile congelado)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      # Sem "version": o pnpm vem do campo packageManager do package.json.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # Falha se o pnpm-lock.yaml não bate com os package.json.
+      - run: pnpm install --frozen-lockfile
+
+  tipos:
+    name: Typecheck
+    needs: instalar
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+
+  lint:
+    name: Lint
+    needs: instalar
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+
+  testes:
+    name: Testes (unitários)
+    needs: instalar
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+
+  seguranca:
+    name: Segurança (segredos e dependências)
+    needs: instalar
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Histórico inteiro: a varredura procura .env em commits antigos.
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Varredura de segredos
+        run: pnpm seguranca:segredos
+
+      - name: Auditoria de dependências
+        # Alta e crítica precisam estar resolvidas antes de lançar.
+        run: pnpm audit --audit-level=high
+
+  build:
+    name: Build (${{ matrix.app }})
+    needs: instalar
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [gestao, assinante, site]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      # O build de gestao e assinante carrega o Better Auth ao coletar as rotas
+      # e exige estas variáveis. Valores de mentira, só para compilar: não são
+      # segredos e nada aqui conecta em banco.
+      - name: Build
+        env:
+          DATABASE_URL: postgresql://localhost:5432/build
+          DATABASE_ADMIN_URL: postgresql://localhost:5432/build
+          BETTER_AUTH_URL: http://localhost:3000
+          BETTER_AUTH_SECRET: build-only-placeholder-not-a-secret-0123456789
+        run: pnpm --filter @ovo/${{ matrix.app }} build
+
+      # O item 8 do script procura URL de banco com senha dentro do que foi compilado.
+      - name: Varredura de segredos na saída do build
+        run: pnpm seguranca:segredos
+
+  banco:
+    name: Testes de banco (branch de teste)
+    needs: instalar
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Os testes SQL escrevem no branch de teste: duas execuções ao mesmo tempo
+    # se atropelariam. Fila em vez de cancelamento.
+    concurrency:
+      group: banco-de-teste
+      cancel-in-progress: false
+    steps:
+      # "secrets" não pode ser usado em "if" de job; por isso a checagem é um passo.
+      - name: Verificar segredo DATABASE_TEST_URL
+        id: segredo
+        env:
+          DATABASE_TEST_URL: ${{ secrets.DATABASE_TEST_URL }}
+        run: |
+          if [ -z "$DATABASE_TEST_URL" ]; then
+            echo "disponivel=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Testes de banco pulados::O segredo DATABASE_TEST_URL não está disponível (não cadastrado, ou PR vindo de fork). Nenhum teste de banco rodou. O banco principal NÃO é usado como substituto."
+          else
+            echo "disponivel=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.segredo.outputs.disponivel == 'true'
+      - uses: pnpm/action-setup@v4
+        if: steps.segredo.outputs.disponivel == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.segredo.outputs.disponivel == 'true'
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+        if: steps.segredo.outputs.disponivel == 'true'
+
+      # Somente DATABASE_TEST_URL é exposta. DATABASE_URL e DATABASE_ADMIN_URL
+      # não existem neste job, e o guarda de scripts/banco-teste.mjs aborta se
+      # a URL de teste apontar para o mesmo banco delas.
+      - name: Testes SQL (fases 1 a 10, etapas 1 e 2)
+        if: steps.segredo.outputs.disponivel == 'true'
+        env:
+          DATABASE_TEST_URL: ${{ secrets.DATABASE_TEST_URL }}
+        run: pnpm teste:banco
+
+      - name: Segurança no banco (estrutura e autorização)
+        if: steps.segredo.outputs.disponivel == 'true'
+        env:
+          DATABASE_TEST_URL: ${{ secrets.DATABASE_TEST_URL }}
+        run: |
+          pnpm seguranca:estrutura
+          pnpm seguranca:autorizacao
